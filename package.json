@@ -1,0 +1,16 @@
+{
+  "name": "wedding-feast-platform",
+  "version": "1.0.0",
+  "description": "Wedding Feast – Wedding Catering & Food Estimation Platform",
+  "scripts": {
+    "start:backend": "cd backend && wrangler dev --port 8787",
+    "start:frontend": "cd frontend && ng serve --port 4200",
+    "build:frontend": "cd frontend && ng build",
+    "migrate:db:local": "cd backend && wrangler d1 migrations apply wedding-feast-db --local",
+    "migrate:db:remote": "cd backend && wrangler d1 migrations apply wedding-feast-db --remote",
+    "seed:db": "cd backend && wrangler d1 execute wedding-feast-db --local --file ./migrations/0002_seed_data.sql"
+  },
+  "keywords": ["wedding", "catering", "angular", "cloudflare-workers", "cloudflare-d1", "cloudflare-r2"],
+  "author": "Wedding Feast Team",
+  "license": "MIT"
+}

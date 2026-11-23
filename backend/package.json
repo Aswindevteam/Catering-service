@@ -1,0 +1,21 @@
+{
+  "name": "wedding-feast-backend",
+  "version": "1.0.0",
+  "description": "Cloudflare Workers REST API with D1 and R2 for Wedding Feast Catering",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "migrate:local": "wrangler d1 migrations apply wedding-feast-db --local",
+    "migrate:remote": "wrangler d1 migrations apply wedding-feast-db --remote",
+    "types": "wrangler types"
+  },
+  "dependencies": {
+    "hono": "^4.7.2"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261123.1",
+    "typescript": "^5.7.3",
+    "wrangler": "^4.166.0"
+  }
+}

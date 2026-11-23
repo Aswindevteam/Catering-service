@@ -1,0 +1,26 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "wedding-feast-backend",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-01-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    "ENVIRONMENT": "development",
+    "JWT_SECRET": "wedding-feast-super-secret-key-2026",
+    "PUBLIC_R2_URL": "/api/images"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "wedding-feast-db",
+      "database_id": "7876a388-75aa-4ea1-bca5-bdf9efb10c92",
+      "migrations_dir": "./migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "IMAGES_BUCKET",
+      "bucket_name": "wedding-feast-images"
+    }
+  ]
+}

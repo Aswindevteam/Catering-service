@@ -8,6 +8,10 @@
     "deploy": "wrangler deploy",
     "migrate:local": "wrangler d1 migrations apply wedding-feast-db --local",
     "migrate:remote": "wrangler d1 migrations apply wedding-feast-db --remote",
+    "migrate:db:local": "wrangler d1 migrations apply wedding-feast-db --local",
+    "migrate:db:remote": "wrangler d1 migrations apply wedding-feast-db --remote",
+    "d1:create": "wrangler d1 create wedding-feast-db",
+    "r2:create": "wrangler r2 bucket create wedding-feast-images",
     "types": "wrangler types"
   },
   "dependencies": {

@@ -5,6 +5,7 @@ export interface Env {
   JWT_SECRET: string;
   ENVIRONMENT: string;
   PUBLIC_R2_URL: string;
+  ASSETS?: Fetcher;
 }
 
 // User & Auth

@@ -5,10 +5,16 @@
   "scripts": {
     "start:backend": "cd backend && wrangler dev --port 8787",
     "start:frontend": "cd frontend && ng serve --port 4200",
-    "build:frontend": "cd frontend && ng build",
+    "build:frontend": "cd frontend && ng build --configuration production",
+    "build": "npm run build:frontend",
+    "deploy": "npm run build:frontend && cd backend && wrangler deploy",
+    "deploy:worker": "cd backend && wrangler deploy",
+    "deploy:pages": "cd frontend && wrangler pages deploy dist/frontend/browser --project-name wedding-feast",
     "migrate:db:local": "cd backend && wrangler d1 migrations apply wedding-feast-db --local",
     "migrate:db:remote": "cd backend && wrangler d1 migrations apply wedding-feast-db --remote",
-    "seed:db": "cd backend && wrangler d1 execute wedding-feast-db --local --file ./migrations/0002_seed_data.sql"
+    "seed:db": "cd backend && wrangler d1 execute wedding-feast-db --local --file ./migrations/0002_seed_data.sql",
+    "d1:create": "cd backend && wrangler d1 create wedding-feast-db",
+    "r2:create": "cd backend && wrangler r2 bucket create wedding-feast-images"
   },
   "keywords": ["wedding", "catering", "angular", "cloudflare-workers", "cloudflare-d1", "cloudflare-r2"],
   "author": "Wedding Feast Team",

@@ -70,11 +70,7 @@ import { BrandLogoComponent } from '../../shared/components/brand-logo/brand-log
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      background: 
-        radial-gradient(circle at 10% 15%, rgba(197, 155, 67, 0.06) 0%, transparent 45%),
-        radial-gradient(circle at 90% 75%, rgba(91, 26, 36, 0.05) 0%, transparent 45%),
-        linear-gradient(180deg, rgba(250, 248, 245, 0.93) 0%, rgba(246, 241, 234, 0.96) 50%, rgba(250, 248, 245, 0.95) 100%),
-        url('https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1920&q=80') center top / cover no-repeat fixed;
+      background-color: var(--bg-canvas, #faf8f5);
     }
 
     .customer-main-content {

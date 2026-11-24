@@ -298,6 +298,8 @@ import { WeddingEvent } from '../../../core/models';
       top: 0;
       z-index: 10000;
       width: 100%;
+      will-change: transform;
+      transform: translateZ(0);
     }
 
     .wf-editorial-header {

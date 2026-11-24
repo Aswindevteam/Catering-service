@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -20,16 +20,18 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
       <!-- Atmospheric Wedding Banquet Hero Header -->
       <header class="celebration-hero-banner">
         <div class="hero-video-bg">
-          <video 
-            class="bg-video" 
-            autoplay 
-            muted 
-            loop 
-            playsinline 
-            poster="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1400&q=80"
-          >
-            <source src="https://assets.mixkit.co/videos/preview/mixkit-dining-room-at-a-luxurious-wedding-banquet-42774-large.mp4" type="video/mp4">
-          </video>
+          @if (!isMobileScreen()) {
+            <video 
+              class="bg-video" 
+              autoplay 
+              muted 
+              loop 
+              playsinline 
+              poster="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1400&q=80"
+            >
+              <source src="https://assets.mixkit.co/videos/preview/mixkit-dining-room-at-a-luxurious-wedding-banquet-42774-large.mp4" type="video/mp4">
+            </video>
+          }
           <div class="hero-gradient-overlay"></div>
         </div>
 
@@ -393,6 +395,9 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
       @if (activeDishModal(); as modalDish) {
         <div class="dish-modal-backdrop" (click)="closeDishModal()">
           <div class="dish-modal-card" (click)="$event.stopPropagation()">
+            <!-- Mobile Sheet Drag Handle -->
+            <div class="mobile-sheet-handle-bar"></div>
+
             <!-- Modal Header -->
             <div class="dish-modal-header">
               <div class="header-left">
@@ -954,8 +959,6 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
 
     .editorial-dish-row {
       width: 100%;
-      content-visibility: auto;
-      contain-intrinsic-size: 0 140px;
 
       .dish-row-inner {
         display: flex;
@@ -1716,14 +1719,23 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
       position: fixed;
       inset: 0;
       z-index: 99999;
-      background: rgba(30, 8, 14, 0.78);
-      backdrop-filter: blur(12px);
+      background: rgba(20, 5, 10, 0.82);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: center;
-      padding: 2.5rem 1rem 2rem;
-      overflow-y: auto;
+      padding: 1.5rem;
+      overflow: hidden;
+      touch-action: none;
       animation: modalFadeIn 0.25s ease;
+
+      @media (max-width: 768px) {
+        align-items: flex-end;
+        padding: 0;
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+      }
     }
 
     .dish-modal-card {
@@ -1732,22 +1744,59 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
       border-radius: 20px;
       width: 100%;
       max-width: 860px;
-      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+      height: auto;
+      max-height: calc(100vh - 3rem);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      margin: auto 0;
+      margin: 0;
       animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+      @media (max-width: 768px) {
+        max-width: 100%;
+        width: 100%;
+        height: 90vh;
+        height: 90dvh;
+        max-height: 90vh;
+        max-height: 90dvh;
+        border-radius: 24px 24px 0 0;
+        border-bottom: none;
+        border-left: none;
+        border-right: none;
+        box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4);
+        animation: modalSlideUpMobile 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+    }
+
+    .mobile-sheet-handle-bar {
+      display: none;
+      width: 44px;
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(91, 26, 36, 0.25);
+      margin: 10px auto 2px;
+      flex-shrink: 0;
+
+      @media (max-width: 768px) {
+        display: block;
+      }
     }
 
     .dish-modal-header {
-      padding: 1.25rem 1.75rem;
+      flex-shrink: 0;
+      padding: 1.15rem 1.75rem;
       background: #FFFFFF;
       border-bottom: 1px solid var(--border-hairline, #e5dec9);
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 1rem;
+      z-index: 2;
+
+      @media (max-width: 768px) {
+        padding: 0.85rem 1.25rem;
+      }
 
       .header-left {
         display: flex;
@@ -1798,9 +1847,12 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
     }
 
     .dish-modal-body {
-      padding: 0 0 1.5rem;
+      flex: 1 1 auto;
+      min-height: 0;
       overflow-y: auto;
-      max-height: calc(85vh - 180px);
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      padding: 0 0 1.5rem;
       display: flex;
       flex-direction: column;
       gap: 1.25rem;
@@ -2127,6 +2179,7 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
     }
 
     .dish-modal-footer {
+      flex-shrink: 0;
       padding: 1.15rem 1.75rem;
       background: #FFFFFF;
       border-top: 1px solid var(--border-hairline, #e5dec9);
@@ -2135,6 +2188,7 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
       justify-content: space-between;
       gap: 1.25rem;
       flex-wrap: wrap;
+      z-index: 2;
 
       @media (max-width: 680px) {
         display: flex;
@@ -2309,6 +2363,11 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
       to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
+    @keyframes modalSlideUpMobile {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
@@ -2319,7 +2378,7 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
     }
   `]
 })
-export class MenuSelectionComponent implements OnInit {
+export class MenuSelectionComponent implements OnInit, OnDestroy {
   private dishService = inject(DishService);
   private categoryService = inject(CategoryService);
   private recipeService = inject(RecipeService);
@@ -2327,6 +2386,9 @@ export class MenuSelectionComponent implements OnInit {
   selectionService = inject(SelectionService);
   translationService = inject(TranslationService);
   imageService = inject(ImageService);
+
+  isMobileScreen = signal<boolean>(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+  private resizeListener?: () => void;
 
   categories = signal<FoodCategory[]>([]);
   allDishes = signal<Dish[]>([]);
@@ -2400,6 +2462,13 @@ export class MenuSelectionComponent implements OnInit {
   });
 
   ngOnInit() {
+    if (typeof window !== 'undefined') {
+      this.resizeListener = () => {
+        this.isMobileScreen.set(window.innerWidth < 768);
+      };
+      window.addEventListener('resize', this.resizeListener, { passive: true });
+    }
+
     this.categoryService.getCategories(true).subscribe({
       next: (res) => { if (res.success) this.categories.set(res.data); }
     });
@@ -2412,6 +2481,16 @@ export class MenuSelectionComponent implements OnInit {
         }
       }
     });
+  }
+
+  ngOnDestroy() {
+    if (typeof document !== 'undefined') {
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
+    }
+    if (typeof window !== 'undefined' && this.resizeListener) {
+      window.removeEventListener('resize', this.resizeListener);
+    }
   }
 
   scrollToCategory(catId: string) {
@@ -2563,6 +2642,20 @@ export class MenuSelectionComponent implements OnInit {
     this.activeDishModal.set(dish);
     this.activeImageIndex.set(0);
 
+    // Lock body scroll to prevent underlying page from dragging / rubber-banding on mobile
+    if (typeof document !== 'undefined') {
+      document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
+    }
+
+    // Scroll modal body cleanly to top for every dish
+    setTimeout(() => {
+      const modalBody = document.querySelector('.dish-modal-body');
+      if (modalBody) {
+        modalBody.scrollTop = 0;
+      }
+    }, 0);
+
     const sel = this.selectionService.selectedDishes().get(dish.id);
     this.modalQuantity.set(sel ? sel.quantity_per_person : dish.quantity_per_person);
 
@@ -2645,6 +2738,11 @@ export class MenuSelectionComponent implements OnInit {
     this.activeDishModal.set(null);
     this.modalRecipe.set(null);
     this.modalImages.set([]);
+
+    if (typeof document !== 'undefined') {
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
+    }
   }
 
   getCurrentModalImage(): string {

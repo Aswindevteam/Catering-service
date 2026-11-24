@@ -21,7 +21,27 @@
     "deployments": "cd backend && wrangler deployments list",
     "tail": "cd backend && wrangler tail"
   },
-  "keywords": ["wedding", "catering", "angular", "cloudflare-workers", "cloudflare-d1", "cloudflare-r2"],
+  "keywords": [
+    "wedding",
+    "catering",
+    "angular",
+    "cloudflare-workers",
+    "cloudflare-d1",
+    "cloudflare-r2"
+  ],
   "author": "Wedding Feast Team",
-  "license": "MIT"
+  "license": "MIT",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Aswindevteam/Catering-service.git"
+  },
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Aswindevteam/Catering-service/issues"
+  },
+  "homepage": "https://github.com/Aswindevteam/Catering-service#readme",
+  "devDependencies": {
+    "playwright": "^1.65.1"
+  }
 }

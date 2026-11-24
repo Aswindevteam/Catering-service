@@ -25,17 +25,6 @@ import { filter } from 'rxjs/operators';
         </div>
       </div>
 
-      <!-- Center: Universal Search Input -->
-      <div class="topbar-search">
-        <span class="material-symbols-outlined search-icon">search</span>
-        <input 
-          type="text" 
-          placeholder="Search ingredients, recipes or dishes..." 
-          class="search-input"
-          (keyup.enter)="onSearch($event)"
-        />
-      </div>
-
       <!-- Right: Language Picker, Notifications & Director Profile -->
       <div class="topbar-right">
         <!-- Multi-language Picker -->
@@ -152,52 +141,6 @@ import { filter } from 'rxjs/operators';
           font-weight: 600;
           color: #382F2D;
           font-family: var(--font-serif, serif);
-        }
-      }
-    }
-
-    /* Universal Search */
-    .topbar-search {
-      flex: 1;
-      max-width: 440px;
-      margin: 0 1.5rem;
-      position: relative;
-      display: flex;
-      align-items: center;
-
-      @media (max-width: 768px) {
-        display: none;
-      }
-
-      .search-icon {
-        position: absolute;
-        left: 0.85rem;
-        font-size: 19px;
-        color: #9C8B7E;
-        pointer-events: none;
-      }
-
-      .search-input {
-        width: 100%;
-        height: 38px;
-        padding: 0 1rem 0 2.5rem;
-        background: #FAF8F5;
-        border: 1px solid #E5DEC9;
-        border-radius: 20px;
-        font-size: 0.84rem;
-        color: #2F0B12;
-        outline: none;
-        transition: all 0.2s ease;
-
-        &::placeholder {
-          color: #9C8B7E;
-          font-style: italic;
-        }
-
-        &:focus {
-          background: #FFFFFF;
-          border-color: #C59B43;
-          box-shadow: 0 0 0 3px rgba(197, 155, 67, 0.15);
         }
       }
     }
@@ -442,19 +385,6 @@ export class AdminHeaderComponent {
 
   toggleDropdown() {
     this.showDropdown.update(v => !v);
-  }
-
-  onSearch(event: any) {
-    const query = event.target?.value?.trim();
-    if (!query) return;
-    const currentUrl = this.router.url;
-    if (currentUrl.includes('/admin/categories')) {
-      this.router.navigate(['/admin/categories'], { queryParams: { search: query } });
-    } else if (currentUrl.includes('/admin/recipes')) {
-      this.router.navigate(['/admin/recipes'], { queryParams: { search: query } });
-    } else {
-      this.router.navigate(['/admin/dishes'], { queryParams: { search: query } });
-    }
   }
 
   logout() {

@@ -7,6 +7,7 @@ import { CategoryService } from '../../../core/services/category.service';
 import { RecipeService } from '../../../core/services/recipe.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { TranslationService } from '../../../core/services/translation.service';
+import { ImageService } from '../../../core/services/image.service';
 import { Dish, FoodCategory, DishImage, RecipeIngredient, RecipeStep } from '../../../core/models';
 
 interface EditableIngredient {
@@ -69,14 +70,31 @@ interface EditableStep {
           <section class="hero-gallery-section">
             <div class="hero-preview-box">
               @if (activePreviewUrl()) {
-                <img [src]="activePreviewUrl()" [alt]="dishForm.get('name')?.value || 'Dish Preview'" class="hero-preview-img" />
+                <img [src]="imageService.resolveUrl(activePreviewUrl())" (error)="imageService.handleImageError($event)" [alt]="dishForm.get('name')?.value || 'Dish Preview'" class="hero-preview-img" />
               } @else {
                 <div class="no-preview">
                   <span class="material-symbols-outlined icon">soup_kitchen</span>
                   <span class="hint">No Plated Photo Selected</span>
                 </div>
               }
-              <div class="hero-badge">Primary Presentation</div>
+
+              <!-- Interactive Primary Cover Badge / Action Button -->
+              @if (isCurrentPreviewPrimary()) {
+                <div class="hero-badge is-primary" title="This image renders first in customer view">
+                  <span class="material-symbols-outlined star-icon">star</span>
+                  <span>{{ tService.currentLang() === 'ta' ? 'முதன்மை காட்சி படம் (வாடிக்கையாளருக்கு முதலில் தோன்றும்)' : 'Primary Presentation (Renders First to Customers)' }}</span>
+                </div>
+              } @else if (currentPreviewImage()) {
+                <button 
+                  type="button" 
+                  class="set-primary-hero-btn" 
+                  (click)="setAsPrimary(currentPreviewImage()!, $event)"
+                  title="Make this photo render first to customers"
+                >
+                  <span class="material-symbols-outlined star-icon">hotel_class</span>
+                  <span>{{ tService.currentLang() === 'ta' ? 'இதை முதன்மை படமாக மாற்று (Render First)' : 'Set as Primary Cover (Render First)' }}</span>
+                </button>
+              }
             </div>
 
             <!-- Thumbnail Grid & Cloudflare R2 Upload Box -->
@@ -85,9 +103,29 @@ interface EditableStep {
                 <div 
                   class="thumb-box" 
                   [class.active]="activePreviewUrl() === img.image_url"
+                  [class.is-primary]="img.is_primary === 1"
                   (click)="activePreviewUrl.set(img.image_url)"
+                  [title]="img.is_primary === 1 ? 'Primary Cover (Renders first to customers)' : 'Click to preview or set as primary'"
                 >
-                  <img [src]="img.image_url" [alt]="img.file_name || 'Thumbnail'" />
+                  <img [src]="imageService.resolveUrl(img.image_url)" (error)="imageService.handleImageError($event)" [alt]="img.file_name || 'Thumbnail'" />
+                  
+                  <!-- Primary Star Tag or Make Primary Button -->
+                  @if (img.is_primary === 1) {
+                    <span class="thumb-primary-tag" title="Renders first to customers">
+                      <span class="material-symbols-outlined">star</span>
+                      <span class="tag-txt">Primary</span>
+                    </span>
+                  } @else {
+                    <button 
+                      type="button" 
+                      class="thumb-make-primary-btn" 
+                      (click)="setAsPrimary(img, $event)" 
+                      title="Set as Primary (render first to customers)"
+                    >
+                      <span class="material-symbols-outlined">star_border</span>
+                    </button>
+                  }
+
                   <button type="button" class="thumb-delete-btn" (click)="deleteImage(img, $event)" title="Delete image">
                     <span class="material-symbols-outlined">delete</span>
                   </button>
@@ -135,87 +173,85 @@ interface EditableStep {
                   ></textarea>
                 </div>
 
-                <!-- Food Category & Serving Unit -->
-                <div class="form-row-2">
-                  <!-- Searchable Category Combobox -->
-                  <div class="form-field category-autocomplete-field" (click)="$event.stopPropagation()">
-                    <label for="category-search">{{ tService.t('admin.story.category') }} <span class="req">*</span></label>
-                    <div 
-                      class="cat-ac-input-box" 
-                      [class.open]="catDropdownOpen()"
-                      [class.invalid]="dishForm.get('category_id')?.touched && dishForm.get('category_id')?.invalid"
-                    >
-                      <span class="material-symbols-outlined cat-ac-icon">restaurant_menu</span>
-                      <input 
-                        id="category-search"
-                        type="text" 
-                        class="cat-ac-input" 
-                        [placeholder]="getSelectedCategoryName() ? getSelectedCategoryName() : 'Search or select course...'"
-                        [ngModel]="catSearchQuery()"
-                        [ngModelOptions]="{standalone: true}"
-                        (ngModelChange)="onCatSearchChange($event)"
-                        (focus)="openCatDropdown()"
-                        (keydown)="onCatKeydown($event)"
-                      />
-                      @if (catSearchQuery()) {
-                        <button type="button" class="cat-ac-clear" (click)="clearCatSearch($event)" title="Clear filter">
-                          <span class="material-symbols-outlined">close</span>
-                        </button>
-                      }
-                      <button type="button" class="cat-ac-toggle" (click)="toggleCatDropdown($event)" aria-label="Toggle category list">
-                        <span class="material-symbols-outlined">{{ catDropdownOpen() ? 'expand_less' : 'expand_more' }}</span>
+                <!-- Food Category (Full Width Row) -->
+                <div class="form-field category-autocomplete-field" (click)="$event.stopPropagation()">
+                  <label for="category-search">{{ tService.t('admin.story.category') }} <span class="req">*</span></label>
+                  <div 
+                    class="cat-ac-input-box" 
+                    [class.open]="catDropdownOpen()"
+                    [class.invalid]="dishForm.get('category_id')?.touched && dishForm.get('category_id')?.invalid"
+                  >
+                    <span class="material-symbols-outlined cat-ac-icon">restaurant_menu</span>
+                    <input 
+                      id="category-search"
+                      type="text" 
+                      class="cat-ac-input" 
+                      [placeholder]="getSelectedCategoryName() ? getSelectedCategoryName() : 'Search or select course...'"
+                      [ngModel]="catSearchQuery()"
+                      [ngModelOptions]="{standalone: true}"
+                      (ngModelChange)="onCatSearchChange($event)"
+                      (focus)="openCatDropdown()"
+                      (keydown)="onCatKeydown($event)"
+                    />
+                    @if (catSearchQuery()) {
+                      <button type="button" class="cat-ac-clear" (click)="clearCatSearch($event)" title="Clear filter">
+                        <span class="material-symbols-outlined">close</span>
                       </button>
-                    </div>
-
-                    @if (catDropdownOpen()) {
-                      <div class="cat-ac-dropdown">
-                        <div class="cat-ac-header">
-                          <span>Select Course Category</span>
-                          @if (catSearchQuery()) {
-                            <span class="term">"{{ catSearchQuery() }}"</span>
-                          }
-                        </div>
-                        <div class="cat-ac-list" role="listbox">
-                          @for (cat of filteredCategories(); track cat.id; let idx = $index) {
-                            <div 
-                              class="cat-ac-item" 
-                              [class.selected]="dishForm.get('category_id')?.value === cat.id"
-                              [class.highlighted]="idx === highlightedCatIndex()"
-                              (click)="selectCategory(cat)"
-                              (mouseenter)="highlightedCatIndex.set(idx)"
-                              role="option"
-                            >
-                              <div class="cat-ac-item-content">
-                                <strong class="cat-name">{{ cat.name }}</strong>
-                                @if (cat.description) {
-                                  <span class="cat-desc">{{ cat.description }}</span>
-                                }
-                              </div>
-                              @if (dishForm.get('category_id')?.value === cat.id) {
-                                <span class="material-symbols-outlined cat-check">check</span>
-                              }
-                            </div>
-                          } @empty {
-                            <div class="cat-no-match">
-                              <span class="material-symbols-outlined">search_off</span>
-                              <span>No category matches "{{ catSearchQuery() }}"</span>
-                            </div>
-                          }
-                        </div>
-                      </div>
                     }
+                    <button type="button" class="cat-ac-toggle" (click)="toggleCatDropdown($event)" aria-label="Toggle category list">
+                      <span class="material-symbols-outlined">{{ catDropdownOpen() ? 'expand_less' : 'expand_more' }}</span>
+                    </button>
                   </div>
 
-                  <div class="form-field">
-                    <label>{{ tService.t('admin.story.baseUnit') }}</label>
-                    <div class="unit-group">
-                      <input type="number" formControlName="quantity_per_person" class="editorial-input qty-input" />
-                      <select formControlName="serving_unit" class="editorial-select unit-select">
-                        <option value="g">g</option>
-                        <option value="pcs">pcs</option>
-                        <option value="ml">ml</option>
-                      </select>
+                  @if (catDropdownOpen()) {
+                    <div class="cat-ac-dropdown">
+                      <div class="cat-ac-header">
+                        <span>Select Course Category</span>
+                        @if (catSearchQuery()) {
+                          <span class="term">"{{ catSearchQuery() }}"</span>
+                        }
+                      </div>
+                      <div class="cat-ac-list" role="listbox">
+                        @for (cat of filteredCategories(); track cat.id; let idx = $index) {
+                          <div 
+                            class="cat-ac-item" 
+                            [class.selected]="dishForm.get('category_id')?.value === cat.id"
+                            [class.highlighted]="idx === highlightedCatIndex()"
+                            (click)="selectCategory(cat)"
+                            (mouseenter)="highlightedCatIndex.set(idx)"
+                            role="option"
+                          >
+                            <div class="cat-ac-item-content">
+                              <strong class="cat-name">{{ cat.name }}</strong>
+                              @if (cat.description) {
+                                <span class="cat-desc">{{ cat.description }}</span>
+                              }
+                            </div>
+                            @if (dishForm.get('category_id')?.value === cat.id) {
+                              <span class="material-symbols-outlined cat-check">check</span>
+                            }
+                          </div>
+                        } @empty {
+                          <div class="cat-no-match">
+                            <span class="material-symbols-outlined">search_off</span>
+                            <span>No category matches "{{ catSearchQuery() }}"</span>
+                          </div>
+                        }
+                      </div>
                     </div>
+                  }
+                </div>
+
+                <!-- Base Serving Unit (Moved to Next Row) -->
+                <div class="form-field base-serving-unit-field">
+                  <label>{{ tService.t('admin.story.baseUnit') }}</label>
+                  <div class="unit-group">
+                    <input type="number" formControlName="quantity_per_person" class="editorial-input qty-input" />
+                    <select formControlName="serving_unit" class="editorial-select unit-select">
+                      <option value="g">g (grams)</option>
+                      <option value="pcs">pcs (pieces)</option>
+                      <option value="ml">ml (milliliters)</option>
+                    </select>
                   </div>
                 </div>
 
@@ -698,15 +734,60 @@ interface EditableStep {
           position: absolute;
           bottom: 12px;
           left: 12px;
-          background: rgba(91, 26, 36, 0.88);
+          background: rgba(91, 26, 36, 0.9);
           color: #EAD9B7;
           backdrop-filter: blur(6px);
           font-size: 0.72rem;
           font-weight: 600;
-          letter-spacing: 0.5px;
-          padding: 0.25rem 0.65rem;
+          letter-spacing: 0.4px;
+          padding: 0.35rem 0.75rem;
           border-radius: 4px;
-          border: 1px solid rgba(197, 155, 67, 0.35);
+          border: 1px solid rgba(197, 155, 67, 0.4);
+          display: flex;
+          align-items: center;
+          gap: 0.35rem;
+
+          &.is-primary {
+            background: linear-gradient(135deg, #4A101D 0%, #2F0B12 100%);
+            color: #FFF2A3;
+            border-color: #C59B43;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+
+            .star-icon {
+              font-size: 15px;
+              color: #FFD700;
+            }
+          }
+        }
+
+        .set-primary-hero-btn {
+          position: absolute;
+          bottom: 12px;
+          left: 12px;
+          background: linear-gradient(135deg, #C59B43 0%, #AA771C 100%);
+          color: #2F0B12;
+          border: none;
+          font-size: 0.75rem;
+          font-weight: 700;
+          letter-spacing: 0.4px;
+          padding: 0.4rem 0.85rem;
+          border-radius: 4px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 0.35rem;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+          transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+          &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(197, 155, 67, 0.5);
+            background: linear-gradient(135deg, #E5BD68 0%, #C59B43 100%);
+          }
+
+          .star-icon {
+            font-size: 16px;
+          }
         }
       }
 
@@ -736,6 +817,60 @@ interface EditableStep {
             box-shadow: 0 0 0 2px rgba(197, 155, 67, 0.2);
           }
 
+          &.is-primary {
+            border-color: #C59B43;
+            box-shadow: 0 0 0 2.5px rgba(197, 155, 67, 0.45);
+          }
+
+          .thumb-primary-tag {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            background: linear-gradient(135deg, #C59B43 0%, #996515 100%);
+            color: #2F0B12;
+            font-size: 0.62rem;
+            font-weight: 800;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            padding: 0.15rem 0.45rem;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            gap: 0.2rem;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+            pointer-events: none;
+
+            .material-symbols-outlined { font-size: 11px; color: #2F0B12; }
+          }
+
+          .thumb-make-primary-btn {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(47, 11, 18, 0.8);
+            color: #FFF2A3;
+            border: 1px solid rgba(197, 155, 67, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.2s;
+
+            &:hover {
+              background: #C59B43;
+              color: #2F0B12;
+              transform: scale(1.1);
+            }
+
+            .material-symbols-outlined { font-size: 14px; }
+          }
+
+          &:hover .thumb-make-primary-btn { opacity: 1; }
+
           .thumb-delete-btn {
             position: absolute;
             top: 4px;
@@ -752,6 +887,8 @@ interface EditableStep {
             cursor: pointer;
             opacity: 0;
             transition: opacity 0.2s;
+
+            &:hover { background: #DC2626; }
 
             .material-symbols-outlined { font-size: 13px; }
           }
@@ -1027,11 +1164,21 @@ interface EditableStep {
       }
     }
 
+    .base-serving-unit-field {
+      .unit-group {
+        display: flex;
+        gap: 0.5rem;
+        max-width: 280px;
+        .qty-input { flex: 1; }
+        .unit-select { width: 130px; }
+      }
+    }
+
     .unit-group {
       display: flex;
       gap: 0.35rem;
       .qty-input { flex: 1; }
-      .unit-select { width: 70px; }
+      .unit-select { width: 85px; }
     }
 
     .diet-chips {
@@ -1375,7 +1522,7 @@ interface EditableStep {
         font-size: 0.86rem;
 
         .lbl { color: #7A695C; font-weight: 500; }
-        .val { font-family: var(--font-serif, serif); font-size: 1.15rem; font-weight: 700; color: #5B1A24; }
+        .val { font-family: var(--font-sans, system-ui, sans-serif); font-variant-numeric: tabular-nums; font-size: 1.15rem; font-weight: 700; color: #5B1A24; }
         .per-plate { font-size: 0.78rem; color: #C59B43; font-weight: 600; }
       }
     }
@@ -1500,14 +1647,15 @@ interface EditableStep {
           margin: 0.25rem 0;
 
           .currency-symbol {
-            font-family: var(--font-serif, serif);
-            font-size: 1.75rem;
+            font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+            font-size: 1.6rem;
             font-weight: 700;
             color: #5B1A24;
           }
 
           .serif-price-input {
-            font-family: var(--font-serif, serif);
+            font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+            font-variant-numeric: tabular-nums;
             font-size: 1.85rem;
             font-weight: 700;
             color: #5B1A24;
@@ -1562,7 +1710,8 @@ interface EditableStep {
           }
 
           .b-val {
-            font-family: var(--font-serif, serif);
+            font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+            font-variant-numeric: tabular-nums;
             font-weight: 700;
             font-size: 0.95rem;
             color: #382F2D;
@@ -1576,14 +1725,28 @@ interface EditableStep {
         padding: 0.85rem 1rem;
         display: flex;
         flex-direction: column;
-        gap: 0.4rem;
+        gap: 0.5rem;
+
+        .result-top {
+          display: flex;
+          align-items: baseline;
+          justify-content: space-between;
+          gap: 0.5rem;
+          flex-wrap: wrap;
+        }
 
         &.healthy {
           background: #F0FDF4;
           border: 1px solid #BBF7D0;
 
-          .result-label { color: #166534; font-size: 0.76rem; font-weight: 600; }
-          .margin-pct { font-family: var(--font-serif, serif); font-size: 1.35rem; font-weight: 700; color: #15803D; }
+          .result-label { color: #166534; font-size: 0.78rem; font-weight: 600; }
+          .margin-pct { 
+            font-family: var(--font-sans, system-ui, -apple-system, sans-serif); 
+            font-variant-numeric: tabular-nums;
+            font-size: 1.25rem; 
+            font-weight: 700; 
+            color: #15803D; 
+          }
           .margin-badge {
             display: flex;
             align-items: center;
@@ -1599,8 +1762,14 @@ interface EditableStep {
           background: #FFFBEB;
           border: 1px solid #FDE68A;
 
-          .result-label { color: #92400E; font-size: 0.76rem; font-weight: 600; }
-          .margin-pct { font-family: var(--font-serif, serif); font-size: 1.35rem; font-weight: 700; color: #B45309; }
+          .result-label { color: #92400E; font-size: 0.78rem; font-weight: 600; }
+          .margin-pct { 
+            font-family: var(--font-sans, system-ui, -apple-system, sans-serif); 
+            font-variant-numeric: tabular-nums;
+            font-size: 1.25rem; 
+            font-weight: 700; 
+            color: #B45309; 
+          }
           .margin-badge {
             display: flex;
             align-items: center;
@@ -1640,6 +1809,8 @@ interface EditableStep {
           color: #6B5B52;
 
           strong {
+            font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+            font-variant-numeric: tabular-nums;
             color: #382F2D;
             font-weight: 600;
           }
@@ -1652,8 +1823,10 @@ interface EditableStep {
             color: #5B1A24;
 
             .gold-total {
-              font-family: var(--font-serif, serif);
-              font-size: 1.15rem;
+              font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+              font-variant-numeric: tabular-nums;
+              font-size: 1.2rem;
+              font-weight: 700;
               color: #C59B43;
             }
           }
@@ -1727,12 +1900,26 @@ export class DishFormComponent implements OnInit {
   private recipeService = inject(RecipeService);
   private toastService = inject(ToastService);
   tService = inject(TranslationService);
+  imageService = inject(ImageService);
 
   isEditing = signal<boolean>(false);
   editingDishId = signal<string | null>(null);
   categories = signal<FoodCategory[]>([]);
   existingImages = signal<DishImage[]>([]);
   activePreviewUrl = signal<string | null>(null);
+
+  isCurrentPreviewPrimary = computed(() => {
+    const preview = this.activePreviewUrl();
+    if (!preview) return false;
+    const match = this.existingImages().find(img => img.image_url === preview);
+    return match ? match.is_primary === 1 : false;
+  });
+
+  currentPreviewImage = computed(() => {
+    const preview = this.activePreviewUrl();
+    if (!preview) return null;
+    return this.existingImages().find(img => img.image_url === preview) || null;
+  });
 
   blueprintTab = signal<'ingredients' | 'preparation'>('ingredients');
   guestScaleCount = signal<number>(500);
@@ -1950,7 +2137,8 @@ export class DishFormComponent implements OnInit {
 
           this.existingImages.set(dish.images || []);
           if (dish.images && dish.images.length > 0) {
-            this.activePreviewUrl.set(dish.images[0].image_url);
+            const primary = dish.images.find(img => img.is_primary === 1);
+            this.activePreviewUrl.set(primary ? primary.image_url : dish.images[0].image_url);
           } else if (dish.primary_image_url) {
             this.activePreviewUrl.set(dish.primary_image_url);
           }
@@ -1958,6 +2146,43 @@ export class DishFormComponent implements OnInit {
       },
       error: () => this.toastService.error('Failed to load dish details')
     });
+  }
+
+  setAsPrimary(img: DishImage, event?: Event) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    if (img.is_primary === 1) return;
+
+    const dishId = this.editingDishId();
+    if (dishId) {
+      this.dishService.setPrimaryDishImage(dishId, img.id).subscribe({
+        next: () => {
+          this.existingImages.update(imgs =>
+            imgs.map(i => ({
+              ...i,
+              is_primary: i.id === img.id ? 1 : 0
+            }))
+          );
+          this.activePreviewUrl.set(img.image_url);
+          const msg = this.tService.currentLang() === 'ta'
+            ? 'முதன்மை படம் மாற்றப்பட்டது! வாடிக்கையாளருக்கு முதலில் இது தோன்றும்.'
+            : 'Primary cover updated! This image will now render first to customers.';
+          this.toastService.success(msg);
+        },
+        error: () => this.toastService.error('Failed to update primary image')
+      });
+    } else {
+      this.existingImages.update(imgs =>
+        imgs.map(i => ({
+          ...i,
+          is_primary: i === img ? 1 : 0
+        }))
+      );
+      this.activePreviewUrl.set(img.image_url);
+      this.toastService.success('Cover image selected for customer view.');
+    }
   }
 
   loadRecipe(dishId: string) {
@@ -2105,9 +2330,16 @@ export class DishFormComponent implements OnInit {
     this.dishService.deleteDishImage(dishId, img.id).subscribe({
       next: () => {
         this.toastService.success('Image deleted from Cloudflare R2.');
-        this.existingImages.update(imgs => imgs.filter(i => i.id !== img.id));
+        this.existingImages.update(imgs => {
+          const list = imgs.filter(i => i.id !== img.id);
+          if (img.is_primary === 1 && list.length > 0) {
+            list[0].is_primary = 1;
+          }
+          return list;
+        });
         const remaining = this.existingImages();
-        this.activePreviewUrl.set(remaining.length > 0 ? remaining[0].image_url : null);
+        const primary = remaining.find(i => i.is_primary === 1);
+        this.activePreviewUrl.set(primary ? primary.image_url : (remaining.length > 0 ? remaining[0].image_url : null));
       },
       error: () => this.toastService.error('Failed to delete image')
     });

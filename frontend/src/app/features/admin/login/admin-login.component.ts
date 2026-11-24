@@ -4,24 +4,21 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angu
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { BrandLogoComponent } from '../../../shared/components/brand-logo/brand-logo.component';
 
 @Component({
   selector: 'app-admin-login',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, BrandLogoComponent],
   template: `
     <div class="login-page">
       <div class="login-card">
         <!-- Logo & Title -->
         <div class="card-header">
           <div class="crest-icon">
-            <svg viewBox="0 0 44 44" width="48" height="48" fill="none">
-              <path d="M22 4C23 9 29 13 34 15C29 18 27 22 22 32C17 22 15 18 10 15C15 13 21 9 22 4Z" fill="#F4D068"/>
-              <circle cx="22" cy="20" r="4.5" fill="#4A0E1C"/>
-              <path d="M9 29C13 27 17 28 22 34C27 28 31 27 35 29C31 35 27 38 22 38C17 38 13 35 9 29Z" fill="#E5BD68"/>
-            </svg>
+            <app-brand-logo [size]="64"></app-brand-logo>
           </div>
-          <h1 class="portal-title">Wedding Feast</h1>
+          <h1 class="portal-title">Thirumala Catering Service</h1>
           <p class="portal-subtitle">Admin Management Portal</p>
         </div>
 
@@ -35,7 +32,7 @@ import { ToastService } from '../../../core/services/toast.service';
                 id="username" 
                 type="text" 
                 formControlName="username" 
-                placeholder="admin or admin@weddingfeast.com"
+                placeholder="admin or admin@thirumalacatering.com"
                 autocomplete="username"
               />
             </div>

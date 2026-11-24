@@ -2,11 +2,12 @@ import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TranslationService } from '../../core/services/translation.service';
+import { BrandLogoComponent } from '../../shared/components/brand-logo/brand-logo.component';
 
 @Component({
   selector: 'app-admin-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, BrandLogoComponent],
   template: `
     <!-- Mobile Backdrop -->
     @if (mobileOpen) {
@@ -16,12 +17,8 @@ import { TranslationService } from '../../core/services/translation.service';
     <aside class="admin-sidebar" [class.mobile-open]="mobileOpen">
       <!-- Royal Crest Brand Icon at Top -->
       <div class="sidebar-top">
-        <a routerLink="/admin/dashboard" class="brand-crest" title="Wedding Feast Admin">
-          <svg viewBox="0 0 44 44" width="36" height="36" fill="none">
-            <path d="M22 4C23 9 29 13 34 15C29 18 27 22 22 32C17 22 15 18 10 15C15 13 21 9 22 4Z" fill="#C59B43"/>
-            <circle cx="22" cy="20" r="4.5" fill="#421119"/>
-            <path d="M9 29C13 27 17 28 22 34C27 28 31 27 35 29C31 35 27 38 22 38C17 38 13 35 9 29Z" fill="#EAD9B7"/>
-          </svg>
+        <a routerLink="/admin/dashboard" class="brand-crest" title="Thirumala Catering Service Admin">
+          <app-brand-logo [size]="40"></app-brand-logo>
         </a>
       </div>
 

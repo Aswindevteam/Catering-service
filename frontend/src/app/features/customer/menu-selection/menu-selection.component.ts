@@ -8,6 +8,7 @@ import { SelectionService, SelectedDishItem } from '../../../core/services/selec
 import { TranslationService } from '../../../core/services/translation.service';
 import { RecipeService } from '../../../core/services/recipe.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ImageService } from '../../../core/services/image.service';
 import { Dish, FoodCategory, Recipe } from '../../../core/models';
 
 @Component({
@@ -86,7 +87,7 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
                 [class.active]="activeCategory() === cat.id"
                 (click)="scrollToCategory(cat.id)"
               >
-                {{ cat.name }}
+                {{ translationService.getCategoryName(cat) }}
               </button>
             }
           </nav>
@@ -97,12 +98,14 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
               <span class="material-symbols-outlined search-icon">search</span>
               <input 
                 type="text" 
-                [(ngModel)]="searchQuery" 
-                placeholder="Search appetizers, idly, vada, gravies, biryani, desserts..." 
+                [ngModel]="searchQuery()" 
+                (ngModelChange)="searchQuery.set($event)"
+                (input)="searchQuery.set($any($event.target).value)"
+                [placeholder]="translationService.t('menu.searchPlaceholder')" 
                 class="dish-search-box"
               />
-              @if (searchQuery) {
-                <button type="button" class="clear-btn" (click)="searchQuery = ''">
+              @if (searchQuery()) {
+                <button type="button" class="clear-btn" (click)="searchQuery.set('')" title="Clear search">
                   <span class="material-symbols-outlined">close</span>
                 </button>
               }
@@ -121,7 +124,7 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
                 type="button" 
                 class="diet-pill veg" 
                 [class.active]="dietFilter() === 'veg'"
-                (click)="dietFilter.set('veg')"
+                (click)="setDietFilter('veg')"
               >
                 <span class="diet-dot veg-dot"></span>
                 <span>{{ translationService.t('diet.veg') }}</span>
@@ -130,7 +133,7 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
                 type="button" 
                 class="diet-pill non-veg" 
                 [class.active]="dietFilter() === 'non-veg'"
-                (click)="dietFilter.set('non-veg')"
+                (click)="setDietFilter('non-veg')"
               >
                 <span class="diet-dot non-veg-dot"></span>
                 <span>{{ translationService.t('diet.nonveg') }}</span>
@@ -139,7 +142,7 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
                 type="button" 
                 class="diet-pill vegan" 
                 [class.active]="dietFilter() === 'vegan'"
-                (click)="dietFilter.set('vegan')"
+                (click)="setDietFilter('vegan')"
               >
                 <span class="diet-dot vegan-dot"></span>
                 <span>{{ translationService.t('diet.vegan') }}</span>
@@ -162,6 +165,7 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
                       [alt]="dish.name" 
                       loading="lazy" 
                       decoding="async"
+                      (error)="onImageError($event)"
                     />
                     <div class="specular-ring"></div>
                     <div class="zoom-cue">
@@ -172,7 +176,7 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
                   <!-- Dish Details -->
                   <div class="dish-content-body">
                     <div class="dish-title-row">
-                      <h3 class="serif-dish-name" (click)="openDishModal(dish, $event)">{{ dish.name }}</h3>
+                      <h3 class="serif-dish-name" (click)="openDishModal(dish, $event)">{{ translationService.getDishName(dish) }}</h3>
                       <button type="button" class="view-plating-btn" (click)="openDishModal(dish, $event)" [title]="translationService.t('dishModal.viewPlating')">
                         <span class="material-symbols-outlined">photo_library</span>
                         <span>{{ translationService.t('dishModal.viewPlating') }}</span>
@@ -181,7 +185,7 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
 
                     <!-- 2-Line Tasting Note -->
                     <p class="culinary-tasting-note" (click)="openDishModal(dish, $event)">
-                      {{ dish.description || 'Authentic heirloom preparation cooked with royal spices and fragrant ghee.' }}
+                      {{ translationService.getDishDesc(dish) }}
                     </p>
 
                     <!-- Dietary & Smart Portion Badges -->
@@ -245,8 +249,12 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
             } @empty {
               <div class="no-results-card">
                 <span class="material-symbols-outlined empty-icon">dinner_dining</span>
-                <h4>No matching dishes found</h4>
-                <p>Try clearing your dietary filter or search query.</p>
+                <h4>{{ translationService.t('menu.noMatches') }}</h4>
+                <p>{{ translationService.t('menu.noMatchesHint') }}</p>
+                <button type="button" class="reset-filter-btn" (click)="resetFilters()">
+                  <span class="material-symbols-outlined">restart_alt</span>
+                  <span>{{ translationService.currentLang() === 'ta' ? 'அனைத்து வடிகட்டிகளையும் நீக்குக' : 'Reset All Filters' }}</span>
+                </button>
               </div>
             }
           </div>
@@ -275,10 +283,10 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
             <!-- Live Selected Dishes Tray -->
             <div class="selected-tray-section">
               <div class="tray-head">
-                <span class="tray-title">{{ selectionService.selectedDishes().size }} Dishes Selected</span>
+                <span class="tray-title">{{ selectionService.selectedDishes().size }} {{ translationService.t('receipt.dishesSelected') }}</span>
                 @if (selectionService.selectedDishes().size > 0) {
                   <button type="button" class="btn-clear-tray" (click)="selectionService.clearSelection()">
-                    Clear All
+                    {{ translationService.t('receipt.clearAll') }}
                   </button>
                 }
               </div>
@@ -286,16 +294,16 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
               @if (selectionService.selectedDishes().size === 0) {
                 <div class="empty-tray-box">
                   <span class="material-symbols-outlined empty-tray-icon">soup_kitchen</span>
-                  <p class="empty-tray-txt">Your feast tray is currently empty.</p>
-                  <span class="empty-tray-sub">Tap <strong>+ Add to Feast</strong> on any dish to generate your live wedding estimate.</span>
+                  <p class="empty-tray-txt">{{ translationService.t('receipt.emptyTrayTitle') }}</p>
+                  <span class="empty-tray-sub">{{ translationService.t('receipt.emptyTrayDesc') }}</span>
                 </div>
               } @else {
                 <div class="tray-items-list">
                   @for (entry of selectedDishesList(); track entry.dish.id) {
                     <div class="tray-item-row">
                       <div class="item-meta">
-                        <span class="item-name">{{ entry.dish.name }}</span>
-                        <span class="item-portion">{{ entry.quantity_per_person }} {{ entry.dish.serving_unit || 'g' }} / guest</span>
+                        <span class="item-name">{{ translationService.getDishName(entry.dish) }}</span>
+                        <span class="item-portion">{{ entry.quantity_per_person }} {{ entry.dish.serving_unit || 'g' }} / {{ translationService.t('unit.guest') }}</span>
                       </div>
                       <div class="item-price-actions">
                         <span class="item-cost">₹{{ getItemCost(entry).toLocaleString('en-IN') }}</span>
@@ -365,17 +373,17 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
         <aside class="mobile-floating-quote-dock">
           <div class="dock-glass-content">
             <div class="dock-left">
-              <span class="dock-badge">{{ selectionService.selectedDishes().size }} Dishes Selected</span>
+              <span class="dock-badge">{{ selectionService.selectedDishes().size }} {{ translationService.t('receipt.dishesSelected') }}</span>
               <span class="dock-divider">&bull;</span>
-              <span class="dock-guest-count">{{ selectionService.eventDetails().guest_count }} Guests</span>
+              <span class="dock-guest-count">{{ selectionService.eventDetails().guest_count }} {{ translationService.t('unit.guests') }}</span>
               <div class="dock-total-cost">
                 <span class="currency-symbol">₹</span>
                 <strong class="rupee-val">{{ ((selectionService.calculation()?.grand_total || 0) / 100).toLocaleString('en-IN') }}</strong>
-                <span class="est-lbl">Est. Total</span>
+                <span class="est-lbl">{{ translationService.t('receipt.grandTotal') }}</span>
               </div>
             </div>
             <button class="review-cta-btn" routerLink="/menu-review">
-              <span>Review</span>
+              <span>{{ translationService.t('action.reviewMenu') }}</span>
               <span class="material-symbols-outlined">arrow_forward</span>
             </button>
           </div>
@@ -388,8 +396,8 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
             <!-- Modal Header -->
             <div class="dish-modal-header">
               <div class="header-left">
-                <span class="modal-category-badge">{{ modalDish.category_name || 'Traditional Feast' }}</span>
-                <h2 class="modal-dish-title">{{ modalDish.name }}</h2>
+                <span class="modal-category-badge">{{ translationService.getCategoryName({ name: modalDish.category_name || '' }) }}</span>
+                <h2 class="modal-dish-title">{{ translationService.getDishName(modalDish) }}</h2>
               </div>
               <button type="button" class="modal-close-btn" (click)="closeDishModal()" aria-label="Close modal">
                 <span class="material-symbols-outlined">close</span>
@@ -407,6 +415,7 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
                     class="carousel-hero-img"
                     loading="lazy"
                     decoding="async"
+                    (error)="onImageError($event)"
                   />
                   <div class="carousel-gradient-overlay"></div>
 
@@ -435,7 +444,7 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
                         (click)="selectImage($index)"
                         [title]="'View angle ' + ($index + 1)"
                       >
-                        <img [src]="img" [alt]="modalDish.name + ' thumbnail ' + ($index + 1)" loading="lazy" decoding="async" />
+                        <img [src]="img" (error)="onImageError($event)" [alt]="modalDish.name + ' thumbnail ' + ($index + 1)" loading="lazy" decoding="async" />
                         <div class="thumb-ring"></div>
                       </button>
                     }
@@ -458,12 +467,12 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
 
                   <span class="badge-chip prep-time">
                     <span class="material-symbols-outlined">schedule</span>
-                    <span>{{ modalDish.prep_time || '15 mins' }}</span>
+                    <span>{{ formatPrepTime(modalDish.prep_time) }}</span>
                   </span>
 
                   <span class="badge-chip portion-spec">
                     <span class="material-symbols-outlined">scale</span>
-                    <span><strong>{{ modalQuantity() }} {{ modalDish.serving_unit || 'pcs' }}</strong> / {{ translationService.t('unit.guest') }}</span>
+                    <span><strong>{{ modalQuantity() }} {{ formatUnit(modalDish.serving_unit) }}</strong> / {{ translationService.t('unit.guest') }}</span>
                   </span>
                 </div>
               </div>
@@ -475,7 +484,7 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
                   {{ translationService.t('dishModal.title') }}
                 </h4>
                 <p class="story-text">
-                  {{ modalDish.description || 'Authentic heirloom royal banquet preparation cooked with pure cow ghee and fragrant freshly ground spices.' }}
+                  {{ translationService.getDishDesc(modalDish) }}
                 </p>
               </div>
 
@@ -486,13 +495,13 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
                     <span class="material-symbols-outlined ing-icon">soup_kitchen</span>
                     <h4 class="ingredients-title">{{ translationService.t('dishModal.ingredients') }}</h4>
                   </div>
-                  <span class="ingredients-subtitle">Authentic composition scaled for wedding banquet guests</span>
+                  <span class="ingredients-subtitle">{{ translationService.t('dishModal.ingredientsSubtitle') }}</span>
                 </div>
 
                 @if (modalLoadingRecipe()) {
                   <div class="ingredients-loading">
                     <span class="material-symbols-outlined spin">progress_activity</span>
-                    <span>Retrieving culinary composition...</span>
+                    <span>{{ translationService.t('dishModal.loadingIngredients') }}</span>
                   </div>
                 } @else if (getModalIngredients().length > 0) {
                   <div class="ingredients-grid">
@@ -501,19 +510,19 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
                         <div class="ing-left">
                           <span class="ing-bullet">✦</span>
                           <div class="ing-info">
-                            <span class="ing-name">{{ ing.name }}</span>
+                            <span class="ing-name">{{ translationService.getIngredientName(ing.name) }}</span>
                             @if (ing.notes) {
-                              <span class="ing-note">{{ ing.notes }}</span>
+                              <span class="ing-note">{{ translationService.getIngredientNote(ing.notes) }}</span>
                             }
                           </div>
                         </div>
-                        <span class="ing-qty">{{ ing.quantity }} {{ ing.unit }}</span>
+                        <span class="ing-qty">{{ ing.quantity }} {{ formatUnit(ing.unit) }}</span>
                       </div>
                     }
                   </div>
                 } @else {
                   <div class="ingredients-empty">
-                    <p>Authentic heirloom preparation with organic farm spices and desi ghee.</p>
+                    <p>{{ translationService.t('dishModal.heirloomNote') }}</p>
                   </div>
                 }
               </div>
@@ -522,7 +531,7 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
             <!-- Sticky Modal Action Dock -->
             <div class="dish-modal-footer">
               <div class="footer-price-dock">
-                <span class="price-lbl">Rate Per Guest:</span>
+                <span class="price-lbl">{{ translationService.t('dishModal.ratePerGuest') }}:</span>
                 <div class="price-val-wrap">
                   <span class="currency-symbol">₹</span>
                   <span class="price-val">{{ modalDish.price_per_person / 100 }}</span>
@@ -534,7 +543,7 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
                 <span class="portion-label">{{ translationService.t('dishModal.portionPerGuest') }}:</span>
                 <div class="modal-stepper">
                   <button type="button" class="btn-step" (click)="adjustModalPortion(-1)" aria-label="Decrease portion">-</button>
-                  <span class="step-num">{{ modalQuantity() }} {{ modalDish.serving_unit || 'pcs' }}</span>
+                  <span class="step-num">{{ modalQuantity() }} {{ formatUnit(modalDish.serving_unit) }}</span>
                   <button type="button" class="btn-step" (click)="adjustModalPortion(1)" aria-label="Increase portion">+</button>
                 </div>
               </div>
@@ -548,7 +557,7 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
                 } @else {
                   <button type="button" class="wf-btn gold modal-update-btn" (click)="updateDishFromModal(modalDish)">
                     <span class="material-symbols-outlined">check_circle</span>
-                    <span>{{ translationService.t('dishModal.updatePortion') }} ({{ modalQuantity() }} {{ modalDish.serving_unit || 'pcs' }})</span>
+                    <span>{{ translationService.t('dishModal.updatePortion') }} ({{ modalQuantity() }} {{ formatUnit(modalDish.serving_unit) }})</span>
                   </button>
                 }
               </div>
@@ -1670,10 +1679,35 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
       background: #FFFFFF;
       border: 1px dashed var(--border-hairline);
       border-radius: var(--radius-md);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6rem;
 
       .empty-icon {
         font-size: 48px;
         color: var(--accent-gold);
+      }
+
+      .reset-filter-btn {
+        margin-top: 0.5rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: var(--primary-maroon, #5B1A24);
+        color: #FFFFFF;
+        border: none;
+        padding: 0.5rem 1.25rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: #421119;
+          transform: translateY(-1px);
+        }
       }
     }
 
@@ -2292,11 +2326,12 @@ export class MenuSelectionComponent implements OnInit {
   private toast = inject(ToastService);
   selectionService = inject(SelectionService);
   translationService = inject(TranslationService);
+  imageService = inject(ImageService);
 
   categories = signal<FoodCategory[]>([]);
   allDishes = signal<Dish[]>([]);
 
-  searchQuery = '';
+  searchQuery = signal<string>('');
   dietFilter = signal<'all' | 'veg' | 'non-veg' | 'vegan'>('all');
   activeCategory = signal<string>('all');
 
@@ -2311,20 +2346,50 @@ export class MenuSelectionComponent implements OnInit {
   filteredDishes = computed(() => {
     let list = this.allDishes();
 
-    if (this.activeCategory() !== 'all') {
-      list = list.filter(d => d.category_id === this.activeCategory());
+    // 1. Course / Category Filter
+    const activeCat = this.activeCategory();
+    if (activeCat !== 'all') {
+      list = list.filter(d => d.category_id === activeCat || (d as any).category === activeCat);
     }
 
-    if (this.dietFilter() !== 'all') {
-      list = list.filter(d => d.food_type === this.dietFilter());
+    // 2. Dietary Filter (inclusive and robust)
+    const diet = this.dietFilter();
+    if (diet === 'veg') {
+      list = list.filter(d => {
+        const ft = (d.food_type || '').toLowerCase();
+        return ft === 'veg' || ft === 'vegetarian' || ft === 'vegan';
+      });
+    } else if (diet === 'non-veg') {
+      list = list.filter(d => {
+        const ft = (d.food_type || '').toLowerCase();
+        return ft === 'non-veg' || ft === 'nonveg' || ft === 'non_veg';
+      });
+    } else if (diet === 'vegan') {
+      list = list.filter(d => {
+        const ft = (d.food_type || '').toLowerCase();
+        return ft === 'vegan';
+      });
     }
 
-    if (this.searchQuery && this.searchQuery.trim()) {
-      const q = this.searchQuery.toLowerCase().trim();
-      list = list.filter(d =>
-        d.name.toLowerCase().includes(q) ||
-        (d.description && d.description.toLowerCase().includes(q))
-      );
+    // 3. Search Query Filter (reactively tracked signal on every keystroke)
+    const q = this.searchQuery().trim().toLowerCase();
+    if (q) {
+      list = list.filter(d => {
+        const dishNameEn = (d.name || '').toLowerCase();
+        const dishDescEn = (d.description || '').toLowerCase();
+        const dishNameLocal = this.translationService.getDishName(d).toLowerCase();
+        const dishDescLocal = this.translationService.getDishDesc(d).toLowerCase();
+        const catNameEn = (d.category_name || '').toLowerCase();
+        const catNameLocal = this.translationService.getCategoryName({ name: d.category_name || '' }).toLowerCase();
+        return (
+          dishNameEn.includes(q) ||
+          dishDescEn.includes(q) ||
+          dishNameLocal.includes(q) ||
+          dishDescLocal.includes(q) ||
+          catNameEn.includes(q) ||
+          catNameLocal.includes(q)
+        );
+      });
     }
 
     return list;
@@ -2350,7 +2415,29 @@ export class MenuSelectionComponent implements OnInit {
   }
 
   scrollToCategory(catId: string) {
-    this.activeCategory.set(catId);
+    if (this.activeCategory() === catId) {
+      this.activeCategory.set('all');
+    } else {
+      this.activeCategory.set(catId);
+    }
+  }
+
+  setDietFilter(type: 'all' | 'veg' | 'non-veg' | 'vegan') {
+    if (this.dietFilter() === type) {
+      this.dietFilter.set('all');
+    } else {
+      this.dietFilter.set(type);
+    }
+  }
+
+  resetFilters() {
+    this.searchQuery.set('');
+    this.dietFilter.set('all');
+    this.activeCategory.set('all');
+  }
+
+  onImageError(e: Event) {
+    this.imageService.handleImageError(e);
   }
 
   adjustGuests(delta: number) {
@@ -2366,13 +2453,15 @@ export class MenuSelectionComponent implements OnInit {
   formatServing(dish: Dish): string {
     const selected = this.selectionService.selectedDishes().get(dish.id);
     const qty = selected ? selected.quantity_per_person : dish.quantity_per_person;
-    const unit = (dish.serving_unit || 'g').toLowerCase();
-    if (['pcs', 'pieces', 'piece'].includes(unit)) {
-      return `${qty} ${this.translationService.t('unit.pcs')}`;
-    } else if (unit === 'ml') {
-      return `${qty} ${this.translationService.t('unit.ml')}`;
-    }
-    return `${qty} ${this.translationService.t('unit.g')}`;
+    return `${qty} ${this.formatUnit(dish.serving_unit)}`;
+  }
+
+  formatUnit(unit: string | null | undefined): string {
+    return this.translationService.formatUnit(unit);
+  }
+
+  formatPrepTime(time: string | null | undefined): string {
+    return this.translationService.formatPrepTime(time);
   }
 
   isPortionCustomized(dish: Dish): boolean {
@@ -2494,9 +2583,13 @@ export class MenuSelectionComponent implements OnInit {
     this.dishService.getDish(dish.id).subscribe({
       next: (res) => {
         if (res.success && res.data) {
-          const fetchedImages = [...images];
+          const fetchedImages: string[] = [];
+          if (res.data.primary_image_url) {
+            fetchedImages.push(res.data.primary_image_url);
+          }
           if (res.data.images && res.data.images.length > 0) {
-            for (const img of res.data.images) {
+            const sorted = [...res.data.images].sort((a, b) => (b.is_primary ?? 0) - (a.is_primary ?? 0));
+            for (const img of sorted) {
               if (img.image_url && !fetchedImages.includes(img.image_url)) {
                 fetchedImages.push(img.image_url);
               }

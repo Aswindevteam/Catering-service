@@ -1,10 +1,13 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
+import { Subject, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { DishService } from '../../../core/services/dish.service';
 import { CategoryService } from '../../../core/services/category.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ImageService } from '../../../core/services/image.service';
 import { Dish, FoodCategory } from '../../../core/models';
 
 @Component({
@@ -28,13 +31,19 @@ import { Dish, FoodCategory } from '../../../core/models';
       <!-- Filter Toolbar matching Figma Screen 3 -->
       <div class="filter-toolbar">
         <div class="search-box">
-          <span class="material-symbols-outlined">search</span>
+          <span class="material-symbols-outlined search-icon">search</span>
           <input 
             type="text" 
-            [(ngModel)]="searchQuery" 
-            (ngModelChange)="onFilterChange()" 
-            placeholder="Search dishes..." 
+            [ngModel]="searchQuery" 
+            (ngModelChange)="onSearchInput($event)" 
+            placeholder="Search dishes by name or ingredients..." 
+            class="dish-search-input"
           />
+          @if (searchQuery) {
+            <button type="button" class="clear-search-btn" (click)="clearSearch()" title="Clear filter">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          }
         </div>
 
         <div class="filters-row">
@@ -89,6 +98,7 @@ import { Dish, FoodCategory } from '../../../core/models';
                   [src]="dish.primary_image_url || 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=600&q=80'" 
                   [alt]="dish.name" 
                   class="dish-img" 
+                  (error)="onImageError($event)"
                 />
               </div>
 
@@ -161,7 +171,7 @@ import { Dish, FoodCategory } from '../../../core/models';
                 <tr>
                   <td>
                     <div class="table-dish-cell">
-                      <img [src]="dish.primary_image_url || 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=120&q=80'" class="table-thumb" />
+                      <img [src]="dish.primary_image_url || 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=120&q=80'" (error)="onImageError($event)" class="table-thumb" />
                       <div>
                         <strong>{{ dish.name }}</strong>
                         <div class="table-desc">{{ dish.description || '' }}</div>
@@ -264,26 +274,64 @@ import { Dish, FoodCategory } from '../../../core/models';
       flex-wrap: wrap;
 
       .search-box {
+        position: relative;
+        flex: 1;
+        min-width: 260px;
+        max-width: 440px;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        background: var(--bg-card-subtle);
-        border: 1px solid var(--border-card);
-        border-radius: var(--radius-sm);
-        padding: 0.45rem 0.85rem;
-        width: 280px;
 
-        .material-symbols-outlined {
+        .search-icon {
+          position: absolute;
+          left: 0.85rem;
+          color: var(--text-muted, #9c8b7e);
           font-size: 20px;
-          color: var(--text-muted);
+          pointer-events: none;
         }
 
-        input {
-          border: none;
-          background: transparent;
-          outline: none;
+        .dish-search-input {
           width: 100%;
+          padding: 0.62rem 2.2rem 0.62rem 2.5rem;
+          background: #ffffff;
+          border: 1px solid var(--border-card, #e5dec9);
+          border-radius: var(--radius-sm, 8px);
           font-size: 0.88rem;
+          color: var(--text-primary);
+          outline: none;
+          transition: all 0.2s;
+
+          &:focus {
+            border-color: var(--accent-gold, #c59b43);
+            box-shadow: 0 0 0 3px rgba(197, 155, 67, 0.15);
+          }
+
+          &::placeholder {
+            color: var(--text-muted, #9c8b7e);
+            font-style: italic;
+          }
+        }
+
+        .clear-search-btn {
+          position: absolute;
+          right: 0.65rem;
+          color: var(--text-muted, #9c8b7e);
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          padding: 2px;
+          border-radius: 50%;
+          transition: color 0.15s;
+
+          &:hover { 
+            color: var(--text-primary, #2f0b12); 
+            background: rgba(0, 0, 0, 0.05);
+          }
+
+          .material-symbols-outlined { 
+            font-size: 18px; 
+          }
         }
       }
 
@@ -635,11 +683,17 @@ import { Dish, FoodCategory } from '../../../core/models';
     }
   `]
 })
-export class AdminDishesComponent implements OnInit {
+export class AdminDishesComponent implements OnInit, OnDestroy {
   private dishService = inject(DishService);
   private categoryService = inject(CategoryService);
   private toastService = inject(ToastService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  imageService = inject(ImageService);
+
+  private searchSubject = new Subject<string>();
+  private searchSub?: Subscription;
+  private routeSub?: Subscription;
 
   dishes = signal<Dish[]>([]);
   categories = signal<FoodCategory[]>([]);
@@ -656,8 +710,42 @@ export class AdminDishesComponent implements OnInit {
   Math = Math;
 
   ngOnInit() {
+    this.searchSub = this.searchSubject.pipe(
+      debounceTime(250),
+      distinctUntilChanged()
+    ).subscribe(term => {
+      this.searchQuery = term;
+      this.currentPage.set(1);
+      this.loadDishes();
+    });
+
+    this.routeSub = this.route.queryParams.subscribe(params => {
+      if (params['search']) {
+        this.searchQuery = params['search'];
+      }
+    });
+
     this.loadCategories();
     this.loadDishes();
+  }
+
+  onSearchInput(val: string) {
+    this.searchQuery = val;
+    this.searchSubject.next(val);
+  }
+
+  clearSearch() {
+    this.searchQuery = '';
+    this.searchSubject.next('');
+  }
+
+  onImageError(e: Event) {
+    this.imageService.handleImageError(e);
+  }
+
+  ngOnDestroy() {
+    this.searchSub?.unsubscribe();
+    this.routeSub?.unsubscribe();
   }
 
   loadCategories() {

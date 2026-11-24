@@ -29,7 +29,7 @@ app.use(
 app.get('/api/health', (c) => {
   return c.json({
     status: 'ok',
-    service: 'Wedding Feast Catering Platform API',
+    service: 'Thirumala Catering Service Platform API',
     environment: c.env.ENVIRONMENT || 'development',
     timestamp: new Date().toISOString(),
   });

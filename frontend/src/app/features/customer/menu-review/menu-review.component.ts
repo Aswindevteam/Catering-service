@@ -57,9 +57,9 @@ import { CustomerSelection, WeddingEvent } from '../../../core/models';
       @if (selectionService.selectedDishes().size === 0) {
         <div class="empty-tray-card">
           <span class="material-symbols-outlined empty-icon">restaurant_menu</span>
-          <h3>No dishes selected yet</h3>
-          <p>Please return to our menu curation and select your favorite royal feast items.</p>
-          <a routerLink="/menu" class="wf-btn primary">Curate Menu Now</a>
+          <h3>{{ translationService.t('proposal.emptyTitle') }}</h3>
+          <p>{{ translationService.t('proposal.emptyDesc') }}</p>
+          <a routerLink="/menu" class="wf-btn primary">{{ translationService.t('proposal.curateBtn') }}</a>
         </div>
       } @else {
         <!-- 3D Printed Menu Card Mode -->
@@ -69,7 +69,7 @@ import { CustomerSelection, WeddingEvent } from '../../../core/models';
               <div class="foil-inner-border">
                 <div class="card-wedding-crest">
                   <span class="material-symbols-outlined crest-symbol">stars</span>
-                  <h2>Wedding Feast Menu</h2>
+                  <h2>{{ translationService.t('proposal.crestTitle') }}</h2>
                   <span class="couple-celebration">{{ selectionService.eventDetails().customer_name }}</span>
                   <span class="venue-date">{{ selectionService.eventDetails().venue }} &bull; {{ selectionService.eventDetails().event_date }}</span>
                 </div>
@@ -79,12 +79,12 @@ import { CustomerSelection, WeddingEvent } from '../../../core/models';
                 <div class="card-courses-columns">
                   @for (group of groupedDishes(); track group.categoryName) {
                     <div class="card-course-block">
-                      <h4 class="card-course-heading">{{ group.categoryName }}</h4>
+                      <h4 class="card-course-heading">{{ translationService.getCategoryName({ name: group.categoryName }) }}</h4>
                       <div class="card-dish-items">
                         @for (item of group.items; track item.dish.id) {
                           <div class="card-dish-line">
-                            <span class="line-name">{{ item.dish.name }}</span>
-                            <span class="line-portion">({{ item.quantity_per_person }} {{ item.dish.serving_unit }})</span>
+                            <span class="line-name">{{ translationService.getDishName(item.dish) }}</span>
+                            <span class="line-portion">({{ item.quantity_per_person }} {{ translationService.formatUnit(item.dish.serving_unit) }})</span>
                           </div>
                         }
                       </div>
@@ -93,7 +93,7 @@ import { CustomerSelection, WeddingEvent } from '../../../core/models';
                 </div>
 
                 <div class="card-footer-quote">
-                  <p>"May this celebration of culinary mastery nourish eternal love and joy."</p>
+                  <p>{{ translationService.t('proposal.crestQuote') }}</p>
                 </div>
               </div>
             </div>
@@ -119,25 +119,25 @@ import { CustomerSelection, WeddingEvent } from '../../../core/models';
                   <!-- Tasting Notes & Quantity -->
                   <div class="itinerary-info">
                     <div class="row-top">
-                      <h3 class="itinerary-dish-name">{{ item.dish.name }}</h3>
-                      <span class="course-chip">{{ item.dish.category_name || 'Course' }}</span>
+                      <h3 class="itinerary-dish-name">{{ translationService.getDishName(item.dish) }}</h3>
+                      <span class="course-chip">{{ translationService.getCategoryName({ name: item.dish.category_name || '' }) }}</span>
                     </div>
 
                     <p class="itinerary-tasting-notes">
-                      Tasting Notes: {{ item.dish.description || 'Authentic traditional recipe cooked with pure ghee, slow simmered to perfection.' }}
+                      <strong>{{ translationService.t('proposal.tastingNotes') }}</strong> {{ translationService.getDishDesc(item.dish) }}
                     </p>
 
                     <div class="itinerary-calculations-bar">
                       <div class="calc-portion">
-                        <span class="calc-dim">Portion per Guest:</span>
-                        <strong>{{ item.quantity_per_person }} {{ item.dish.serving_unit }}</strong>
+                        <span class="calc-dim">{{ translationService.t('proposal.portionPerGuest') }}:</span>
+                        <strong>{{ item.quantity_per_person }} {{ translationService.formatUnit(item.dish.serving_unit) }}</strong>
                       </div>
                       <div class="calc-prep">
                         <span class="calc-dim">{{ translationService.t('proposal.totalPrep') }}:</span>
                         <strong class="gold-qty">{{ formatBulkKitchenQuantity(item.quantity_per_person, item.dish.serving_unit) }}</strong>
                       </div>
                       <div class="calc-cost">
-                        <span class="calc-dim">Cost ({{ selectionService.eventDetails().guest_count }} Guests):</span>
+                        <span class="calc-dim">{{ translationService.t('calc.costForGuests') }} ({{ selectionService.eventDetails().guest_count }} {{ translationService.t('unit.guests') }}):</span>
                         <strong class="maroon-cost">₹{{ getItemCost(item).toLocaleString('en-IN') }}</strong>
                       </div>
                     </div>
@@ -150,12 +150,12 @@ import { CustomerSelection, WeddingEvent } from '../../../core/models';
             <div class="dietary-notes-box">
               <div class="box-head">
                 <span class="material-symbols-outlined">edit_note</span>
-                <h4>Special Culinary Instructions</h4>
+                <h4>{{ translationService.t('proposal.specialInstructionsTitle') }}</h4>
               </div>
               <textarea 
                 [(ngModel)]="specialRequests" 
                 rows="3" 
-                placeholder="Mention specific spice requirements, Jain portions, live counter arrangements or custom dietary requirements..."
+                [placeholder]="translationService.t('proposal.specialInstructionsPlaceholder')"
               ></textarea>
             </div>
           </div>
@@ -167,8 +167,8 @@ import { CustomerSelection, WeddingEvent } from '../../../core/models';
                 <!-- Receipt Crest -->
                 <div class="receipt-crest">
                   <span class="material-symbols-outlined crest-icon">celebration</span>
-                  <span class="brand-sub-title">Wedding Feast</span>
-                  <h3>Your Estimation</h3>
+                  <span class="brand-sub-title">{{ translationService.t('brand.name') }}</span>
+                  <h3>{{ translationService.t('proposal.yourEstimation') }}</h3>
                 </div>
 
                 <!-- Financial Rows matching Figma Screen 02 -->
@@ -214,7 +214,7 @@ import { CustomerSelection, WeddingEvent } from '../../../core/models';
 
                   <!-- Actions matching Figma Screen 02 -->
                   <div class="receipt-actions-block">
-                    <span class="interactive-action-sub">Interactive Primary Action</span>
+                    <span class="interactive-action-sub">{{ translationService.t('proposal.interactiveAction') }}</span>
                     <button type="button" class="action-btn pdf-btn" (click)="printProposal()">
                       <span class="material-symbols-outlined">download</span>
                       <span>{{ translationService.t('action.downloadPdf') }}</span>
@@ -239,18 +239,18 @@ import { CustomerSelection, WeddingEvent } from '../../../core/models';
                         </svg>
                       </span>
                       <div class="wa-title-wrap">
-                        <strong>Have Queries or Suggestions?</strong>
-                        <span>Chat directly with Banquet Concierge</span>
+                        <strong>{{ translationService.t('proposal.waTitle') }}</strong>
+                        <span>{{ translationService.t('proposal.waSubtitle') }}</span>
                       </div>
                     </div>
                     <p class="wa-desc">
-                      Need live counters, custom heirloom recipes, or dietary accommodations? Connect on WhatsApp.
+                      {{ translationService.t('proposal.waDesc') }}
                     </p>
                     <a [href]="getWhatsAppConciergeUrl()" target="_blank" class="btn-wa-direct">
                       <svg viewBox="0 0 24 24" width="18" height="18" fill="#FFFFFF">
                         <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2Z"/>
                       </svg>
-                      <span>Chat on WhatsApp (+91 98765 43210)</span>
+                      <span>{{ translationService.t('proposal.waBtn') }}</span>
                     </a>
                   </div>
                 }
@@ -267,8 +267,8 @@ import { CustomerSelection, WeddingEvent } from '../../../core/models';
           <div class="contact-confirm-dialog" (click)="$event.stopPropagation()">
             <div class="dialog-header">
               <div class="dialog-titles">
-                <span class="sub-crest">✦ Regal Feast Catering Reservation ✦</span>
-                <h3>Provide Contact & Banquet Venue Address</h3>
+                <span class="sub-crest">{{ translationService.t('dialog.regalTitle') }}</span>
+                <h3>{{ translationService.t('dialog.venueTitle') }}</h3>
               </div>
               <button type="button" class="close-x" (click)="showContactModal.set(false)" aria-label="Close modal">
                 <span class="material-symbols-outlined">close</span>
@@ -277,55 +277,55 @@ import { CustomerSelection, WeddingEvent } from '../../../core/models';
 
             <div class="dialog-body">
               <p class="dialog-intro">
-                Please confirm your contact details and banquet venue address so our catering service fleet and culinary team can coordinate your feast flawlessly.
+                {{ translationService.t('dialog.venueIntro') }}
               </p>
 
               <div class="form-grid-2">
                 <div class="form-group">
-                  <label>Customer / Host Full Name *</label>
+                  <label>{{ translationService.t('dialog.fullName') }}</label>
                   <input type="text" [(ngModel)]="bookingForm.customer_name" placeholder="e.g. Radhika Sharma & Arjun Nair" />
                 </div>
                 <div class="form-group">
-                  <label>Contact Phone Number *</label>
+                  <label>{{ translationService.t('dialog.phone') }}</label>
                   <input type="text" [(ngModel)]="bookingForm.customer_phone" placeholder="+91 98765 43210" />
                 </div>
               </div>
 
               <div class="form-grid-2">
                 <div class="form-group">
-                  <label>Email Address</label>
+                  <label>{{ translationService.t('dialog.email') }}</label>
                   <input type="email" [(ngModel)]="bookingForm.customer_email" placeholder="radhika.arjun@wedding.com" />
                 </div>
                 <div class="form-group">
-                  <label>Celebration Event Type</label>
+                  <label>{{ translationService.t('dialog.eventType') }}</label>
                   <input type="text" [(ngModel)]="bookingForm.event_type" placeholder="Wedding Reception" />
                 </div>
               </div>
 
               <div class="form-grid-2">
                 <div class="form-group">
-                  <label>Event Date</label>
+                  <label>{{ translationService.t('dialog.eventDate') }}</label>
                   <input type="date" [(ngModel)]="bookingForm.event_date" />
                 </div>
                 <div class="form-group">
-                  <label>Guest Count</label>
+                  <label>{{ translationService.t('dialog.guestCount') }}</label>
                   <input type="number" [(ngModel)]="bookingForm.guest_count" min="25" />
                 </div>
               </div>
 
               <div class="form-group">
-                <label>Banquet Venue & Full Delivery Street Address *</label>
+                <label>{{ translationService.t('dialog.venueAddress') }}</label>
                 <textarea rows="2" [(ngModel)]="bookingForm.venue" placeholder="e.g. Manikandan, Aalur, Thirukoilur Taluk, Kallakurichi Dt, 605751, Tamil Nadu"></textarea>
               </div>
 
               <div class="form-group">
-                <label>Special Culinary Requests / Dietary Notes (Optional)</label>
+                <label>{{ translationService.t('dialog.dietNotes') }}</label>
                 <textarea rows="2" [(ngModel)]="bookingForm.notes" placeholder="e.g. Provide 20 Jain portions, serve welcome drinks in brass glasses..."></textarea>
               </div>
             </div>
 
             <div class="dialog-footer">
-              <button type="button" class="btn-cancel" (click)="showContactModal.set(false)">Back to Review</button>
+              <button type="button" class="btn-cancel" (click)="showContactModal.set(false)">{{ translationService.t('dialog.backToReview') }}</button>
               <button 
                 type="button" 
                 class="btn-submit-booking" 
@@ -334,10 +334,10 @@ import { CustomerSelection, WeddingEvent } from '../../../core/models';
               >
                 @if (submitting()) {
                   <span class="material-symbols-outlined spin">progress_activity</span>
-                  <span>Confirming Feast...</span>
+                  <span>{{ translationService.t('dialog.confirming') }}</span>
                 } @else {
                   <span class="material-symbols-outlined">check_circle</span>
-                  <span>Confirm & Lock Feast Booking</span>
+                  <span>{{ translationService.t('dialog.confirmBtn') }}</span>
                 }
               </button>
             </div>
@@ -352,21 +352,21 @@ import { CustomerSelection, WeddingEvent } from '../../../core/models';
             <div class="success-crest">
               <span class="material-symbols-outlined">verified</span>
             </div>
-            <h2>Regal Feast Reserved</h2>
-            <p>Your wedding catering order has been registered in the database with reference ID:</p>
+            <h2>{{ translationService.t('success.title') }}</h2>
+            <p>{{ translationService.t('success.refIntro') }}</p>
             <div class="booking-id-box">{{ confirmedSelection()?.id }}</div>
 
             <div class="booking-summary-box">
               <div class="summary-line">
-                <span class="lbl">Host:</span>
+                <span class="lbl">{{ translationService.t('success.host') }}:</span>
                 <strong>{{ bookingForm.customer_name }}</strong>
               </div>
               <div class="summary-line">
-                <span class="lbl">Guests:</span>
-                <strong>{{ bookingForm.guest_count }} Guests</strong>
+                <span class="lbl">{{ translationService.t('dialog.guestCount') }}:</span>
+                <strong>{{ bookingForm.guest_count }} {{ translationService.t('unit.guests') }}</strong>
               </div>
               <div class="summary-line">
-                <span class="lbl">Venue:</span>
+                <span class="lbl">{{ translationService.t('success.venue') }}:</span>
                 <span>{{ bookingForm.venue }}</span>
               </div>
             </div>
@@ -376,9 +376,9 @@ import { CustomerSelection, WeddingEvent } from '../../../core/models';
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="#FFFFFF">
                   <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2Z"/>
                 </svg>
-                <span>Notify Concierge on WhatsApp</span>
+                <span>{{ translationService.t('success.notifyWa') }}</span>
               </a>
-              <button class="wf-btn secondary" (click)="confirmedSelection.set(null)" routerLink="/menu">Curate Another Feast</button>
+              <button class="wf-btn secondary" (click)="confirmedSelection.set(null)" routerLink="/menu">{{ translationService.t('success.curateAnother') }}</button>
             </div>
           </div>
         </div>
@@ -1311,13 +1311,17 @@ export class MenuReviewComponent {
     const u = (unit || '').toLowerCase();
 
     if (['pcs', 'pieces', 'piece'].includes(u)) {
-      return `${total} pieces`;
+      return `${total} ${this.translationService.t('unit.pcs')}`;
     } else if (['g', 'grams', 'gram'].includes(u)) {
-      return total >= 1000 ? `${(total / 1000).toFixed(1).replace(/\.0$/, '')} kg` : `${total} g`;
+      return total >= 1000
+        ? `${(total / 1000).toFixed(1).replace(/\.0$/, '')} ${this.translationService.t('unit.kg')}`
+        : `${total} ${this.translationService.t('unit.g')}`;
     } else if (['ml', 'milliliter', 'millilitre'].includes(u)) {
-      return total >= 1000 ? `${(total / 1000).toFixed(1).replace(/\.0$/, '')} Liters` : `${total} ml`;
+      return total >= 1000
+        ? `${(total / 1000).toFixed(1).replace(/\.0$/, '')} ${this.translationService.t('unit.l')}`
+        : `${total} ${this.translationService.t('unit.ml')}`;
     }
-    return `${total} ${unit}`;
+    return `${total} ${this.translationService.formatUnit(unit)}`;
   }
 
   printProposal() {
@@ -1351,7 +1355,7 @@ export class MenuReviewComponent {
         this.showContactModal.set(false);
         if (res.success && res.data) {
           this.confirmedSelection.set(res.data);
-          this.toastService.success('Wedding feast order submitted successfully!');
+          this.toastService.success(this.translationService.currentLang() === 'ta' ? 'திருமால கேட்டரிங் முன்பதிவு வெற்றிகரமாக சமர்ப்பிக்கப்பட்டது!' : 'Thirumala catering order submitted successfully!');
         }
       },
       error: (err) => {
@@ -1365,7 +1369,7 @@ export class MenuReviewComponent {
     const ev = this.selectionService.eventDetails();
     const grandPaise = this.selectionService.calculation()?.grand_total || 0;
     const grandInr = (grandPaise / 100).toLocaleString('en-IN');
-    const msg = `Namaste Wedding Feast Concierge! I am curating our catering for ${ev.customer_name || 'our wedding feast'} (${ev.guest_count || 100} guests). Total Estimate: ₹${grandInr}. I have a few questions/special menu requests.`;
+    const msg = `Namaste Thirumala Catering Service Concierge! I am curating our catering for ${ev.customer_name || 'our banquet feast'} (${ev.guest_count || 100} guests). Total Estimate: ₹${grandInr}. I have a few questions/special menu requests.`;
     return `https://wa.me/919876543210?text=${encodeURIComponent(msg)}`;
   }
 
@@ -1374,7 +1378,7 @@ export class MenuReviewComponent {
     const ev = this.bookingForm;
     const grandPaise = this.selectionService.calculation()?.grand_total || 0;
     const grandInr = (grandPaise / 100).toLocaleString('en-IN');
-    const msg = `Namaste! We have confirmed our Wedding Feast catering reservation (Ref ID: ${orderId}) for ${ev.customer_name} (${ev.guest_count} guests) at ${ev.venue}. Total: ₹${grandInr}. Please share further catering arrangements.`;
+    const msg = `Namaste! We have confirmed our Thirumala Catering Service reservation (Ref ID: ${orderId}) for ${ev.customer_name} (${ev.guest_count} guests) at ${ev.venue}. Total: ₹${grandInr}. Please share further catering arrangements.`;
     return `https://wa.me/919876543210?text=${encodeURIComponent(msg)}`;
   }
 }

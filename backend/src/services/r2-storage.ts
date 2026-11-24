@@ -64,7 +64,11 @@ export class R2StorageService {
     });
 
     // Public URL served via Worker endpoint /api/images/:key
-    const publicUrl = `/api/images/${objectKey}`;
+    let publicUrl = `/api/images/${objectKey}`;
+    if (this.env.PUBLIC_R2_URL && this.env.PUBLIC_R2_URL.startsWith('http')) {
+      const base = this.env.PUBLIC_R2_URL.replace(/\/$/, '');
+      publicUrl = `${base}/${objectKey}`;
+    }
 
     return {
       key: objectKey,

@@ -7,12 +7,13 @@ import { AuthService } from '../../../core/services/auth.service';
 import { TranslationService } from '../../../core/services/translation.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { LanguagePickerComponent } from '../language-picker/language-picker.component';
+import { BrandLogoComponent } from '../brand-logo/brand-logo.component';
 import { WeddingEvent } from '../../../core/models';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, LanguagePickerComponent],
+  imports: [CommonModule, RouterModule, FormsModule, LanguagePickerComponent, BrandLogoComponent],
   template: `
     <div class="navbar-wrapper">
       <header class="wf-editorial-header">
@@ -20,11 +21,7 @@ import { WeddingEvent } from '../../../core/models';
         <!-- Brand Mark -->
         <a routerLink="/" class="brand-link">
           <div class="brand-crest">
-            <svg viewBox="0 0 36 36" width="30" height="30" fill="none">
-              <path d="M18 3C19 7 24 10 28 12C24 14 22 18 18 25C14 18 12 14 8 12C12 10 17 7 18 3Z" fill="#C59B43"/>
-              <circle cx="18" cy="15" r="3.5" fill="#5B1A24"/>
-              <path d="M7 23C11 21 14 22 18 26C22 22 25 21 29 23C25 28 22 30 18 30C14 30 11 28 7 23Z" fill="#EAD9B7"/>
-            </svg>
+            <app-brand-logo [size]="34"></app-brand-logo>
           </div>
           <div class="brand-typography">
             <span class="brand-name">{{ translationService.t('brand.name') }}</span>
@@ -183,8 +180,8 @@ import { WeddingEvent } from '../../../core/models';
           <div class="event-modal-dialog" (click)="$event.stopPropagation()">
             <div class="event-modal-head">
               <div class="head-titles">
-                <span class="modal-subhead">Celebration Blueprint</span>
-                <h3>Wedding & Event Details</h3>
+                <span class="modal-subhead">✦ {{ translationService.t('brand.name') }} ✦</span>
+                <h3>{{ translationService.t('event.title') }}</h3>
               </div>
               <button type="button" class="close-x-btn" (click)="showEventModal.set(false)" aria-label="Close modal">
                 <span class="material-symbols-outlined">close</span>
@@ -193,51 +190,55 @@ import { WeddingEvent } from '../../../core/models';
 
             <div class="event-modal-body">
               <p class="modal-intro">
-                Tailor your guest count, celebration dates, and banquet venue for accurate real-time catering estimations.
+                {{ translationService.t('event.intro') }}
               </p>
 
               <div class="modal-grid-2">
                 <div class="field-wrap">
-                  <label>Customer / Host Name *</label>
+                  <label>{{ translationService.t('event.hostName') }} *</label>
                   <input type="text" [(ngModel)]="eventForm.customer_name" placeholder="e.g. Radhika Sharma & Arjun Nair" />
                 </div>
                 <div class="field-wrap">
-                  <label>Contact Phone Number *</label>
+                  <label>{{ translationService.t('dialog.phone') }}</label>
                   <input type="text" [(ngModel)]="eventForm.customer_phone" placeholder="+91 98765 43210" />
                 </div>
               </div>
 
               <div class="modal-grid-2">
                 <div class="field-wrap">
-                  <label>Email Address</label>
+                  <label>{{ translationService.t('dialog.email') }}</label>
                   <input type="email" [(ngModel)]="eventForm.customer_email" placeholder="radhika.arjun@wedding.com" />
                 </div>
                 <div class="field-wrap">
-                  <label>Celebration Type</label>
+                  <label>{{ translationService.t('event.type') }}</label>
                   <select [(ngModel)]="eventForm.event_type">
-                    <option value="Wedding Reception">Wedding Reception</option>
-                    <option value="Traditional Muhurtham">Traditional Muhurtham</option>
-                    <option value="Sangeet & Mehendi">Sangeet & Mehendi</option>
-                    <option value="Engagement Feast">Engagement Feast</option>
-                    <option value="Anniversary Gala">Anniversary Gala</option>
+                    <option value="Wedding Reception">{{ translationService.t('eventType.reception') }}</option>
+                    <option value="Traditional Muhurtham">{{ translationService.t('eventType.muhurtham') }}</option>
+                    <option value="Sangeet & Mehendi">{{ translationService.t('eventType.sangeet') }}</option>
+                    <option value="Engagement Feast">{{ translationService.t('eventType.engagement') }}</option>
+                    <option value="Anniversary Gala">{{ translationService.t('eventType.anniversary') }}</option>
                   </select>
                 </div>
               </div>
 
               <div class="modal-grid-2">
                 <div class="field-wrap">
-                  <label>Event Name</label>
-                  <input type="text" [(ngModel)]="eventForm.event_name" placeholder="Grand Wedding Reception" />
+                  <label>{{ translationService.t('event.name') }}</label>
+                  <input 
+                    type="text" 
+                    [(ngModel)]="eventForm.event_name" 
+                    [placeholder]="translationService.currentLang() === 'ta' ? 'எ.கா. பிரம்மாண்ட திருமண வரவேற்பு' : 'e.g. Grand Wedding Reception'" 
+                  />
                 </div>
                 <div class="field-wrap">
-                  <label>Event Date</label>
+                  <label>{{ translationService.t('event.date') }}</label>
                   <input type="date" [(ngModel)]="eventForm.event_date" />
                 </div>
               </div>
 
               <div class="modal-grid-2">
                 <div class="field-wrap">
-                  <label>Guest Count</label>
+                  <label>{{ translationService.t('event.guestsCount') }}</label>
                   <div class="guest-counter-input">
                     <button type="button" class="btn-step" (click)="eventForm.guest_count = Math.max(25, (eventForm.guest_count || 100) - 50)">-</button>
                     <input type="number" [(ngModel)]="eventForm.guest_count" min="25" max="5000" />
@@ -245,13 +246,16 @@ import { WeddingEvent } from '../../../core/models';
                   </div>
                 </div>
                 <div class="field-wrap">
-                  <label>City & Pincode</label>
-                  <input type="text" placeholder="Aalur, Kallakurichi - 605751" />
+                  <label>{{ translationService.t('event.cityPincode') }}</label>
+                  <input 
+                    type="text" 
+                    [placeholder]="translationService.currentLang() === 'ta' ? 'ஆலூர், கள்ளக்குறிச்சி - 605751' : 'Aalur, Kallakurichi - 605751'" 
+                  />
                 </div>
               </div>
 
               <div class="field-wrap">
-                <label>Banquet Venue & Street Address *</label>
+                <label>{{ translationService.t('dialog.venueAddress') }}</label>
                 <textarea rows="2" [(ngModel)]="eventForm.venue" placeholder="e.g. Manikandan, Aalur, Thirukoilur Taluk, Kallakurichi Dt, 605751, Tamil Nadu"></textarea>
               </div>
 
@@ -262,24 +266,24 @@ import { WeddingEvent } from '../../../core/models';
                   </svg>
                 </div>
                 <div class="callout-text">
-                  <strong>Need help or custom arrangements?</strong>
-                  <p>Our Culinary Concierge is available on WhatsApp at <strong>+91 98765 43210</strong></p>
+                  <strong>{{ translationService.t('proposal.waTitle') }}</strong>
+                  <p>{{ translationService.t('event.waConciergeText') }} <strong>+91 98765 43210</strong></p>
                 </div>
                 <a 
                   href="https://wa.me/919876543210?text=Namaste%20Wedding%20Feast!%20I%20have%20questions%20regarding%20our%20celebration%20catering%20details." 
                   target="_blank" 
                   class="callout-wa-link"
                 >
-                  Chat Now
+                  WhatsApp
                 </a>
               </div>
             </div>
 
             <div class="event-modal-foot">
-              <button type="button" class="btn-ghost" (click)="showEventModal.set(false)">Cancel</button>
+              <button type="button" class="btn-ghost" (click)="showEventModal.set(false)">{{ translationService.t('dialog.backToReview') }}</button>
               <button type="button" class="btn-save-event" (click)="saveEventDetails()">
                 <span class="material-symbols-outlined">check_circle</span>
-                <span>Update Celebration Details</span>
+                <span>{{ translationService.t('event.saveBtn') }}</span>
               </button>
             </div>
           </div>

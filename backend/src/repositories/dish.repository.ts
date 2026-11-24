@@ -294,4 +294,18 @@ export class DishRepository {
 
     return { success: true, imageKey: img.image_r2_key };
   }
+
+  async setPrimaryImage(dishId: string, imageId: string): Promise<boolean> {
+    const img = await this.db.prepare('SELECT id FROM dish_images WHERE id = ? AND dish_id = ?')
+      .bind(imageId, dishId).first<DishImage>();
+    if (!img) return false;
+
+    // Unset all other primaries for this dish
+    await this.db.prepare('UPDATE dish_images SET is_primary = 0 WHERE dish_id = ?').bind(dishId).run();
+
+    // Set the selected image as primary
+    await this.db.prepare('UPDATE dish_images SET is_primary = 1 WHERE id = ?').bind(imageId).run();
+
+    return true;
+  }
 }

@@ -2,11 +2,12 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
+import { BrandLogoComponent } from '../../shared/components/brand-logo/brand-logo.component';
 
 @Component({
   selector: 'app-customer-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule, NavbarComponent],
+  imports: [CommonModule, RouterModule, NavbarComponent, BrandLogoComponent],
   template: `
     <div class="customer-app-wrapper">
       <app-navbar></app-navbar>
@@ -18,7 +19,10 @@ import { NavbarComponent } from '../../shared/components/navbar/navbar.component
         <div class="footer-inner">
           <div class="footer-grid">
             <div class="footer-brand">
-              <h3>Wedding Feast</h3>
+              <div class="footer-brand-header">
+                <app-brand-logo [size]="44"></app-brand-logo>
+                <h3>Thirumala Catering Service</h3>
+              </div>
               <p>Royal Wedding Catering, Heirloom Cuisine & Real-Time Estimation Platform.</p>
               <div class="footer-address">
                 <span class="material-symbols-outlined addr-icon">location_on</span>
@@ -31,7 +35,7 @@ import { NavbarComponent } from '../../shared/components/navbar/navbar.component
               <p>Have custom menu queries, tasting session requests, or live counter suggestions?</p>
               <div class="concierge-actions">
                 <a 
-                  href="https://wa.me/919876543210?text=Namaste%20Wedding%20Feast!%20I%20would%20like%20to%20inquire%20about%20wedding%20catering%20arrangements." 
+                  href="https://wa.me/919876543210?text=Namaste%20Thirumala%20Catering%20Service!%20I%20would%20like%20to%20inquire%20about%20wedding%20catering%20arrangements." 
                   target="_blank" 
                   class="footer-wa-btn"
                 >
@@ -47,7 +51,7 @@ import { NavbarComponent } from '../../shared/components/navbar/navbar.component
             <div class="footer-nav-col">
               <h4>Platform Navigation</h4>
               <div class="footer-links">
-                <a routerLink="/menu">Curate Wedding Feast</a>
+                <a routerLink="/menu">Curate Catering Feast</a>
                 <a routerLink="/menu-review">Review Feast Estimation</a>
                 <a routerLink="/admin/login">Admin Culinary Studio</a>
               </div>
@@ -55,7 +59,7 @@ import { NavbarComponent } from '../../shared/components/navbar/navbar.component
           </div>
 
           <div class="footer-bottom">
-            <span>&copy; 2026 Wedding Feast Platform. Built on Cloudflare Workers, Cloudflare D1 & R2 Object Storage.</span>
+            <span>&copy; 2026 Thirumala Catering Service Platform. Built on Cloudflare Workers, Cloudflare D1 & R2 Object Storage.</span>
           </div>
         </div>
       </footer>
@@ -109,11 +113,18 @@ import { NavbarComponent } from '../../shared/components/navbar/navbar.component
           flex-direction: column;
           gap: 0.75rem;
 
+          .footer-brand-header {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+          }
+
           h3 {
             font-family: var(--font-display, 'Cinzel', serif);
             font-size: 1.5rem;
             color: #f4d068;
             letter-spacing: 1px;
+            margin: 0;
           }
 
           p {

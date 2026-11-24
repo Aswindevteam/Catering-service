@@ -147,6 +147,24 @@ dishesApp.delete('/:id/images/:imageId', adminAuthMiddleware, async (c) => {
   }
 });
 
+// Set specific dish image as primary presentation (renders first to customers)
+dishesApp.put('/:id/images/:imageId/primary', adminAuthMiddleware, async (c) => {
+  try {
+    const dishId = c.req.param('id') || '';
+    const imageId = c.req.param('imageId') || '';
+    const repo = new DishRepository(c.env.DB);
+    const success = await repo.setPrimaryImage(dishId, imageId);
+
+    if (!success) {
+      return c.json({ success: false, error: 'Image not found for this dish' }, 404);
+    }
+
+    return c.json({ success: true, message: 'Primary presentation image updated successfully' });
+  } catch (err: any) {
+    return c.json({ success: false, error: err.message }, 500);
+  }
+});
+
 // Upload a general image for dishes without yet binding to a dish ID
 dishesApp.post('/upload-image', adminAuthMiddleware, async (c) => {
   try {

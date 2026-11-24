@@ -9,7 +9,7 @@
 	"vars": {
 		"ENVIRONMENT": "development",
 		"JWT_SECRET": "wedding-feast-super-secret-key-2026",
-		"PUBLIC_R2_URL": "/api/images"
+		"PUBLIC_R2_URL": "https://wedding-feast-backend.aswinsamidurai.workers.dev/api/images"
 	},
 	"assets": {
 		"directory": "../frontend/dist/frontend/browser",

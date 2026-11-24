@@ -114,16 +114,16 @@ import { TranslationService, SUPPORTED_LANGS, SupportedLang } from '../../../cor
       }
 
       @media (max-width: 480px) {
-        padding: 0.15rem 0.35rem;
+        padding: 0.15rem 0.3rem;
         gap: 0.15rem;
 
         .lang-icon {
-          font-size: 14px;
+          font-size: 13px;
         }
 
         .lang-select-mobile {
-          font-size: 0.72rem;
-          max-width: 48px;
+          font-size: 0.70rem;
+          max-width: 46px;
         }
       }
     }

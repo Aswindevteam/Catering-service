@@ -24,7 +24,7 @@ export class SelectionService {
   eventDetails = signal<WeddingEvent>({
     id: '',
     customer_name: 'Radhika & Arjun',
-    customer_phone: '+91 98765 43210',
+    customer_phone: '+91 72998 87725',
     customer_email: 'arjun.radhika@example.com',
     event_name: 'Grand Wedding Reception',
     event_type: 'Wedding',

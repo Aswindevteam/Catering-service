@@ -154,7 +154,7 @@ import { WeddingEvent } from '../../../core/models';
               <!-- Direct WhatsApp Concierge Button -->
               <div class="mobile-divider"></div>
               <a 
-                href="https://wa.me/919876543210?text=Namaste%20Wedding%20Feast!%20I%20have%20a%20query%20about%20catering%20and%20arrangements." 
+                href="https://wa.me/917299887725?text=Namaste%20Thirumala%20Catering%20Service!%20I%20have%20a%20query%20about%20catering%20and%20arrangements." 
                 target="_blank" 
                 class="mobile-whatsapp-btn"
                 (click)="mobileMenuOpen.set(false)"
@@ -200,7 +200,7 @@ import { WeddingEvent } from '../../../core/models';
                 </div>
                 <div class="field-wrap">
                   <label>{{ translationService.t('dialog.phone') }}</label>
-                  <input type="text" [(ngModel)]="eventForm.customer_phone" placeholder="+91 98765 43210" />
+                  <input type="text" [(ngModel)]="eventForm.customer_phone" placeholder="+91 72998 87725" />
                 </div>
               </div>
 
@@ -267,10 +267,10 @@ import { WeddingEvent } from '../../../core/models';
                 </div>
                 <div class="callout-text">
                   <strong>{{ translationService.t('proposal.waTitle') }}</strong>
-                  <p>{{ translationService.t('event.waConciergeText') }} <strong>+91 98765 43210</strong></p>
+                  <p>{{ translationService.t('event.waConciergeText') }} <strong>+91 72998 87725</strong></p>
                 </div>
                 <a 
-                  href="https://wa.me/919876543210?text=Namaste%20Wedding%20Feast!%20I%20have%20questions%20regarding%20our%20celebration%20catering%20details." 
+                  href="https://wa.me/917299887725?text=Namaste%20Thirumala%20Catering%20Service!%20I%20have%20questions%20regarding%20our%20celebration%20catering%20details." 
                   target="_blank" 
                   class="callout-wa-link"
                 >
@@ -321,9 +321,13 @@ import { WeddingEvent } from '../../../core/models';
         padding: 0.55rem 0.75rem;
         gap: 0.4rem;
       }
-      @media (max-width: 420px) {
-        padding: 0.5rem 0.5rem;
-        gap: 0.25rem;
+      @media (max-width: 480px) {
+        padding: 0.45rem 0.5rem;
+        gap: 0.3rem;
+      }
+      @media (max-width: 375px) {
+        padding: 0.4rem 0.35rem;
+        gap: 0.2rem;
       }
     }
 
@@ -339,40 +343,59 @@ import { WeddingEvent } from '../../../core/models';
         gap: 0.35rem;
         flex: 1 1 auto;
       }
+      @media (max-width: 375px) {
+        gap: 0.25rem;
+      }
 
       .brand-crest {
         display: flex;
         align-items: center;
+        justify-content: center;
         flex-shrink: 0;
         filter: drop-shadow(0 2px 4px rgba(91, 26, 36, 0.15));
 
         @media (max-width: 480px) {
-          transform: scale(0.85);
-          transform-origin: center left;
+          width: 28px;
+          height: 28px;
+          ::ng-deep .brand-logo-container,
+          ::ng-deep svg {
+            width: 28px !important;
+            height: 28px !important;
+          }
         }
       }
 
       .brand-typography {
         display: flex;
         flex-direction: column;
+        justify-content: center;
         min-width: 0;
-        overflow: hidden;
+        overflow: visible;
 
         .brand-name {
           font-family: var(--font-serif);
           font-size: 1.35rem;
           font-weight: 700;
           color: var(--primary-maroon);
-          letter-spacing: 0.2px;
-          line-height: 1.1;
+          letter-spacing: 0.1px;
+          line-height: 1.35;
+          padding-top: 1px;
+          padding-bottom: 4px;
           white-space: nowrap;
 
           @media (max-width: 680px) {
-            font-size: 1.05rem;
+            font-size: 0.98rem;
+            line-height: 1.35;
           }
-          @media (max-width: 420px) {
-            font-size: clamp(0.84rem, 3.7vw, 0.98rem);
-            letter-spacing: -0.2px;
+          @media (max-width: 440px) {
+            font-size: clamp(0.70rem, 3.15vw, 0.82rem);
+            letter-spacing: -0.15px;
+            padding-bottom: 3px;
+          }
+          @media (max-width: 375px) {
+            font-size: clamp(0.66rem, 2.95vw, 0.74rem);
+            letter-spacing: -0.25px;
+            padding-bottom: 3px;
           }
         }
 
@@ -445,7 +468,10 @@ import { WeddingEvent } from '../../../core/models';
       flex-shrink: 0;
 
       @media (max-width: 680px) {
-        gap: 0.4rem;
+        gap: 0.35rem;
+      }
+      @media (max-width: 420px) {
+        gap: 0.25rem;
       }
 
       .tray-link {
@@ -538,8 +564,16 @@ import { WeddingEvent } from '../../../core/models';
           display: flex;
         }
 
+        @media (max-width: 480px) {
+          width: 34px;
+          height: 34px;
+        }
+
         .material-symbols-outlined {
           font-size: 22px;
+          @media (max-width: 480px) {
+            font-size: 20px;
+          }
         }
       }
     }

@@ -21,7 +21,7 @@ import { BrandLogoComponent } from '../../shared/components/brand-logo/brand-log
             <div class="footer-brand">
               <div class="footer-brand-header">
                 <app-brand-logo [size]="44"></app-brand-logo>
-                <h3>Thiruma Catering Service</h3>
+                <h3>Thirumala Catering Service</h3>
               </div>
               <p>Royal Wedding Catering, Heirloom Cuisine & Real-Time Estimation Platform.</p>
               <div class="footer-address">
@@ -35,14 +35,14 @@ import { BrandLogoComponent } from '../../shared/components/brand-logo/brand-log
               <p>Have custom menu queries, tasting session requests, or live counter suggestions?</p>
               <div class="concierge-actions">
                 <a 
-                  href="https://wa.me/919876543210?text=Namaste%20Thiruma%20Catering%20Service!%20I%20would%20like%20to%20inquire%20about%20wedding%20catering%20arrangements." 
+                  href="https://wa.me/917299887725?text=Namaste%20Thirumala%20Catering%20Service!%20I%20would%20like%20to%20inquire%20about%20wedding%20catering%20arrangements." 
                   target="_blank" 
                   class="footer-wa-btn"
                 >
                   <svg viewBox="0 0 24 24" width="18" height="18" fill="#FFFFFF">
                     <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2Z"/>
                   </svg>
-                  <span>Chat on WhatsApp (+91 98765 43210)</span>
+                  <span>Chat on WhatsApp (+91 72998 87725)</span>
                 </a>
                 <span class="concierge-time">Available 7 Days • 9:00 AM – 10:00 PM IST</span>
               </div>
@@ -59,7 +59,7 @@ import { BrandLogoComponent } from '../../shared/components/brand-logo/brand-log
           </div>
 
           <div class="footer-bottom">
-            <span>&copy; 2026 Thiruma Catering Service Platform. Built on Cloudflare Workers, Cloudflare D1 & R2 Object Storage.</span>
+            <span>&copy; 2026 Thirumala Catering Service Platform. Built on Cloudflare Workers, Cloudflare D1 & R2 Object Storage.</span>
           </div>
         </div>
       </footer>

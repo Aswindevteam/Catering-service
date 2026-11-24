@@ -117,7 +117,7 @@ INSERT OR IGNORE INTO recipe_steps (id, recipe_id, step_number, instruction) VAL
 
 -- 9. Sample Events & Customer Selections
 INSERT OR IGNORE INTO events (id, customer_name, customer_phone, customer_email, event_name, event_type, event_date, venue, guest_count, status) VALUES
-('evt_001', 'Radhika & Arjun', '+91 98765 43210', 'arjun.radhika@example.com', 'Radhika & Arjun Wedding', 'Wedding', '2026-12-15', 'Grand Palace Banquet Hall, Bangalore', 350, 'confirmed'),
+('evt_001', 'Radhika & Arjun', '+91 72998 87725', 'arjun.radhika@example.com', 'Radhika & Arjun Wedding', 'Wedding', '2026-12-15', 'Grand Palace Banquet Hall, Bangalore', 350, 'confirmed'),
 ('evt_002', 'Priya & Vikram', '+91 98451 12345', 'vikram.priya@example.com', 'Grand Reception Event', 'Reception', '2026-12-20', 'Royal Orchid Convention Center', 250, 'pending'),
 ('evt_003', 'Sneha & Rohan', '+91 97400 98765', 'rohan.sneha@example.com', 'Sangeet Night Celebration', 'Sangeet', '2026-12-28', 'Taj Gateway Lawns', 180, 'confirmed');
 

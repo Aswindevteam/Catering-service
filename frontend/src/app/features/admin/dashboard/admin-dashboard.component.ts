@@ -276,7 +276,7 @@ interface TimelineEvent {
                 </div>
                 <div class="modal-field">
                   <label>Contact Phone</label>
-                  <input type="text" [(ngModel)]="newEvent.customer_phone" placeholder="+91 98765 43210" />
+                  <input type="text" [(ngModel)]="newEvent.customer_phone" placeholder="+91 72998 87725" />
                 </div>
               </div>
               <div class="modal-row-2">

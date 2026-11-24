@@ -26,8 +26,14 @@ export class TranslationService {
       const saved = localStorage.getItem('wf_lang') as SupportedLang;
       if (saved && ['en', 'ta', 'hi', 'ml'].includes(saved)) {
         this.currentLang.set(saved);
+        if (typeof document !== 'undefined') {
+          document.documentElement.lang = saved;
+        }
       } else {
         this.currentLang.set('ta');
+        if (typeof document !== 'undefined') {
+          document.documentElement.lang = 'ta';
+        }
       }
     }
   }
@@ -37,15 +43,18 @@ export class TranslationService {
     if (typeof window !== 'undefined' && window.localStorage) {
       localStorage.setItem('wf_lang', lang);
     }
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = lang;
+    }
   }
 
   private translations: Record<string, Record<SupportedLang, string>> = {
     // Brand & Hero
     'brand.name': {
-      en: 'Thiruma Catering Service',
-      ta: 'திருமா கேட்டரிங் சர்வீஸ்',
-      hi: 'तिरुमा कैटरिंग सर्विस',
-      ml: 'തിരുമാ കാറ്ററിംഗ് സർവീസ്',
+      en: 'Thirumala Catering Service',
+      ta: 'திருமலா கேட்டரிங் சர்வீஸ்',
+      hi: 'तिरुमाला कैटरिंग सर्विस',
+      ml: 'തിരുമല കാറ്ററിംഗ് സർവീസ്',
     },
     'brand.tagline': {
       en: 'Royal Wedding & Banquet Catering Excellence',
@@ -846,10 +855,10 @@ export class TranslationService {
       ml: 'ശുദ്ധമായ നെയ്യും സുഗന്ധവ്യഞ്ജനങ്ങളും ചേർത്ത പരമ്പരാഗത വിഭവം.',
     },
     'proposal.crestTitle': {
-      en: 'Thiruma Catering Service Menu',
-      ta: 'திருமா கேட்டரிங் திருமண மெனு',
-      hi: 'तिरुमा कैटरिंग मेन्यू',
-      ml: 'തിരുമാ കാറ്ററിംഗ് മെനു',
+      en: 'Thirumala Catering Service Menu',
+      ta: 'திருமலா கேட்டரிங் திருமண மெனு',
+      hi: 'तिरुमाला कैटरिंग मेन्यू',
+      ml: 'തിരുമല കാറ്ററിംഗ് മെനു',
     },
     'proposal.crestQuote': {
       en: '"May this celebration of culinary mastery nourish eternal love and joy."',
@@ -930,10 +939,10 @@ export class TranslationService {
       ml: 'ലൈവ് കൗണ്ടറുകൾ, പ്രത്യേക വിഭവങ്ങൾ എന്നിവയ്ക്കായി വാട്സാപ്പിൽ ബന്ധപ്പെടുക.',
     },
     'proposal.waBtn': {
-      en: 'Chat on WhatsApp (+91 98765 43210)',
-      ta: 'வாட்ஸ்அப்பில் தொடர்புகொள்ள (+91 98765 43210)',
-      hi: 'व्हाट्सएप पर चैट करें (+91 98765 43210)',
-      ml: 'വാട്സാപ്പിൽ ചാറ്റ് ചെയ്യുക (+91 98765 43210)',
+      en: 'Chat on WhatsApp (+91 72998 87725)',
+      ta: 'வாட்ஸ்அப்பில் தொடர்புகொள்ள (+91 72998 87725)',
+      hi: 'व्हाट्सएप पर चैट करें (+91 72998 87725)',
+      ml: 'വാട്സാപ്പിൽ ചാറ്റ് ചെയ്യുക (+91 72998 87725)',
     },
     'calc.costForGuests': {
       en: 'Cost',

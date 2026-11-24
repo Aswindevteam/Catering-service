@@ -1,4 +1,4 @@
-/* Thiruma Catering Service - "Immersive Narrative" Editorial Luxury Design System */
+/* Thirumala Catering Service - "Immersive Narrative" Editorial Luxury Design System */
 :root {
   /* Editorial Luxury Brand Colors */
   --primary-maroon: #5b1a24;
@@ -35,9 +35,9 @@
   --vegan-cyan: #00796b;
   --vegan-cyan-bg: #e0f2f1;
 
-  --font-serif: 'Playfair Display', 'Noto Sans Tamil', Georgia, serif;
+  --font-serif: 'Playfair Display', 'Noto Sans Tamil', 'Noto Sans Devanagari', 'Noto Sans Malayalam', Georgia, serif;
   --font-display: 'Cinzel', serif;
-  --font-sans: 'Plus Jakarta Sans', 'Noto Sans Tamil', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', 'Noto Sans Tamil', 'Noto Sans Devanagari', 'Noto Sans Malayalam', system-ui, -apple-system, sans-serif;
 
   --radius-xs: 4px;
   --radius-sm: 8px;
@@ -78,8 +78,10 @@ body {
   touch-action: manipulation;
 }
 
-/* Tamil Typography - Ligature Preservation (prevents broken letter gaps) */
-:lang(ta), [lang="ta"] {
+/* Indic Typography - Ligature & Descender Preservation (prevents broken letter gaps & clipped loops) */
+:lang(ta), [lang="ta"],
+:lang(hi), [lang="hi"],
+:lang(ml), [lang="ml"] {
   letter-spacing: normal !important;
   font-feature-settings: "kern" 1, "liga" 1;
 }

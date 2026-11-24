@@ -1174,10 +1174,29 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
         flex-wrap: wrap;
         gap: 0.65rem;
 
+        @media (max-width: 480px) {
+          flex-wrap: nowrap;
+          gap: 0.35rem;
+        }
+
         .price-callout {
           display: flex;
           align-items: baseline;
           gap: 0.35rem;
+          min-width: 0;
+          flex-shrink: 1;
+
+          @media (max-width: 480px) {
+            gap: 0.15rem;
+
+            .currency-symbol { font-size: 1.05rem; }
+            .rupee-val { font-size: 1.15rem; }
+            .rupee-sub { font-size: 0.72rem; }
+            .scaled-badge {
+              font-size: 0.62rem;
+              padding: 0.05rem 0.25rem;
+            }
+          }
 
           .currency-symbol {
             font-family: var(--font-sans, system-ui, sans-serif) !important;
@@ -1213,6 +1232,7 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
           position: relative;
           z-index: 10;
           pointer-events: auto;
+          flex-shrink: 0;
 
           .add-feast-btn {
             padding: 0.55rem 1.25rem;
@@ -1229,6 +1249,11 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
             border: 1px solid var(--accent-gold, #C59B43);
             box-shadow: 0 4px 12px rgba(91, 26, 36, 0.2);
             transition: all 0.2s ease;
+
+            @media (max-width: 480px) {
+              padding: 0.45rem 0.95rem;
+              font-size: 0.8rem;
+            }
 
             .plus-icon { font-size: 18px; color: var(--accent-gold-light); }
 
@@ -1250,6 +1275,29 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
             border-radius: 24px;
             border: 1px solid rgba(197, 155, 67, 0.4);
             box-shadow: 0 4px 12px rgba(91, 26, 36, 0.25);
+            flex-shrink: 0;
+
+            @media (max-width: 480px) {
+              padding: 0.2rem 0.4rem;
+              gap: 0.2rem;
+
+              .step-btn {
+                width: 24px;
+                height: 24px;
+                font-size: 0.95rem;
+              }
+
+              .step-display {
+                font-size: 0.78rem;
+                padding: 0 0.2rem;
+              }
+
+              .remove-chip-btn {
+                margin-left: 0.1rem;
+                padding: 0.1rem;
+                .material-symbols-outlined { font-size: 15px; }
+              }
+            }
 
             .step-btn {
               width: 28px;
@@ -1595,6 +1643,12 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
         animation: slideUpDock 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       }
 
+      @media (max-width: 480px) {
+        bottom: 0.4rem;
+        left: 0.4rem;
+        right: 0.4rem;
+      }
+
       .dock-glass-content {
         background: rgba(91, 26, 36, 0.96);
         border: 1px solid var(--accent-gold);
@@ -1623,6 +1677,8 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
           gap: 0.45rem;
           font-size: 0.8rem;
           flex-wrap: wrap;
+          min-width: 0;
+          flex: 1 1 auto;
 
           .dock-badge { font-weight: 700; color: #FAF8F5; }
           .dock-divider { color: var(--accent-gold-light); }
@@ -1669,9 +1725,61 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
           white-space: nowrap;
           border: none;
           cursor: pointer;
+          flex-shrink: 0;
+          transition: all 0.2s ease;
 
           &:hover { background: #FFFFFF; }
           .material-symbols-outlined { font-size: 16px; }
+        }
+
+        /* Small screen responsive adjustments placed AFTER base rules to override cleanly */
+        @media (max-width: 480px) {
+          padding: 0.45rem 0.65rem;
+          border-radius: 20px;
+          gap: 0.35rem;
+
+          .dock-left {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.1rem;
+
+            .dock-guest-count, .dock-divider {
+              display: none !important;
+            }
+
+            .dock-badge {
+              font-size: 0.68rem;
+              color: rgba(255, 255, 255, 0.9);
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              max-width: 125px;
+            }
+
+            .dock-total-cost {
+              margin-left: 0;
+              display: flex;
+              align-items: baseline;
+              gap: 0.15rem;
+
+              .currency-symbol { font-size: 0.82rem; }
+              .rupee-val { font-size: 1.05rem; }
+              .est-lbl { font-size: 0.64rem; }
+            }
+          }
+
+          .review-cta-btn {
+            padding: 0.4rem 0.65rem;
+            font-size: 0.76rem;
+            gap: 0.2rem;
+            border-radius: 16px;
+            max-width: 145px;
+            white-space: nowrap;
+
+            .material-symbols-outlined {
+              font-size: 15px;
+            }
+          }
         }
       }
     }

@@ -42,10 +42,10 @@ export class TranslationService {
   private translations: Record<string, Record<SupportedLang, string>> = {
     // Brand & Hero
     'brand.name': {
-      en: 'Thirumala Catering Service',
-      ta: 'திருமால கேட்டரிங் சர்வீஸ்',
-      hi: 'तिरुमाला कैटरिंग सर्विस',
-      ml: 'തിരുമാല കാറ്ററിംഗ് സർവീസ്',
+      en: 'Thiruma Catering Service',
+      ta: 'திருமா கேட்டரிங் சர்வீஸ்',
+      hi: 'तिरुमा कैटरिंग सर्विस',
+      ml: 'തിരുമാ കാറ്ററിംഗ് സർവീസ്',
     },
     'brand.tagline': {
       en: 'Royal Wedding & Banquet Catering Excellence',
@@ -283,8 +283,8 @@ export class TranslationService {
     },
     'action.reviewMenu': {
       en: 'Review Menu',
-      ta: 'மெனுவை சரிபார்க்க',
-      hi: 'मेन्यू समीक्षा करें',
+      ta: 'மெனு பார்க்க',
+      hi: 'मेन्यू देखें',
       ml: 'മെനു കാണുക',
     },
     'action.confirmFeast': {
@@ -846,10 +846,10 @@ export class TranslationService {
       ml: 'ശുദ്ധമായ നെയ്യും സുഗന്ധവ്യഞ്ജനങ്ങളും ചേർത്ത പരമ്പരാഗത വിഭവം.',
     },
     'proposal.crestTitle': {
-      en: 'Thirumala Catering Service Menu',
-      ta: 'திருமால கேட்டரிங் திருமண மெனு',
-      hi: 'तिरुमाला कैटरिंग मेन्यू',
-      ml: 'തിരുമാല കാറ്ററിംഗ് മെനു',
+      en: 'Thiruma Catering Service Menu',
+      ta: 'திருமா கேட்டரிங் திருமண மெனு',
+      hi: 'तिरुमा कैटरिंग मेन्यू',
+      ml: 'തിരുമാ കാറ്ററിംഗ് മെനു',
     },
     'proposal.crestQuote': {
       en: '"May this celebration of culinary mastery nourish eternal love and joy."',

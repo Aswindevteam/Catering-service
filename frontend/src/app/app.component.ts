@@ -11,5 +11,5 @@ import { ToastComponent } from './shared/components/toast/toast.component';
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  title = 'Thirumala Catering Service';
+  title = 'Thiruma Catering Service';
 }

@@ -17,7 +17,7 @@ import { BrandLogoComponent } from '../../shared/components/brand-logo/brand-log
     <aside class="admin-sidebar" [class.mobile-open]="mobileOpen">
       <!-- Royal Crest Brand Icon at Top -->
       <div class="sidebar-top">
-        <a routerLink="/admin/dashboard" class="brand-crest" title="Thirumala Catering Service Admin">
+        <a routerLink="/admin/dashboard" class="brand-crest" title="Thiruma Catering Service Admin">
           <app-brand-logo [size]="40"></app-brand-logo>
         </a>
       </div>

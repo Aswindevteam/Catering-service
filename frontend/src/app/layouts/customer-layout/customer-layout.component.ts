@@ -21,7 +21,7 @@ import { BrandLogoComponent } from '../../shared/components/brand-logo/brand-log
             <div class="footer-brand">
               <div class="footer-brand-header">
                 <app-brand-logo [size]="44"></app-brand-logo>
-                <h3>Thirumala Catering Service</h3>
+                <h3>Thiruma Catering Service</h3>
               </div>
               <p>Royal Wedding Catering, Heirloom Cuisine & Real-Time Estimation Platform.</p>
               <div class="footer-address">
@@ -35,7 +35,7 @@ import { BrandLogoComponent } from '../../shared/components/brand-logo/brand-log
               <p>Have custom menu queries, tasting session requests, or live counter suggestions?</p>
               <div class="concierge-actions">
                 <a 
-                  href="https://wa.me/919876543210?text=Namaste%20Thirumala%20Catering%20Service!%20I%20would%20like%20to%20inquire%20about%20wedding%20catering%20arrangements." 
+                  href="https://wa.me/919876543210?text=Namaste%20Thiruma%20Catering%20Service!%20I%20would%20like%20to%20inquire%20about%20wedding%20catering%20arrangements." 
                   target="_blank" 
                   class="footer-wa-btn"
                 >
@@ -59,7 +59,7 @@ import { BrandLogoComponent } from '../../shared/components/brand-logo/brand-log
           </div>
 
           <div class="footer-bottom">
-            <span>&copy; 2026 Thirumala Catering Service Platform. Built on Cloudflare Workers, Cloudflare D1 & R2 Object Storage.</span>
+            <span>&copy; 2026 Thiruma Catering Service Platform. Built on Cloudflare Workers, Cloudflare D1 & R2 Object Storage.</span>
           </div>
         </div>
       </footer>

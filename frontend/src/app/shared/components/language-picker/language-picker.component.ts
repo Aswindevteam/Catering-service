@@ -112,6 +112,20 @@ import { TranslationService, SUPPORTED_LANGS, SupportedLang } from '../../../cor
           max-width: 58px;
         }
       }
+
+      @media (max-width: 480px) {
+        padding: 0.15rem 0.35rem;
+        gap: 0.15rem;
+
+        .lang-icon {
+          font-size: 14px;
+        }
+
+        .lang-select-mobile {
+          font-size: 0.72rem;
+          max-width: 48px;
+        }
+      }
     }
   `]
 })

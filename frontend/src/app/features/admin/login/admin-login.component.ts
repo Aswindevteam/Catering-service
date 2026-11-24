@@ -18,7 +18,7 @@ import { BrandLogoComponent } from '../../../shared/components/brand-logo/brand-
           <div class="crest-icon">
             <app-brand-logo [size]="64"></app-brand-logo>
           </div>
-          <h1 class="portal-title">Thirumala Catering Service</h1>
+          <h1 class="portal-title">Thiruma Catering Service</h1>
           <p class="portal-subtitle">Admin Management Portal</p>
         </div>
 

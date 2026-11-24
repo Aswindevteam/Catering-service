@@ -298,8 +298,6 @@ import { WeddingEvent } from '../../../core/models';
       top: 0;
       z-index: 10000;
       width: 100%;
-      will-change: transform;
-      transform: translateZ(0);
     }
 
     .wf-editorial-header {
@@ -320,8 +318,12 @@ import { WeddingEvent } from '../../../core/models';
       gap: 1.5rem;
 
       @media (max-width: 768px) {
-        padding: 0.6rem 0.75rem;
+        padding: 0.55rem 0.75rem;
         gap: 0.4rem;
+      }
+      @media (max-width: 420px) {
+        padding: 0.5rem 0.5rem;
+        gap: 0.25rem;
       }
     }
 
@@ -334,7 +336,7 @@ import { WeddingEvent } from '../../../core/models';
       flex-shrink: 0;
 
       @media (max-width: 680px) {
-        gap: 0.45rem;
+        gap: 0.35rem;
         flex: 1 1 auto;
       }
 
@@ -345,10 +347,8 @@ import { WeddingEvent } from '../../../core/models';
         filter: drop-shadow(0 2px 4px rgba(91, 26, 36, 0.15));
 
         @media (max-width: 480px) {
-          svg {
-            width: 26px;
-            height: 26px;
-          }
+          transform: scale(0.85);
+          transform-origin: center left;
         }
       }
 
@@ -363,15 +363,16 @@ import { WeddingEvent } from '../../../core/models';
           font-size: 1.35rem;
           font-weight: 700;
           color: var(--primary-maroon);
-          letter-spacing: 0.4px;
+          letter-spacing: 0.2px;
           line-height: 1.1;
           white-space: nowrap;
 
           @media (max-width: 680px) {
-            font-size: 1.15rem;
+            font-size: 1.05rem;
           }
-          @media (max-width: 380px) {
-            font-size: 1.02rem;
+          @media (max-width: 420px) {
+            font-size: clamp(0.84rem, 3.7vw, 0.98rem);
+            letter-spacing: -0.2px;
           }
         }
 
@@ -549,6 +550,7 @@ import { WeddingEvent } from '../../../core/models';
       inset: 0;
       background: rgba(45, 9, 16, 0.72);
       backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
       z-index: 99998;
       animation: fadeIn 0.15s ease-out;
     }
@@ -560,6 +562,8 @@ import { WeddingEvent } from '../../../core/models';
       bottom: 0;
       width: 300px;
       max-width: 86vw;
+      height: 100vh;
+      height: 100dvh;
       background: #FAF8F5;
       border-left: 2px solid var(--accent-gold, #c59b43);
       box-shadow: -6px 0 32px rgba(0, 0, 0, 0.4);
@@ -567,6 +571,8 @@ import { WeddingEvent } from '../../../core/models';
       flex-direction: column;
       padding: 1.25rem;
       z-index: 99999;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
       animation: slideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 
       .mobile-drawer-header {

@@ -1355,7 +1355,7 @@ export class MenuReviewComponent {
         this.showContactModal.set(false);
         if (res.success && res.data) {
           this.confirmedSelection.set(res.data);
-          this.toastService.success(this.translationService.currentLang() === 'ta' ? 'திருமால கேட்டரிங் முன்பதிவு வெற்றிகரமாக சமர்ப்பிக்கப்பட்டது!' : 'Thirumala catering order submitted successfully!');
+          this.toastService.success(this.translationService.currentLang() === 'ta' ? 'திருமா கேட்டரிங் முன்பதிவு வெற்றிகரமாக சமர்ப்பிக்கப்பட்டது!' : 'Thiruma catering order submitted successfully!');
         }
       },
       error: (err) => {
@@ -1369,7 +1369,7 @@ export class MenuReviewComponent {
     const ev = this.selectionService.eventDetails();
     const grandPaise = this.selectionService.calculation()?.grand_total || 0;
     const grandInr = (grandPaise / 100).toLocaleString('en-IN');
-    const msg = `Namaste Thirumala Catering Service Concierge! I am curating our catering for ${ev.customer_name || 'our banquet feast'} (${ev.guest_count || 100} guests). Total Estimate: ₹${grandInr}. I have a few questions/special menu requests.`;
+    const msg = `Namaste Thiruma Catering Service Concierge! I am curating our catering for ${ev.customer_name || 'our banquet feast'} (${ev.guest_count || 100} guests). Total Estimate: ₹${grandInr}. I have a few questions/special menu requests.`;
     return `https://wa.me/919876543210?text=${encodeURIComponent(msg)}`;
   }
 
@@ -1378,7 +1378,7 @@ export class MenuReviewComponent {
     const ev = this.bookingForm;
     const grandPaise = this.selectionService.calculation()?.grand_total || 0;
     const grandInr = (grandPaise / 100).toLocaleString('en-IN');
-    const msg = `Namaste! We have confirmed our Thirumala Catering Service reservation (Ref ID: ${orderId}) for ${ev.customer_name} (${ev.guest_count} guests) at ${ev.venue}. Total: ₹${grandInr}. Please share further catering arrangements.`;
+    const msg = `Namaste! We have confirmed our Thiruma Catering Service reservation (Ref ID: ${orderId}) for ${ev.customer_name} (${ev.guest_count} guests) at ${ev.venue}. Total: ₹${grandInr}. Please share further catering arrangements.`;
     return `https://wa.me/919876543210?text=${encodeURIComponent(msg)}`;
   }
 }

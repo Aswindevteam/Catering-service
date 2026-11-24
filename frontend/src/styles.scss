@@ -57,16 +57,26 @@
   padding: 0;
 }
 
-html, body {
-  height: 100%;
+html {
+  min-height: 100%;
   width: 100%;
   max-width: 100vw;
-  overflow-x: hidden;
+  overflow-x: clip;
   font-family: var(--font-sans);
   background-color: var(--bg-canvas);
   color: var(--text-primary);
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 a {
@@ -208,23 +218,30 @@ input, select, textarea {
 /* 3D Platter Card & Specular Lighting */
 .perspective-container {
   perspective: 1000px;
+
+  @media (max-width: 768px) {
+    perspective: none !important;
+  }
 }
 
 .platter-3d-wrap {
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
 
-  &:hover {
-    transform: translateY(-2px);
+  @media (hover: hover) {
+    &:hover {
+      transform: translateY(-2px);
+    }
   }
 }
 
 .circular-platter-visual {
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
-  will-change: transform;
 
-  &:hover {
-    transform: scale(1.06) rotate(-2deg);
-    box-shadow: 0 10px 24px rgba(91, 26, 36, 0.25);
+  @media (hover: hover) {
+    &:hover {
+      transform: scale(1.06) rotate(-2deg);
+      box-shadow: 0 10px 24px rgba(91, 26, 36, 0.25);
+    }
   }
 }
 
@@ -256,8 +273,16 @@ input, select, textarea {
     pointer-events: none;
   }
 
-  &:hover::before {
-    transform: rotate(-25deg) translate(30%, 30%);
+  @media (hover: hover) {
+    &:hover::before {
+      transform: rotate(-25deg) translate(30%, 30%);
+    }
+  }
+
+  @media (max-width: 768px) {
+    &::before {
+      display: none !important;
+    }
   }
 }
 

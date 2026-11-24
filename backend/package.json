@@ -10,8 +10,13 @@
     "migrate:remote": "wrangler d1 migrations apply wedding-feast-db --remote",
     "migrate:db:local": "wrangler d1 migrations apply wedding-feast-db --local",
     "migrate:db:remote": "wrangler d1 migrations apply wedding-feast-db --remote",
+    "seed:expanded:remote": "wrangler d1 execute wedding-feast-db --remote --file ./migrations/0005_expanded_wedding_menu_and_settings.sql",
+    "seed:expanded:local": "wrangler d1 execute wedding-feast-db --local --file ./migrations/0005_expanded_wedding_menu_and_settings.sql",
     "d1:create": "wrangler d1 create wedding-feast-db",
+    "d1:list": "wrangler d1 list",
     "r2:create": "wrangler r2 bucket create wedding-feast-images",
+    "deployments": "wrangler deployments list",
+    "tail": "wrangler tail",
     "types": "wrangler types"
   },
   "dependencies": {

@@ -161,6 +161,7 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
                       [src]="dish.primary_image_url || 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=350&q=80'" 
                       [alt]="dish.name" 
                       loading="lazy" 
+                      decoding="async"
                     />
                     <div class="specular-ring"></div>
                     <div class="zoom-cue">
@@ -404,6 +405,8 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
                     [src]="getCurrentModalImage()" 
                     [alt]="modalDish.name" 
                     class="carousel-hero-img"
+                    loading="lazy"
+                    decoding="async"
                   />
                   <div class="carousel-gradient-overlay"></div>
 
@@ -432,7 +435,7 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
                         (click)="selectImage($index)"
                         [title]="'View angle ' + ($index + 1)"
                       >
-                        <img [src]="img" [alt]="modalDish.name + ' thumbnail ' + ($index + 1)" />
+                        <img [src]="img" [alt]="modalDish.name + ' thumbnail ' + ($index + 1)" loading="lazy" decoding="async" />
                         <div class="thumb-ring"></div>
                       </button>
                     }
@@ -594,11 +597,19 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
         inset: 0;
         z-index: 1;
 
+        @media (max-width: 768px) {
+          background: url('https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80') center/cover no-repeat;
+        }
+
         .bg-video {
           width: 100%;
           height: 100%;
           object-fit: cover;
           filter: brightness(0.65) saturate(1.15);
+
+          @media (max-width: 768px) {
+            display: none !important;
+          }
         }
 
         .hero-gradient-overlay {
@@ -688,6 +699,11 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
             border-radius: 10px;
             padding: 0.5rem 0.85rem;
             backdrop-filter: blur(8px);
+
+            @media (max-width: 768px) {
+              backdrop-filter: none;
+              background: rgba(66, 17, 25, 0.85);
+            }
 
             .chip-icon {
               color: var(--accent-gold-light, #f4d068);
@@ -929,6 +945,8 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
 
     .editorial-dish-row {
       width: 100%;
+      content-visibility: auto;
+      contain-intrinsic-size: 0 140px;
 
       .dish-row-inner {
         display: flex;
@@ -1570,6 +1588,8 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
         border: 1px solid var(--accent-gold);
         box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
         backdrop-filter: blur(14px);
+        transform: translateZ(0);
+        will-change: transform;
         border-radius: 30px;
         padding: 0.65rem 1rem 0.65rem 1.25rem;
         display: flex;
@@ -1577,6 +1597,13 @@ import { Dish, FoodCategory, Recipe } from '../../../core/models';
         justify-content: space-between;
         color: #ffffff;
         gap: 0.75rem;
+
+        @media (max-width: 768px) {
+          backdrop-filter: none;
+          -webkit-backdrop-filter: none;
+          background: #5b1a24;
+          box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+        }
 
         .dock-left {
           display: flex;

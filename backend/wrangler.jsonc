@@ -31,6 +31,11 @@
 		{
 			"binding": "IMAGES_BUCKET",
 			"bucket_name": "wedding-feast-images"
+		},
+		{
+			"bucket_name": "wedding-feast-images",
+			"binding": "wedding_feast_images",
+			"remote": true
 		}
 	]
 }

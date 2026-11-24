@@ -970,6 +970,8 @@ import { WeddingEvent } from '../../../core/models';
         right: 1.25rem;
         z-index: 9999;
         text-decoration: none;
+        transform: translateZ(0);
+        will-change: transform;
         animation: fabSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       }
 

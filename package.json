@@ -12,9 +12,14 @@
     "deploy:pages": "cd frontend && wrangler pages deploy dist/frontend/browser --project-name wedding-feast",
     "migrate:db:local": "cd backend && wrangler d1 migrations apply wedding-feast-db --local",
     "migrate:db:remote": "cd backend && wrangler d1 migrations apply wedding-feast-db --remote",
+    "seed:expanded:remote": "cd backend && wrangler d1 execute wedding-feast-db --remote --file ./migrations/0005_expanded_wedding_menu_and_settings.sql",
+    "seed:expanded:local": "cd backend && wrangler d1 execute wedding-feast-db --local --file ./migrations/0005_expanded_wedding_menu_and_settings.sql",
     "seed:db": "cd backend && wrangler d1 execute wedding-feast-db --local --file ./migrations/0002_seed_data.sql",
     "d1:create": "cd backend && wrangler d1 create wedding-feast-db",
-    "r2:create": "cd backend && wrangler r2 bucket create wedding-feast-images"
+    "d1:list": "cd backend && wrangler d1 list",
+    "r2:create": "cd backend && wrangler r2 bucket create wedding-feast-images",
+    "deployments": "cd backend && wrangler deployments list",
+    "tail": "cd backend && wrangler tail"
   },
   "keywords": ["wedding", "catering", "angular", "cloudflare-workers", "cloudflare-d1", "cloudflare-r2"],
   "author": "Wedding Feast Team",

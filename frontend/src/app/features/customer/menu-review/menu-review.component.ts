@@ -98,10 +98,9 @@ import { CustomerSelection, WeddingEvent } from '../../../core/models';
               </div>
             </div>
           </div>
-        }
-
-        <!-- 2-Column Asymmetric Layout (65% Left / 35% Right) matching Figma Screen 02 -->
-        <div class="proposal-columns-layout" [class.hidden-on-card]="viewMode() === 'card3d'">
+        } @else {
+          <!-- 2-Column Asymmetric Layout (65% Left / 35% Right) matching Figma Screen 02 -->
+          <div class="proposal-columns-layout">
           <!-- Left 65% Column: Bespoke Menu Itinerary -->
           <div class="left-itinerary-col">
             <div class="itinerary-list">
@@ -112,6 +111,8 @@ import { CustomerSelection, WeddingEvent } from '../../../core/models';
                     <img 
                       [src]="item.dish.primary_image_url || 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=250&q=80'" 
                       [alt]="item.dish.name" 
+                      loading="lazy"
+                      decoding="async"
                     />
                   </div>
 
@@ -258,6 +259,7 @@ import { CustomerSelection, WeddingEvent } from '../../../core/models';
           </aside>
         </div>
       }
+    }
 
       <!-- Contact Details & Delivery Address Confirmation Modal -->
       @if (showContactModal()) {
@@ -789,7 +791,12 @@ import { CustomerSelection, WeddingEvent } from '../../../core/models';
     .card3d-showcase-container {
       display: flex;
       justify-content: center;
-      padding: 2rem 0;
+      padding: 1.5rem 0;
+      transform: translateZ(0);
+
+      @media (max-width: 600px) {
+        padding: 0.75rem 0;
+      }
     }
 
     .foil-menu-card {
@@ -798,6 +805,17 @@ import { CustomerSelection, WeddingEvent } from '../../../core/models';
       padding: 2.5rem;
       border: 2px solid var(--accent-gold);
       box-shadow: 0 20px 50px rgba(91, 26, 36, 0.35);
+      transform: translateZ(0);
+
+      @media (max-width: 600px) {
+        padding: 1.25rem 0.85rem;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+
+        .foil-inner-border {
+          padding: 1rem 0.65rem;
+          gap: 1rem;
+        }
+      }
 
       .foil-inner-border {
         border: 1px solid rgba(229, 222, 201, 0.4);

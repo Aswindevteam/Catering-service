@@ -227,13 +227,13 @@
 
             <!-- 7-Day Weekdays Header -->
             <div class="cal-weekdays">
-              <span>Sun</span>
-              <span>Mon</span>
-              <span>Tue</span>
-              <span>Wed</span>
-              <span>Thu</span>
-              <span>Fri</span>
-              <span>Sat</span>
+              <span><span class="day-full">Sun</span><span class="day-short">S</span></span>
+              <span><span class="day-full">Mon</span><span class="day-short">M</span></span>
+              <span><span class="day-full">Tue</span><span class="day-short">T</span></span>
+              <span><span class="day-full">Wed</span><span class="day-short">W</span></span>
+              <span><span class="day-full">Thu</span><span class="day-short">T</span></span>
+              <span><span class="day-full">Fri</span><span class="day-short">F</span></span>
+              <span><span class="day-full">Sat</span><span class="day-short">S</span></span>
             </div>
 
             <!-- Month Days Grid -->
@@ -425,7 +425,8 @@
             (click)="scheduleStep.set(1)"
           >
             <span class="step-num">1</span>
-            <span class="step-label">Event Particulars</span>
+            <span class="step-label full-text">Event Particulars</span>
+            <span class="step-label short-text">Particulars</span>
           </button>
 
           <button 
@@ -435,8 +436,9 @@
             (click)="scheduleStep.set(2)"
           >
             <span class="step-num">2</span>
-            <span class="step-label">Meal Sessions & Dishes</span>
-            <span class="step-badge">{{ sessionSummary().activeCount }} Sessions</span>
+            <span class="step-label full-text">Meal Sessions & Dishes</span>
+            <span class="step-label short-text">Sessions</span>
+            <span class="step-badge">{{ sessionSummary().activeCount }}</span>
           </button>
 
           <button 
@@ -446,7 +448,8 @@
             (click)="scheduleStep.set(3)"
           >
             <span class="step-num">3</span>
-            <span class="step-label">Feast Summary & Pricing</span>
+            <span class="step-label full-text">Feast Summary & Pricing</span>
+            <span class="step-label short-text">Summary</span>
           </button>
         </div>
 
@@ -1073,36 +1076,38 @@
                       </div>
                     </div>
 
-                    <table class="report-dishes-table">
-                      <thead>
-                        <tr>
-                          <th style="width: 48px;">#</th>
-                          <th style="width: 140px;">Category</th>
-                          <th>Dish Name</th>
-                          <th style="width: 130px;">Portion / Guest</th>
-                          <th style="width: 160px;">Batch Prep Size</th>
-                          <th style="width: 120px;" class="text-right">Per Head</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        @for (d of s.dishes; track d.dish_id; let idx = $index) {
+                    <div class="report-table-scroll">
+                      <table class="report-dishes-table">
+                        <thead>
                           <tr>
-                            <td class="text-muted">{{ idx + 1 }}</td>
-                            <td><span class="tbl-cat-pill">{{ d.category_name || 'General' }}</span></td>
-                            <td class="dish-name-cell">{{ d.name }}</td>
-                            <td>{{ d.serving_quantity || 100 }}{{ d.serving_unit || 'g' }}</td>
-                            <td class="batch-cell">
-                              <strong>{{ calculateBatchRequirement(d.serving_quantity, d.serving_unit, s.guest_count) }}</strong>
-                            </td>
-                            <td class="text-right text-muted">₹{{ ((d.price_per_person || 7500) / 100).toFixed(0) }}</td>
+                            <th style="width: 48px;">#</th>
+                            <th style="width: 140px;">Category</th>
+                            <th>Dish Name</th>
+                            <th style="width: 130px;">Portion / Guest</th>
+                            <th style="width: 160px;">Batch Prep Size</th>
+                            <th style="width: 120px;" class="text-right">Per Head</th>
                           </tr>
-                        } @empty {
-                          <tr>
-                            <td colspan="6" class="empty-dishes">Dishes to be finalized with head chef and host.</td>
-                          </tr>
-                        }
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          @for (d of s.dishes; track d.dish_id; let idx = $index) {
+                            <tr>
+                              <td class="text-muted">{{ idx + 1 }}</td>
+                              <td><span class="tbl-cat-pill">{{ d.category_name || 'General' }}</span></td>
+                              <td class="dish-name-cell">{{ d.name }}</td>
+                              <td>{{ d.serving_quantity || 100 }}{{ d.serving_unit || 'g' }}</td>
+                              <td class="batch-cell">
+                                <strong>{{ calculateBatchRequirement(d.serving_quantity, d.serving_unit, s.guest_count) }}</strong>
+                              </td>
+                              <td class="text-right text-muted">₹{{ ((d.price_per_person || 7500) / 100).toFixed(0) }}</td>
+                            </tr>
+                          } @empty {
+                            <tr>
+                              <td colspan="6" class="empty-dishes">Dishes to be finalized with head chef and host.</td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 }
               </div>

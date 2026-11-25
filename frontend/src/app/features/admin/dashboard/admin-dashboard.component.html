@@ -641,28 +641,43 @@
                         <div class="dishes-catalog-scroll">
                           @for (dish of filteredDishesForPicker(); track dish.id) {
                             <div class="dish-pick-row" [class.selected]="isDishInCurrentSession(dish.id)">
-                              <div class="dish-info-left">
-                                <span class="pick-dish-name">{{ dish.name }}</span>
+                              <div class="dish-info-left" (click)="openDishProfile(dish)" title="Click to view full recipe & dish profile">
+                                <div class="pick-name-row">
+                                  <span class="diet-dot" [class.veg]="dish.food_type !== 'non-veg'" [class.non-veg]="dish.food_type === 'non-veg'"></span>
+                                  <span class="pick-dish-name">{{ dish.name }}</span>
+                                  <button type="button" class="btn-dish-info" (click)="openDishProfile(dish, $event)" title="View Dish Profile & Recipe">
+                                    <span class="material-symbols-outlined">visibility</span>
+                                  </button>
+                                </div>
                                 <div class="pick-meta">
                                   <span class="pick-cat-badge">{{ dish.category_name || 'General' }}</span>
                                   <span class="pick-portion">{{ dish.quantity_per_person || 100 }}{{ dish.serving_unit || 'g' }}/guest</span>
                                   <span class="pick-price">₹{{ ((dish.price_per_person || 7500) / 100).toFixed(0) }}</span>
                                 </div>
                               </div>
-                              <button 
-                                type="button" 
-                                class="add-dish-btn" 
-                                [disabled]="isDishInCurrentSession(dish.id)"
-                                (click)="addDishToCurrentSession(dish)"
-                              >
+                              <div class="dish-pick-actions">
                                 @if (isDishInCurrentSession(dish.id)) {
-                                  <span class="material-symbols-outlined">done</span>
-                                  <span>Added</span>
+                                  <button 
+                                    type="button" 
+                                    class="add-dish-btn added" 
+                                    (click)="openDishProfile(dish)"
+                                    title="Dish added! Click to adjust portion pieces/grams"
+                                  >
+                                    <span class="material-symbols-outlined">done</span>
+                                    <span>Added</span>
+                                  </button>
                                 } @else {
-                                  <span class="material-symbols-outlined">add</span>
-                                  <span>Add</span>
+                                  <button 
+                                    type="button" 
+                                    class="add-dish-btn" 
+                                    (click)="addDishToCurrentSession(dish)"
+                                    title="Add to current session"
+                                  >
+                                    <span class="material-symbols-outlined">add</span>
+                                    <span>Add</span>
+                                  </button>
                                 }
-                              </button>
+                              </div>
                             </div>
                           } @empty {
                             <div class="empty-picker">
@@ -675,7 +690,10 @@
                       <!-- Right: Curated Menu for this Session -->
                       <div class="selected-tray-panel">
                         <div class="tray-header">
-                          <h5>Selected for {{ cur.shortName }}</h5>
+                          <div class="tray-title-wrap">
+                            <h5>Selected for {{ cur.shortName }}</h5>
+                            <span class="tray-sub-hint">Click dish to view recipe or adjust grams/pieces</span>
+                          </div>
                           <span class="tray-count-badge">{{ cur.dishes.length }} dishes</span>
                         </div>
 
@@ -684,8 +702,26 @@
                             <div class="tray-dish-chip">
                               <span class="dish-num">{{ i + 1 }}</span>
                               <div class="tray-dish-details">
-                                <span class="tray-name">{{ d.name }}</span>
-                                <span class="tray-sub">{{ d.category_name }} • ₹{{ (d.price_per_person / 100).toFixed(0) }}/guest</span>
+                                <div class="tray-top-row" (click)="openDishProfileForDishId(d.dish_id)" title="Click to view profile & recipe">
+                                  <span class="tray-name">{{ d.name }}</span>
+                                  <span class="material-symbols-outlined tray-view-icon">visibility</span>
+                                </div>
+                                <div class="tray-meta-line">
+                                  <span class="tray-sub">{{ d.category_name }} • ₹{{ (d.price_per_person / 100).toFixed(0) }}/guest</span>
+                                  <span class="tray-batch-pill" title="Total kitchen preparation needed for {{ cur.guest_count || 600 }} guests">
+                                    {{ calculateBatchRequirement(d.serving_quantity, d.serving_unit, cur.guest_count || 600) }}
+                                  </span>
+                                </div>
+                                <!-- Inline Serving Quantity / Unit Stepper -->
+                                <div class="tray-portion-stepper" (click)="$event.stopPropagation()">
+                                  <span class="stepper-label">Portion:</span>
+                                  <button type="button" class="btn-step-mini" (click)="adjustTrayDishQuantity(d.dish_id, -1, $event)" title="Decrease portion">-</button>
+                                  <span class="step-mini-val">{{ d.serving_quantity || 100 }}</span>
+                                  <button type="button" class="btn-step-mini" (click)="adjustTrayDishQuantity(d.dish_id, 1, $event)" title="Increase portion">+</button>
+                                  <button type="button" class="btn-unit-toggle" (click)="cycleTrayDishUnit(d.dish_id, $event)" title="Click to switch unit (g, pcs, ml, cups)">
+                                    {{ d.serving_unit || 'g' }}
+                                  </button>
+                                </div>
                               </div>
                               <button 
                                 type="button" 
@@ -1174,6 +1210,264 @@
             <span class="material-symbols-outlined">print</span>
             <span>Print / Save PDF</span>
           </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- DISH PROFILE & RECIPE MODAL (WITH PORTION / GRAMS / PIECES CUSTOMIZER) -->
+  @if (activeDishModal(); as dish) {
+    <div class="dish-profile-backdrop" (click)="closeDishProfile()">
+      <div class="dish-profile-card" (click)="$event.stopPropagation()">
+        <!-- Header -->
+        <div class="dish-profile-header">
+          <div class="header-titles">
+            <div class="cat-diet-row">
+              <span class="profile-cat-pill">{{ dish.category_name || 'Specialty' }}</span>
+              <span class="profile-diet-tag" [class.veg]="dish.food_type !== 'non-veg'" [class.non-veg]="dish.food_type === 'non-veg'">
+                <span class="diet-dot"></span>
+                <span>{{ dish.food_type === 'non-veg' ? 'Non-Veg' : 'Pure Veg' }}</span>
+              </span>
+            </div>
+            <h3 class="profile-dish-name">
+              {{ tService.getDishName(dish) }}
+            </h3>
+          </div>
+          <button type="button" class="profile-close-btn" (click)="closeDishProfile()" aria-label="Close">
+            &times;
+          </button>
+        </div>
+
+        <!-- Body -->
+        <div class="dish-profile-body">
+          <!-- Multi-Image Hero / Gallery -->
+          <div class="profile-gallery-hero">
+            <div class="hero-image-wrap">
+              <img 
+                [src]="modalImages()[activeModalImageIndex()] || dish.primary_image_url || 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=1000&q=85'" 
+                [alt]="dish.name"
+                class="hero-img"
+                (error)="onImageError($event)"
+              />
+              <span class="hero-price-badge">₹{{ ((dish.price_per_person || 7500) / 100).toFixed(0) }} / Guest</span>
+            </div>
+
+            @if (modalImages().length > 1) {
+              <div class="profile-thumb-strip">
+                @for (img of modalImages(); track $index) {
+                  <button 
+                    type="button" 
+                    class="thumb-btn" 
+                    [class.active]="$index === activeModalImageIndex()"
+                    (click)="activeModalImageIndex.set($index)"
+                  >
+                    <img [src]="img" (error)="onImageError($event)" [alt]="dish.name + ' thumb ' + ($index + 1)" />
+                  </button>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Quick Specifications Badges -->
+          <div class="profile-specs-bar">
+            <div class="spec-item">
+              <span class="material-symbols-outlined">restaurant</span>
+              <span><strong>{{ dish.category_name || 'Course' }}</strong></span>
+            </div>
+            <div class="spec-item">
+              <span class="material-symbols-outlined">local_fire_department</span>
+              <span>{{ getSpiceBadge(dish) }}</span>
+            </div>
+            <div class="spec-item">
+              <span class="material-symbols-outlined">timer</span>
+              <span>{{ dish.prep_time || '25 mins' }}</span>
+            </div>
+          </div>
+
+          <!-- Culinary Presentation Story -->
+          @if (dish.description || tService.getDishDesc(dish)) {
+            <div class="profile-story-box">
+              <h5 class="story-heading">Culinary Craft & Tasting Note</h5>
+              <p class="story-desc">{{ tService.getDishDesc(dish) || dish.description }}</p>
+            </div>
+          }
+
+          <!-- PORTION & QUANTITY CUSTOMIZER ("Add pieces or grams or quantities") -->
+          <div class="profile-portion-customizer">
+            <div class="customizer-header">
+              <div class="title-wrap">
+                <span class="material-symbols-outlined customizer-icon">scale</span>
+                <div>
+                  <h4 class="customizer-title">Banquet Serving Portion per Guest</h4>
+                  <p class="customizer-sub">Adjust pieces, grams, or portion size for {{ currentSession().shortName }} session</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Unit Selector (Grams / Pieces / Milliliters / Cups) -->
+            <div class="portion-unit-selector">
+              <span class="field-label">Portion Unit:</span>
+              <div class="unit-pills">
+                <button 
+                  type="button" 
+                  class="unit-pill" 
+                  [class.active]="modalServingUnit() === 'g'"
+                  (click)="setModalUnit('g')"
+                >
+                  Grams (g)
+                </button>
+                <button 
+                  type="button" 
+                  class="unit-pill" 
+                  [class.active]="modalServingUnit() === 'pcs'"
+                  (click)="setModalUnit('pcs')"
+                >
+                  Pieces (pcs)
+                </button>
+                <button 
+                  type="button" 
+                  class="unit-pill" 
+                  [class.active]="modalServingUnit() === 'ml'"
+                  (click)="setModalUnit('ml')"
+                >
+                  Milliliters (ml)
+                </button>
+                <button 
+                  type="button" 
+                  class="unit-pill" 
+                  [class.active]="modalServingUnit() === 'cups'"
+                  (click)="setModalUnit('cups')"
+                >
+                  Cups
+                </button>
+              </div>
+            </div>
+
+            <!-- Stepper and Presets -->
+            <div class="stepper-and-presets-row">
+              <div class="portion-stepper-box">
+                <button type="button" class="btn-step-large" (click)="adjustModalQuantity(-1)" title="Decrease quantity">
+                  <span class="material-symbols-outlined">remove</span>
+                </button>
+                <div class="stepper-input-wrap">
+                  <input 
+                    type="number" 
+                    class="stepper-number-input" 
+                    [ngModel]="modalServingQuantity()" 
+                    (ngModelChange)="modalServingQuantity.set(+$event)"
+                    min="1" 
+                    max="5000"
+                  />
+                  <span class="stepper-unit-label">{{ modalServingUnit() }}</span>
+                </div>
+                <button type="button" class="btn-step-large" (click)="adjustModalQuantity(1)" title="Increase quantity">
+                  <span class="material-symbols-outlined">add</span>
+                </button>
+              </div>
+
+              <!-- Quick Presets -->
+              <div class="quick-presets-strip">
+                <span class="presets-label">Presets:</span>
+                @if (modalServingUnit() === 'g') {
+                  <button type="button" class="preset-chip" [class.active]="modalServingQuantity() === 50" (click)="setModalQuantityPreset(50)">50g</button>
+                  <button type="button" class="preset-chip" [class.active]="modalServingQuantity() === 100" (click)="setModalQuantityPreset(100)">100g</button>
+                  <button type="button" class="preset-chip" [class.active]="modalServingQuantity() === 150" (click)="setModalQuantityPreset(150)">150g</button>
+                  <button type="button" class="preset-chip" [class.active]="modalServingQuantity() === 200" (click)="setModalQuantityPreset(200)">200g</button>
+                  <button type="button" class="preset-chip" [class.active]="modalServingQuantity() === 250" (click)="setModalQuantityPreset(250)">250g</button>
+                } @else if (modalServingUnit() === 'pcs') {
+                  <button type="button" class="preset-chip" [class.active]="modalServingQuantity() === 1" (click)="setModalQuantityPreset(1)">1 pc</button>
+                  <button type="button" class="preset-chip" [class.active]="modalServingQuantity() === 2" (click)="setModalQuantityPreset(2)">2 pcs</button>
+                  <button type="button" class="preset-chip" [class.active]="modalServingQuantity() === 3" (click)="setModalQuantityPreset(3)">3 pcs</button>
+                  <button type="button" class="preset-chip" [class.active]="modalServingQuantity() === 4" (click)="setModalQuantityPreset(4)">4 pcs</button>
+                } @else if (modalServingUnit() === 'ml') {
+                  <button type="button" class="preset-chip" [class.active]="modalServingQuantity() === 100" (click)="setModalQuantityPreset(100)">100ml</button>
+                  <button type="button" class="preset-chip" [class.active]="modalServingQuantity() === 150" (click)="setModalQuantityPreset(150)">150ml</button>
+                  <button type="button" class="preset-chip" [class.active]="modalServingQuantity() === 200" (click)="setModalQuantityPreset(200)">200ml</button>
+                  <button type="button" class="preset-chip" [class.active]="modalServingQuantity() === 250" (click)="setModalQuantityPreset(250)">250ml</button>
+                } @else {
+                  <button type="button" class="preset-chip" [class.active]="modalServingQuantity() === 1" (click)="setModalQuantityPreset(1)">1 cup</button>
+                  <button type="button" class="preset-chip" [class.active]="modalServingQuantity() === 2" (click)="setModalQuantityPreset(2)">2 cups</button>
+                }
+              </div>
+            </div>
+
+            <!-- Live Kitchen Batch Requirement Callout -->
+            <div class="batch-calculation-banner">
+              <span class="material-symbols-outlined batch-calc-icon">soup_kitchen</span>
+              <div class="batch-calc-info">
+                <span class="batch-calc-label">Total Kitchen Preparation for <strong>{{ currentSession().guest_count || newEvent.guest_count || 600 }} Guests</strong> ({{ currentSession().shortName }}):</span>
+                <span class="batch-calc-highlight">
+                  {{ calculateBatchRequirement(modalServingQuantity(), modalServingUnit(), currentSession().guest_count || newEvent.guest_count || 600) }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recipe & Authentic Ingredients Preview -->
+          <div class="profile-recipe-section">
+            <h5 class="recipe-heading">
+              <span class="material-symbols-outlined">menu_book</span>
+              <span>Authentic Recipe & Ingredients</span>
+            </h5>
+
+            @if (modalLoadingRecipe()) {
+              <div class="recipe-loading">
+                <span class="material-symbols-outlined spin">progress_activity</span>
+                <span>Fetching master chef formulation...</span>
+              </div>
+            } @else if (modalRecipe(); as rcp) {
+              @if (rcp.ingredients && rcp.ingredients.length > 0) {
+                <div class="ingredients-grid">
+                  @for (ing of rcp.ingredients; track ing.id || $index) {
+                    <div class="ingredient-chip">
+                      <span class="ing-name">{{ ing.name }}</span>
+                      <span class="ing-qty">{{ ing.quantity }} {{ ing.unit }}</span>
+                    </div>
+                  }
+                </div>
+              }
+
+              @if (rcp.steps && rcp.steps.length > 0) {
+                <div class="recipe-steps-list">
+                  @for (st of rcp.steps; track st.id || $index) {
+                    <div class="step-item">
+                      <span class="step-badge">{{ st.step_number || ($index + 1) }}</span>
+                      <p class="step-text">{{ st.instruction }}</p>
+                    </div>
+                  }
+                </div>
+              }
+            } @else {
+              <div class="recipe-empty">
+                <p>Curated traditional Thirumala Catering kitchen recipe using pure Ghee, cold-pressed oils, and farm-fresh spices.</p>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="dish-profile-footer">
+          <button type="button" class="btn-cancel" (click)="closeDishProfile()">
+            Close
+          </button>
+
+          <div class="footer-primary-actions">
+            @if (isDishInCurrentSession(dish.id)) {
+              <button type="button" class="btn-remove-session" (click)="removeDishFromModal()">
+                <span class="material-symbols-outlined">delete</span>
+                <span>Remove</span>
+              </button>
+              <button type="button" class="btn-save-session update" (click)="saveDishFromModalToSession()">
+                <span class="material-symbols-outlined">check_circle</span>
+                <span>Update Portion ({{ modalServingQuantity() }} {{ modalServingUnit() }})</span>
+              </button>
+            } @else {
+              <button type="button" class="btn-save-session add" (click)="saveDishFromModalToSession()">
+                <span class="material-symbols-outlined">add_circle</span>
+                <span>Add to {{ currentSession().shortName }} ({{ modalServingQuantity() }} {{ modalServingUnit() }})</span>
+              </button>
+            }
+          </div>
         </div>
       </div>
     </div>

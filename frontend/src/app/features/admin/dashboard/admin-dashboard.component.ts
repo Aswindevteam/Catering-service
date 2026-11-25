@@ -5,10 +5,11 @@ import { FormsModule } from '@angular/forms';
 import { DashboardService, DashboardOverview, PopularDishItem, ActivityItem, RevenueChartPoint } from '../../../core/services/dashboard.service';
 import { SelectionService } from '../../../core/services/selection.service';
 import { DishService } from '../../../core/services/dish.service';
+import { RecipeService } from '../../../core/services/recipe.service';
 import { CategoryService } from '../../../core/services/category.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { TranslationService } from '../../../core/services/translation.service';
-import { WeddingEvent, Dish, FoodCategory } from '../../../core/models';
+import { WeddingEvent, Dish, FoodCategory, Recipe } from '../../../core/models';
 
 export interface MealSessionItem {
   dish_id: string;
@@ -65,6 +66,7 @@ export class AdminDashboardComponent implements OnInit {
   private selectionService = inject(SelectionService);
   private dishService = inject(DishService);
   private categoryService = inject(CategoryService);
+  private recipeService = inject(RecipeService);
   private toast = inject(ToastService);
   tService = inject(TranslationService);
 
@@ -102,6 +104,15 @@ export class AdminDashboardComponent implements OnInit {
   selectedEventDetail = signal<TimelineEvent | null>(null);
   showReportModal = signal(false);
   selectedReportEvent = signal<TimelineEvent | null>(null);
+
+  // Dish Profile & Recipe Modal State (Portion / Grams / Pieces customizer)
+  activeDishModal = signal<Dish | null>(null);
+  modalRecipe = signal<Recipe | null>(null);
+  modalLoadingRecipe = signal<boolean>(false);
+  modalServingQuantity = signal<number>(100);
+  modalServingUnit = signal<string>('g');
+  modalImages = signal<string[]>([]);
+  activeModalImageIndex = signal<number>(0);
 
   // Multi-Session Scheduling Form State
   scheduleStep = signal<number>(1); // 1 = Details, 2 = Meal Sessions & Categorized Dishes, 3 = Summary
@@ -533,6 +544,299 @@ export class AdminDashboardComponent implements OnInit {
     const cur = this.currentSession();
     cur.dishes = cur.dishes.filter(d => d.dish_id !== dishId);
     this.mealSessions.update(list => [...list]);
+  }
+
+  // Dish Profile Popup & Customization (Pieces / Grams / Quantities)
+  openDishProfile(dish: Dish, event?: Event) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    const cur = this.currentSession();
+    const existing = cur.dishes.find(d => d.dish_id === dish.id);
+    if (existing) {
+      this.modalServingQuantity.set(existing.serving_quantity || dish.quantity_per_person || 100);
+      this.modalServingUnit.set(existing.serving_unit || dish.serving_unit || 'g');
+    } else {
+      this.modalServingQuantity.set(dish.quantity_per_person || 100);
+      this.modalServingUnit.set(dish.serving_unit || 'g');
+    }
+
+    this.activeModalImageIndex.set(0);
+    this.activeDishModal.set(dish);
+
+    // Initial images & fallback
+    const images: string[] = [];
+    if (dish.primary_image_url) images.push(dish.primary_image_url);
+    if (dish.images && dish.images.length > 0) {
+      dish.images.forEach(img => {
+        if (img.image_url && !images.includes(img.image_url)) images.push(img.image_url);
+      });
+    }
+    const fallbacks = this.getFallbackImagesForDish(dish);
+    for (const fb of fallbacks) {
+      if (!images.includes(fb)) images.push(fb);
+    }
+    this.modalImages.set(images);
+
+    // Fetch full dish details & images
+    this.dishService.getDish(dish.id).subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          const fetched: string[] = [];
+          if (res.data.primary_image_url) fetched.push(res.data.primary_image_url);
+          if (res.data.images && res.data.images.length > 0) {
+            res.data.images.forEach(img => {
+              if (img.image_url && !fetched.includes(img.image_url)) fetched.push(img.image_url);
+            });
+          }
+          for (const fb of fallbacks) {
+            if (!fetched.includes(fb)) fetched.push(fb);
+          }
+          this.modalImages.set(fetched);
+        }
+      }
+    });
+
+    // Fetch master recipe & ingredients
+    this.modalLoadingRecipe.set(true);
+    this.recipeService.getRecipeByDishId(dish.id).subscribe({
+      next: (res) => {
+        this.modalLoadingRecipe.set(false);
+        if (res.success && res.data) {
+          this.modalRecipe.set(res.data);
+        } else {
+          this.modalRecipe.set(null);
+        }
+      },
+      error: () => {
+        this.modalLoadingRecipe.set(false);
+        this.modalRecipe.set(null);
+      }
+    });
+  }
+
+  openDishProfileForDishId(dishId: string, event?: Event) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    const found = this.allDishes().find(d => d.id === dishId);
+    if (found) {
+      this.openDishProfile(found);
+    } else {
+      // Create minimal dish stub if not yet loaded in list
+      const cur = this.currentSession();
+      const item = cur.dishes.find(d => d.dish_id === dishId);
+      if (item) {
+        const stub: Dish = {
+          id: item.dish_id,
+          name: item.name,
+          category_id: 'general',
+          category_name: item.category_name,
+          description: 'Authentic royal banquet dish prepared fresh with pure ghee and hand-ground spices.',
+          food_type: 'veg',
+          price_per_person: item.price_per_person,
+          quantity_per_person: item.serving_quantity || 100,
+          serving_unit: item.serving_unit || 'g',
+          min_order_quantity: 50,
+          prep_time: '25 mins',
+          availability: 1,
+          is_deleted: 0,
+          created_at: '',
+          updated_at: ''
+        };
+        this.openDishProfile(stub);
+      }
+    }
+  }
+
+  closeDishProfile() {
+    this.activeDishModal.set(null);
+    this.modalRecipe.set(null);
+    this.modalImages.set([]);
+  }
+
+  adjustModalQuantity(delta: number) {
+    const unit = this.modalServingUnit();
+    let step = 1;
+    let min = 1;
+    let max = 5000;
+
+    if (unit === 'g' || unit === 'ml') {
+      step = 25;
+      min = 25;
+      max = 1000;
+    } else if (unit === 'pcs') {
+      step = 1;
+      min = 1;
+      max = 20;
+    } else if (unit === 'cups') {
+      step = 1;
+      min = 1;
+      max = 10;
+    }
+
+    const current = this.modalServingQuantity() || min;
+    const next = Math.max(min, Math.min(max, current + (delta * step)));
+    this.modalServingQuantity.set(next);
+  }
+
+  setModalUnit(unit: string) {
+    const prevUnit = this.modalServingUnit();
+    this.modalServingUnit.set(unit);
+
+    if (unit === 'pcs' && prevUnit !== 'pcs') {
+      if (this.modalServingQuantity() > 10) this.modalServingQuantity.set(2);
+    } else if (unit === 'g' && prevUnit === 'pcs') {
+      if (this.modalServingQuantity() < 20) this.modalServingQuantity.set(100);
+    } else if (unit === 'ml' && prevUnit === 'pcs') {
+      if (this.modalServingQuantity() < 20) this.modalServingQuantity.set(150);
+    } else if (unit === 'cups' && prevUnit !== 'cups') {
+      if (this.modalServingQuantity() > 10) this.modalServingQuantity.set(1);
+    }
+  }
+
+  setModalQuantityPreset(qty: number) {
+    this.modalServingQuantity.set(qty);
+  }
+
+  saveDishFromModalToSession() {
+    const dish = this.activeDishModal();
+    if (!dish) return;
+    const cur = this.currentSession();
+    const qty = this.modalServingQuantity() || (this.modalServingUnit() === 'pcs' ? 2 : 100);
+    const unit = this.modalServingUnit() || 'g';
+
+    const existingIdx = cur.dishes.findIndex(d => d.dish_id === dish.id);
+    if (existingIdx >= 0) {
+      cur.dishes[existingIdx].serving_quantity = qty;
+      cur.dishes[existingIdx].serving_unit = unit;
+      this.toast.success(`Updated portion for "${dish.name}" to ${qty} ${unit} in ${cur.shortName}.`);
+    } else {
+      cur.dishes.push({
+        dish_id: dish.id,
+        name: dish.name,
+        category_name: dish.category_name,
+        price_per_person: dish.price_per_person || 7500,
+        serving_quantity: qty,
+        serving_unit: unit
+      });
+      this.toast.success(`Added "${dish.name}" (${qty} ${unit}) to ${cur.shortName}.`);
+    }
+
+    this.mealSessions.update(list => [...list]);
+    this.closeDishProfile();
+  }
+
+  removeDishFromModal() {
+    const dish = this.activeDishModal();
+    if (!dish) return;
+    this.removeDishFromCurrentSession(dish.id);
+    this.closeDishProfile();
+    this.toast.info(`Removed "${dish.name}" from ${this.currentSession().shortName}.`);
+  }
+
+  adjustTrayDishQuantity(dishId: string, delta: number, event?: Event) {
+    if (event) event.stopPropagation();
+    const cur = this.currentSession();
+    const item = cur.dishes.find(d => d.dish_id === dishId);
+    if (!item) return;
+
+    const unit = item.serving_unit || 'g';
+    const step = (unit === 'g' || unit === 'ml') ? 25 : 1;
+    const min = (unit === 'g' || unit === 'ml') ? 25 : 1;
+    const current = item.serving_quantity || (unit === 'pcs' ? 2 : 100);
+
+    item.serving_quantity = Math.max(min, current + (delta * step));
+    this.mealSessions.update(list => [...list]);
+  }
+
+  cycleTrayDishUnit(dishId: string, event?: Event) {
+    if (event) event.stopPropagation();
+    const cur = this.currentSession();
+    const item = cur.dishes.find(d => d.dish_id === dishId);
+    if (!item) return;
+
+    const units = ['g', 'pcs', 'ml', 'cups'];
+    const currentIdx = units.indexOf(item.serving_unit || 'g');
+    const nextUnit = units[(currentIdx + 1) % units.length];
+    item.serving_unit = nextUnit;
+
+    if (nextUnit === 'pcs' && (item.serving_quantity || 100) > 10) {
+      item.serving_quantity = 2;
+    } else if (nextUnit === 'g' && (item.serving_quantity || 2) < 20) {
+      item.serving_quantity = 100;
+    } else if (nextUnit === 'ml' && (item.serving_quantity || 2) < 20) {
+      item.serving_quantity = 150;
+    } else if (nextUnit === 'cups' && (item.serving_quantity || 100) > 10) {
+      item.serving_quantity = 1;
+    }
+
+    this.mealSessions.update(list => [...list]);
+    this.toast.info(`Changed unit for "${item.name}" to ${nextUnit}.`);
+  }
+
+  getSpiceBadge(dish: Dish): string {
+    if (dish.food_type === 'non-veg') return 'Spicy & Aromatic';
+    const name = dish.name.toLowerCase();
+    if (name.includes('butter') || name.includes('idly') || name.includes('sweet') || name.includes('jamun') || name.includes('halwa')) {
+      return 'Mild & Rich';
+    }
+    return 'Medium Spice';
+  }
+
+  onImageError(event: any) {
+    event.target.src = 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=1000&q=85';
+  }
+
+  getFallbackImagesForDish(dish: Dish): string[] {
+    const name = dish.name.toLowerCase();
+    if (name.includes('idly') || name.includes('idli')) {
+      return [
+        'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=1000&q=85',
+        'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?auto=format&fit=crop&w=1000&q=85'
+      ];
+    } else if (name.includes('vada') || name.includes('vadai')) {
+      return [
+        'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=1000&q=85',
+        'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=1000&q=85'
+      ];
+    } else if (name.includes('dosa') || name.includes('dosai')) {
+      return [
+        'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=1000&q=85',
+        'https://images.unsplash.com/photo-1668236543090-82eba5ee5976?auto=format&fit=crop&w=1000&q=85'
+      ];
+    } else if (name.includes('biryani') || name.includes('briyani')) {
+      return [
+        'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=1000&q=85',
+        'https://images.unsplash.com/photo-1633945274405-b6c8069047b0?auto=format&fit=crop&w=1000&q=85'
+      ];
+    } else if (name.includes('paneer') || name.includes('tikka')) {
+      return [
+        'https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?auto=format&fit=crop&w=1000&q=85',
+        'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&w=1000&q=85'
+      ];
+    } else if (name.includes('gobi') || name.includes('cauliflower')) {
+      return [
+        'https://images.unsplash.com/photo-1589302168068-964664d93dc0?auto=format&fit=crop&w=1000&q=85'
+      ];
+    } else if (name.includes('chicken') || name.includes('mutton') || name.includes('fish')) {
+      return [
+        'https://images.unsplash.com/photo-1610057099431-d73a1c9d2f2f?auto=format&fit=crop&w=1000&q=85',
+        'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?auto=format&fit=crop&w=1000&q=85'
+      ];
+    } else if (name.includes('jamun') || name.includes('halwa') || name.includes('payasam') || name.includes('sweet') || name.includes('rasagolla')) {
+      return [
+        'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=1000&q=85',
+        'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=1000&q=85'
+      ];
+    }
+    return [
+      'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=1000&q=85',
+      'https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?auto=format&fit=crop&w=1000&q=85'
+    ];
   }
 
   saveScheduledEvent() {

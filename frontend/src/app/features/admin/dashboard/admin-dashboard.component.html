@@ -812,6 +812,125 @@
                     }
                   }
                 </div>
+
+                <!-- Real-time Commercial & Fee Breakdown Card -->
+                @if (currentModalFinancials(); as fin) {
+                  <div class="summary-financials-card">
+                    <div class="financials-card-header">
+                      <div class="header-left">
+                        <span class="material-symbols-outlined fin-icon">receipt_long</span>
+                        <div>
+                          <h5>Catering Quotation & Fee Breakdown</h5>
+                          <span class="fin-sub">Itemized food costs, catering service charges, logistics & taxes</span>
+                        </div>
+                      </div>
+                      <div class="header-right">
+                        <span class="badge-rate">₹{{ fin.costPerGuestPaise > 0 ? (fin.costPerGuestPaise / 100).toFixed(0) : '0' }} / guest</span>
+                      </div>
+                    </div>
+
+                    <!-- Session Food Items Cost Table -->
+                    <div class="fin-sessions-table-wrapper">
+                      <table class="fin-sessions-table">
+                        <thead>
+                          <tr>
+                            <th>Meal Session</th>
+                            <th>Headcount</th>
+                            <th>Dishes</th>
+                            <th>Rate / Guest</th>
+                            <th class="text-right">Food Cost</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @for (sc of fin.sessionsCost; track sc.sessionId) {
+                            <tr>
+                              <td>
+                                <strong class="session-name-cell">{{ sc.sessionName }}</strong>
+                              </td>
+                              <td>{{ sc.guestCount }} Guests</td>
+                              <td>{{ sc.dishCount }} Items</td>
+                              <td class="text-muted">₹{{ (sc.perGuestPaise / 100).toFixed(0) }}</td>
+                              <td class="text-right font-bold">₹{{ formatInr(sc.totalFoodCostPaise) }}</td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <!-- Fees & Total Calculation Lines -->
+                    <div class="fin-totals-sheet">
+                      <div class="fin-row">
+                        <span class="fin-label">Culinary Food Subtotal (All Active Sessions)</span>
+                        <span class="fin-val font-bold">₹{{ formatInr(fin.totalFoodSubtotalPaise) }}</span>
+                      </div>
+
+                      @if (fin.serviceChargePaise > 0) {
+                        <div class="fin-row fee-row">
+                          <span class="fin-label">
+                            <span class="fee-badge">Catering Service Charge ({{ fin.serviceChargeRate }}%)</span>
+                            <span class="fee-desc">Includes royal service crew, head chef deployment, buffet & chafing setup</span>
+                          </span>
+                          <span class="fin-val text-green">+₹{{ formatInr(fin.serviceChargePaise) }}</span>
+                        </div>
+                      }
+
+                      @if (fin.transportationChargePaise > 0) {
+                        <div class="fin-row fee-row">
+                          <span class="fin-label">
+                            <span class="fee-badge">Logistics, Fleet Fuel & Venue Transport</span>
+                            <span class="fee-desc">Dedicated refrigerated transport from Central Kitchen to Mandapam</span>
+                          </span>
+                          <span class="fin-val text-green">+₹{{ formatInr(fin.transportationChargePaise) }}</span>
+                        </div>
+                      }
+
+                      <div class="fin-row taxable-row">
+                        <span class="fin-label">Taxable Commercial Base</span>
+                        <span class="fin-val">₹{{ formatInr(fin.taxableAmountPaise) }}</span>
+                      </div>
+
+                      @if (fin.gstAmountPaise > 0) {
+                        <div class="fin-row tax-row">
+                          <span class="fin-label">
+                            <span class="tax-badge">GST ({{ fin.gstRate }}%)</span>
+                            <span class="fee-desc">CGST 2.5% + SGST 2.5% Catering Compliance</span>
+                          </span>
+                          <span class="fin-val text-muted">+₹{{ formatInr(fin.gstAmountPaise) }}</span>
+                        </div>
+                      }
+
+                      <div class="fin-row grand-total-row">
+                        <div class="grand-label-col">
+                          <span class="grand-title">NET GRAND TOTAL (ALL INCLUSIVE)</span>
+                          <span class="grand-sub">Based on {{ fin.peakGuests }} peak guests across {{ fin.sessionsCost.length }} session(s)</span>
+                        </div>
+                        <div class="grand-val-col">
+                          <span class="grand-price">₹{{ formatInr(fin.grandTotalPaise) }}</span>
+                          <span class="grand-per-head">~₹{{ (fin.costPerGuestPaise / 100).toFixed(0) }} per guest</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Payment Milestones Preview -->
+                    <div class="payment-milestones-row">
+                      <div class="milestone-box">
+                        <span class="ms-label">Booking Advance (40%)</span>
+                        <strong class="ms-val">₹{{ getAdvanceAmount(fin.grandTotalPaise, 40) }}</strong>
+                        <span class="ms-note">Upon confirmation</span>
+                      </div>
+                      <div class="milestone-box">
+                        <span class="ms-label">Pre-Event Milestone (40%)</span>
+                        <strong class="ms-val">₹{{ getAdvanceAmount(fin.grandTotalPaise, 40) }}</strong>
+                        <span class="ms-note">7 Days before event</span>
+                      </div>
+                      <div class="milestone-box">
+                        <span class="ms-label">Final Settlement (20%)</span>
+                        <strong class="ms-val">₹{{ getAdvanceAmount(fin.grandTotalPaise, 20) }}</strong>
+                        <span class="ms-note">Post feast conclusion</span>
+                      </div>
+                    </div>
+                  </div>
+                }
               </div>
             </div>
           }
@@ -1151,6 +1270,143 @@
                     </div>
                   </div>
                 }
+              </div>
+            }
+
+            <!-- Official Commercial & Financial Billing Statement -->
+            @if (currentReportFinancials(); as fin) {
+              <div class="report-financial-section">
+                <div class="report-fin-header">
+                  <div class="fin-title-group">
+                    <span class="material-symbols-outlined fin-header-icon">payments</span>
+                    <h3 class="sec-title">Commercial Estimate & Billing Statement</h3>
+                  </div>
+                  <span class="fin-ref-tag">ALL RATES EXPRESSED IN INDIAN RUPEES (INR)</span>
+                </div>
+
+                <div class="report-table-scroll">
+                  <table class="report-financial-table">
+                    <thead>
+                      <tr>
+                        <th style="width: 48px;">#</th>
+                        <th>Description / Service Particulars</th>
+                        <th style="width: 140px;" class="text-center">Headcount / Unit</th>
+                        <th style="width: 150px;" class="text-right">Unit Rate</th>
+                        <th style="width: 180px;" class="text-right">Total Amount (₹)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <!-- Session Food Items -->
+                      @for (sc of fin.sessionsCost; track sc.sessionId; let idx = $index) {
+                        <tr>
+                          <td class="text-muted">{{ idx + 1 }}</td>
+                          <td>
+                            <strong>{{ sc.sessionName }}</strong>
+                            <div class="fin-item-sub">{{ sc.dishCount }} Dishes Selected • Fresh Mandapam Preparation</div>
+                          </td>
+                          <td class="text-center font-medium">{{ sc.guestCount }} Guests</td>
+                          <td class="text-right">₹{{ (sc.perGuestPaise / 100).toFixed(0) }} / Pax</td>
+                          <td class="text-right font-bold">₹{{ formatInr(sc.totalFoodCostPaise) }}</td>
+                        </tr>
+                      }
+
+                      <!-- Subtotal Row -->
+                      <tr class="subtotal-tr">
+                        <td colspan="4" class="text-right font-bold">Total Food & Beverage Subtotal:</td>
+                        <td class="text-right font-bold text-maroon">₹{{ formatInr(fin.totalFoodSubtotalPaise) }}</td>
+                      </tr>
+
+                      <!-- Service Fee Row -->
+                      @if (fin.serviceChargePaise > 0) {
+                        <tr class="fee-tr">
+                          <td class="text-muted">+</td>
+                          <td>
+                            <strong>Catering & Banquet Service Charge ({{ fin.serviceChargeRate }}%)</strong>
+                            <div class="fin-item-sub">Head chef supervision, uniformed dining crew, buffet counters, chafing dish fuel & cleanup</div>
+                          </td>
+                          <td class="text-center font-medium">{{ fin.sessionsCost.length }} Session(s)</td>
+                          <td class="text-right">{{ fin.serviceChargeRate }}% on Food</td>
+                          <td class="text-right font-bold text-green">+₹{{ formatInr(fin.serviceChargePaise) }}</td>
+                        </tr>
+                      }
+
+                      <!-- Logistics / Transport Row -->
+                      @if (fin.transportationChargePaise > 0) {
+                        <tr class="fee-tr">
+                          <td class="text-muted">+</td>
+                          <td>
+                            <strong>Logistics, Fleet Fuel & Kitchen Transport</strong>
+                            <div class="fin-item-sub">Refrigerated mobile transport from Central Culinary HQ (Tirukoilur) to Banquet Mandapam</div>
+                          </td>
+                          <td class="text-center font-medium">1 Fleet Consignment</td>
+                          <td class="text-right">Standard Fixed</td>
+                          <td class="text-right font-bold text-green">+₹{{ formatInr(fin.transportationChargePaise) }}</td>
+                        </tr>
+                      }
+
+                      <!-- Taxable Commercial Base -->
+                      <tr class="taxable-tr">
+                        <td colspan="4" class="text-right font-bold">Taxable Commercial Base:</td>
+                        <td class="text-right font-bold">₹{{ formatInr(fin.taxableAmountPaise) }}</td>
+                      </tr>
+
+                      <!-- GST Taxes -->
+                      @if (fin.gstAmountPaise > 0) {
+                        <tr class="tax-tr">
+                          <td class="text-muted">+</td>
+                          <td>
+                            <strong>Goods & Services Tax (GST {{ fin.gstRate }}%)</strong>
+                            <div class="fin-item-sub">CGST 2.5% + SGST 2.5% Applicable on Outdoor Catering Services</div>
+                          </td>
+                          <td class="text-center font-medium">{{ fin.gstRate }}%</td>
+                          <td class="text-right">5% Combined</td>
+                          <td class="text-right font-bold text-muted">+₹{{ formatInr(fin.gstAmountPaise) }}</td>
+                        </tr>
+                      }
+
+                      <!-- Net Grand Banquet Total -->
+                      <tr class="grand-total-tr">
+                        <td colspan="3" class="grand-total-title">
+                          <span class="grand-badge">OFFICIAL BANQUET QUOTATION</span>
+                          <h3>NET GRAND BANQUET TOTAL</h3>
+                          <span class="grand-note">Includes all food preparation, service personnel, transport & government taxes</span>
+                        </td>
+                        <td colspan="2" class="grand-total-figures text-right">
+                          <div class="grand-price-big">₹{{ formatInr(fin.grandTotalPaise) }}</div>
+                          <div class="grand-per-guest-calc">₹{{ (fin.costPerGuestPaise / 100).toFixed(0) }} / Guest ({{ fin.peakGuests }} Peak Pax)</div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- Payment Milestones & Commercial Settlement Schedule -->
+                <div class="report-payment-terms-box">
+                  <div class="terms-header">
+                    <span class="material-symbols-outlined terms-icon">account_balance</span>
+                    <h5>Payment Milestones & Commercial Terms</h5>
+                  </div>
+                  <div class="terms-grid">
+                    <div class="term-card">
+                      <span class="term-milestone">1. Booking Advance (40%)</span>
+                      <strong class="term-amount">₹{{ getAdvanceAmount(fin.grandTotalPaise, 40) }}</strong>
+                      <span class="term-desc">Mandatory for date blocking & procurement reservation</span>
+                    </div>
+                    <div class="term-card">
+                      <span class="term-milestone">2. Pre-Event Milestone (40%)</span>
+                      <strong class="term-amount">₹{{ getAdvanceAmount(fin.grandTotalPaise, 40) }}</strong>
+                      <span class="term-desc">Payable 7 days prior to Muhurtham date</span>
+                    </div>
+                    <div class="term-card">
+                      <span class="term-milestone">3. Final Settlement (20%)</span>
+                      <strong class="term-amount">₹{{ getAdvanceAmount(fin.grandTotalPaise, 20) }}</strong>
+                      <span class="term-desc">Upon successful feast completion at reception</span>
+                    </div>
+                  </div>
+                  <div class="bank-remittance-note">
+                    <strong>Electronic Bank Remittance:</strong> Thirumala Catering Service • Account No: 50200088912345 • IFSC: IDIB000T025 • Bank: Indian Bank, Tirukoilur Branch • UPI / GPay: 7299887725@upi
+                  </div>
+                </div>
               </div>
             }
 

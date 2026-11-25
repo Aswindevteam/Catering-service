@@ -6,10 +6,11 @@ import { DashboardService, DashboardOverview, PopularDishItem, ActivityItem, Rev
 import { SelectionService } from '../../../core/services/selection.service';
 import { DishService } from '../../../core/services/dish.service';
 import { RecipeService } from '../../../core/services/recipe.service';
+import { PricingService } from '../../../core/services/pricing.service';
 import { CategoryService } from '../../../core/services/category.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { TranslationService } from '../../../core/services/translation.service';
-import { WeddingEvent, Dish, FoodCategory, Recipe } from '../../../core/models';
+import { WeddingEvent, Dish, FoodCategory, Recipe, EstimationSettings } from '../../../core/models';
 
 export interface MealSessionItem {
   dish_id: string;
@@ -31,6 +32,29 @@ export interface MealSession {
   dishes: MealSessionItem[];
 }
 
+export interface FinancialSessionCost {
+  sessionId: string;
+  sessionName: string;
+  guestCount: number;
+  dishCount: number;
+  perGuestPaise: number; // in paise
+  totalFoodCostPaise: number; // in paise
+}
+
+export interface FinancialBreakdown {
+  sessionsCost: FinancialSessionCost[];
+  totalFoodSubtotalPaise: number;
+  serviceChargeRate: number;
+  serviceChargePaise: number;
+  transportationChargePaise: number;
+  taxableAmountPaise: number;
+  gstRate: number;
+  gstAmountPaise: number;
+  grandTotalPaise: number;
+  peakGuests: number;
+  costPerGuestPaise: number;
+}
+
 export interface TimelineEvent {
   id: string;
   rawDate: string; // 'YYYY-MM-DD'
@@ -43,6 +67,7 @@ export interface TimelineEvent {
   status: string;
   statusClass: string;
   sessions?: MealSession[];
+  financials?: FinancialBreakdown;
 }
 
 export interface CalendarDay {
@@ -67,6 +92,7 @@ export class AdminDashboardComponent implements OnInit {
   private dishService = inject(DishService);
   private categoryService = inject(CategoryService);
   private recipeService = inject(RecipeService);
+  private pricingService = inject(PricingService);
   private toast = inject(ToastService);
   tService = inject(TranslationService);
 
@@ -75,6 +101,24 @@ export class AdminDashboardComponent implements OnInit {
   activities = signal<ActivityItem[]>([]);
   allDishes = signal<Dish[]>([]);
   categories = signal<FoodCategory[]>([]);
+
+  // Platform Pricing Settings (Service charge, transport, GST)
+  pricingSettings = signal<EstimationSettings>({
+    id: 'default',
+    setting_key: 'default',
+    default_serving_quantity: 100,
+    currency: 'INR',
+    currency_symbol: '₹',
+    service_charge_rate: 10,
+    service_charge_enabled: 1,
+    transportation_charge: 500000, // ₹5,000 in paise
+    transportation_enabled: 1,
+    gst_rate: 5,
+    gst_enabled: 1,
+    min_guests: 50,
+    is_active: 1,
+    updated_at: new Date().toISOString()
+  });
 
   // View Mode: 'calendar' (default) vs 'timeline'
   viewMode = signal<'calendar' | 'timeline'>('calendar');
@@ -265,22 +309,98 @@ export class AdminDashboardComponent implements OnInit {
     const active = this.mealSessions().filter(s => s.enabled);
     let totalGuests = 0;
     let totalDishCount = 0;
-    let totalEstCostPaise = 0;
 
     active.forEach(s => {
       totalGuests = Math.max(totalGuests, s.guest_count);
       totalDishCount += s.dishes.length;
-      const sessionDishPerGuest = s.dishes.reduce((acc, d) => acc + (d.price_per_person || 0), 0);
-      totalEstCostPaise += sessionDishPerGuest * s.guest_count;
     });
+
+    const fin = this.calculateSessionsFinancials(active, totalGuests || Number(this.newEvent.guest_count || 600));
 
     return {
       activeCount: active.length,
       peakGuests: totalGuests || Number(this.newEvent.guest_count || 600),
       totalDishes: totalDishCount,
-      estimatedTotalInr: totalEstCostPaise > 0 ? (totalEstCostPaise / 100).toLocaleString('en-IN') : '0'
+      estimatedTotalInr: this.formatInr(fin.totalFoodSubtotalPaise),
+      grandTotalInr: this.formatInr(fin.grandTotalPaise),
+      costPerGuestInr: this.formatInr(fin.costPerGuestPaise)
     };
   });
+
+  // Accurate catering quotation & fees calculation
+  calculateSessionsFinancials(sessions?: MealSession[], fallbackGuests?: number): FinancialBreakdown {
+    const settings = this.pricingSettings();
+    const activeSessions = (sessions || []).filter(s => s.enabled !== false);
+    const peakGuests = Math.max(1, ...(activeSessions.map(s => Number(s.guest_count) || 0)), Number(fallbackGuests) || 100);
+
+    let totalFoodSubtotalPaise = 0;
+    const sessionsCost: FinancialSessionCost[] = activeSessions.map(s => {
+      const dishes = s.dishes || [];
+      const perGuestPaise = dishes.reduce((acc, d) => acc + (d.price_per_person || 0), 0);
+      const guestCount = Number(s.guest_count) || Number(fallbackGuests) || 100;
+      const totalFoodCostPaise = perGuestPaise * guestCount;
+      totalFoodSubtotalPaise += totalFoodCostPaise;
+      return {
+        sessionId: s.id,
+        sessionName: s.name,
+        guestCount,
+        dishCount: dishes.length,
+        perGuestPaise,
+        totalFoodCostPaise
+      };
+    });
+
+    const serviceChargeRate = settings.service_charge_enabled ? (settings.service_charge_rate ?? 10) : 0;
+    const serviceChargePaise = Math.round(totalFoodSubtotalPaise * (serviceChargeRate / 100));
+
+    const transportationChargePaise = settings.transportation_enabled ? (settings.transportation_charge ?? 500000) : 0;
+
+    const taxableAmountPaise = totalFoodSubtotalPaise + serviceChargePaise + transportationChargePaise;
+
+    const gstRate = settings.gst_enabled ? (settings.gst_rate ?? 5) : 0;
+    const gstAmountPaise = Math.round(taxableAmountPaise * (gstRate / 100));
+
+    const grandTotalPaise = taxableAmountPaise + gstAmountPaise;
+    const costPerGuestPaise = Math.round(grandTotalPaise / peakGuests);
+
+    return {
+      sessionsCost,
+      totalFoodSubtotalPaise,
+      serviceChargeRate,
+      serviceChargePaise,
+      transportationChargePaise,
+      taxableAmountPaise,
+      gstRate,
+      gstAmountPaise,
+      grandTotalPaise,
+      peakGuests,
+      costPerGuestPaise
+    };
+  }
+
+  // Real-time calculation for scheduling modal (Step 3)
+  currentModalFinancials = computed<FinancialBreakdown>(() => {
+    return this.calculateSessionsFinancials(
+      this.mealSessions().filter(s => s.enabled),
+      this.newEvent.guest_count
+    );
+  });
+
+  // Real-time calculation for BEO Final Report modal
+  currentReportFinancials = computed<FinancialBreakdown | null>(() => {
+    const ev = this.selectedReportEvent();
+    if (!ev) return null;
+    if (ev.financials) return ev.financials;
+    return this.calculateSessionsFinancials(ev.sessions, ev.guestCount);
+  });
+
+  formatInr(paise: number): string {
+    return ((paise || 0) / 100).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+  }
+
+  getAdvanceAmount(totalPaise: number, pct: number): string {
+    return this.formatInr(Math.round((totalPaise || 0) * (pct / 100)));
+  }
 
   ngOnInit() {
     this.dashboardService.getOverview().subscribe({
@@ -301,6 +421,16 @@ export class AdminDashboardComponent implements OnInit {
       next: (res) => {
         if (res.success) this.activities.set(res.data);
       }
+    });
+
+    // Load dynamic pricing settings (service fee, logistics, GST)
+    this.pricingService.getSettings().subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          this.pricingSettings.set(res.data);
+        }
+      },
+      error: () => {}
     });
 
     // Load all categories for dish picker
@@ -336,13 +466,21 @@ export class AdminDashboardComponent implements OnInit {
               : ev.event_date;
 
             let parsedSessions: MealSession[] | undefined = undefined;
+            let parsedFinancials: FinancialBreakdown | undefined = undefined;
             if (ev.notes) {
               try {
                 const parsed = JSON.parse(ev.notes);
                 if (parsed.sessions && Array.isArray(parsed.sessions)) {
                   parsedSessions = parsed.sessions;
                 }
+                if (parsed.financials) {
+                  parsedFinancials = parsed.financials;
+                }
               } catch (_) {}
+            }
+
+            if (!parsedFinancials && parsedSessions && parsedSessions.length > 0) {
+              parsedFinancials = this.calculateSessionsFinancials(parsedSessions, ev.guest_count);
             }
 
             let status = 'Confirming Menu';
@@ -366,7 +504,8 @@ export class AdminDashboardComponent implements OnInit {
               guestCount: ev.guest_count,
               status,
               statusClass,
-              sessions: parsedSessions
+              sessions: parsedSessions,
+              financials: parsedFinancials
             };
           });
 
@@ -882,18 +1021,23 @@ export class AdminDashboardComponent implements OnInit {
     const peakGuests = Math.max(...activeSessions.map(s => Number(s.guest_count) || 100));
     this.newEvent.guest_count = peakGuests;
 
+    // Compute comprehensive financials (subtotal, service fee, logistics, GST, grand total)
+    const financials = this.calculateSessionsFinancials(activeSessions, peakGuests);
+
     const dateObj = new Date(this.newEvent.event_date || '');
     const dateStr = !isNaN(dateObj.getTime())
       ? dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
       : 'Upcoming';
 
-    // Store rich sessions inside notes payload
+    // Store rich sessions and complete financial breakdown inside notes payload
     const eventPayload: Partial<WeddingEvent> = {
       ...this.newEvent,
+      guest_count: peakGuests,
       notes: JSON.stringify({
         sessions: activeSessions,
         totalDishes: activeSessions.reduce((acc, s) => acc + s.dishes.length, 0),
-        venue: this.newEvent.venue || 'No. 73, Mandhaikaara Street, Tirukoilur'
+        venue: this.newEvent.venue || 'No. 73, Mandhaikaara Street, Tirukoilur',
+        financials: financials
       })
     };
 
@@ -911,11 +1055,12 @@ export class AdminDashboardComponent implements OnInit {
           guestCount: peakGuests,
           status: 'Confirming Menu',
           statusClass: 'confirming',
-          sessions: activeSessions
+          sessions: activeSessions,
+          financials: financials
         };
 
         this.timelineEvents.update(list => [newEv, ...list]);
-        this.toast.success(`Wedding event "${this.newEvent.event_name}" with ${activeSessions.length} meal sessions scheduled successfully!`);
+        this.toast.success(`Wedding celebration "${this.newEvent.event_name}" scheduled with grand total ₹${this.formatInr(financials.grandTotalPaise)}!`);
         this.showScheduleModal.set(false);
       },
       error: () => {
@@ -931,11 +1076,12 @@ export class AdminDashboardComponent implements OnInit {
           guestCount: peakGuests,
           status: 'Confirming Menu',
           statusClass: 'confirming',
-          sessions: activeSessions
+          sessions: activeSessions,
+          financials: financials
         };
 
         this.timelineEvents.update(list => [newEv, ...list]);
-        this.toast.success(`Event "${this.newEvent.event_name}" added to calendar with ${activeSessions.length} sessions.`);
+        this.toast.success(`Event "${this.newEvent.event_name}" added to calendar with grand total ₹${this.formatInr(financials.grandTotalPaise)}.`);
         this.showScheduleModal.set(false);
       }
     });
@@ -1028,6 +1174,26 @@ export class AdminDashboardComponent implements OnInit {
         });
         text += `\n`;
       }
+    }
+
+    const fin = ev.financials || this.calculateSessionsFinancials(ev.sessions, ev.guestCount);
+    if (fin) {
+      text += `━━━━━━━━━━━━━━━━━━━━━\n`;
+      text += `*COMMERCIAL BILLING ESTIMATE:*\n`;
+      text += `• Food Subtotal: ₹${this.formatInr(fin.totalFoodSubtotalPaise)}\n`;
+      if (fin.serviceChargePaise > 0) {
+        text += `• Catering Service Charges (${fin.serviceChargeRate}%): +₹${this.formatInr(fin.serviceChargePaise)}\n`;
+      }
+      if (fin.transportationChargePaise > 0) {
+        text += `• Kitchen Fleet & Logistics: +₹${this.formatInr(fin.transportationChargePaise)}\n`;
+      }
+      if (fin.gstAmountPaise > 0) {
+        text += `• GST (${fin.gstRate}%): +₹${this.formatInr(fin.gstAmountPaise)}\n`;
+      }
+      text += `*NET GRAND BANQUET TOTAL: ₹${this.formatInr(fin.grandTotalPaise)}* (~₹${this.formatInr(fin.costPerGuestPaise)}/guest)\n`;
+      text += `• 40% Booking Advance: ₹${this.getAdvanceAmount(fin.grandTotalPaise, 40)}\n`;
+      text += `• 40% Pre-Event: ₹${this.getAdvanceAmount(fin.grandTotalPaise, 40)}\n`;
+      text += `• 20% Post-Event: ₹${this.getAdvanceAmount(fin.grandTotalPaise, 20)}\n\n`;
     }
 
     text += `━━━━━━━━━━━━━━━━━━━━━\n`;

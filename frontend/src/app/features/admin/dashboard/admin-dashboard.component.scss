@@ -2096,6 +2096,256 @@
             }
           }
         }
+
+        /* REAL-TIME CATERING FINANCIALS & FEES CARD IN SCHEDULING STEP 3 */
+        .summary-financials-card {
+          background: #FFFFFF;
+          border: 1.5px solid #D4AF37;
+          border-radius: 8px;
+          overflow: hidden;
+          box-shadow: 0 4px 14px rgba(197, 155, 67, 0.12);
+          display: flex;
+          flex-direction: column;
+          width: 100%;
+          box-sizing: border-box;
+
+          .financials-card-header {
+            background: linear-gradient(135deg, #5B1A24 0%, #3D1017 100%);
+            color: #FFFFFF;
+            padding: 0.85rem 1.15rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+
+            .header-left {
+              display: flex;
+              align-items: center;
+              gap: 0.65rem;
+
+              .fin-icon {
+                font-size: 1.35rem;
+                color: #E2C067;
+              }
+
+              h5 {
+                margin: 0;
+                font-size: 0.95rem;
+                font-weight: 700;
+                color: #FFFFFF;
+                letter-spacing: 0.3px;
+              }
+
+              .fin-sub {
+                font-size: 0.72rem;
+                color: #EADCC8;
+                display: block;
+                margin-top: 0.1rem;
+              }
+            }
+
+            .header-right {
+              .badge-rate {
+                background: #D4AF37;
+                color: #2D1418;
+                font-size: 0.78rem;
+                font-weight: 800;
+                padding: 0.25rem 0.65rem;
+                border-radius: 20px;
+                letter-spacing: 0.3px;
+              }
+            }
+          }
+
+          .fin-sessions-table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-bottom: 1px solid #EAE5D9;
+
+            .fin-sessions-table {
+              width: 100%;
+              min-width: 480px;
+              border-collapse: collapse;
+              font-size: 0.82rem;
+
+              thead th {
+                background: #FAF7F2;
+                padding: 0.55rem 0.85rem;
+                text-align: left;
+                font-size: 0.72rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                color: #7A686B;
+                border-bottom: 1px solid #E2D9C8;
+
+                &.text-right { text-align: right; }
+              }
+
+              tbody td {
+                padding: 0.55rem 0.85rem;
+                border-bottom: 1px solid #F3EFE9;
+                color: #382F2D;
+
+                &.text-right { text-align: right; }
+                &.font-bold { font-weight: 700; color: #5B1A24; }
+                &.text-muted { color: #7A686B; }
+
+                .session-name-cell {
+                  color: #5B1A24;
+                  font-weight: 700;
+                }
+              }
+            }
+          }
+
+          .fin-totals-sheet {
+            padding: 0.85rem 1.15rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.55rem;
+            background: #FAF8F5;
+
+            .fin-row {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              font-size: 0.85rem;
+              gap: 1rem;
+
+              .fin-label {
+                color: #4A3E3F;
+                display: flex;
+                flex-direction: column;
+                gap: 0.1rem;
+
+                .fee-badge, .tax-badge {
+                  font-weight: 700;
+                  color: #5B1A24;
+                }
+
+                .fee-desc {
+                  font-size: 0.70rem;
+                  color: #7A686B;
+                }
+              }
+
+              .fin-val {
+                font-weight: 600;
+                color: #2D2424;
+                white-space: nowrap;
+
+                &.font-bold { font-weight: 800; font-size: 0.92rem; color: #5B1A24; }
+                &.text-green { color: #1B7A43; font-weight: 700; }
+                &.text-muted { color: #6E5E60; }
+              }
+
+              &.fee-row {
+                padding: 0.35rem 0;
+                border-bottom: 1px dashed #E5DEC9;
+              }
+
+              &.taxable-row {
+                padding: 0.45rem 0;
+                border-top: 1px solid #E2D9C8;
+                border-bottom: 1px dashed #E5DEC9;
+                font-weight: 600;
+              }
+
+              &.tax-row {
+                padding: 0.35rem 0;
+                border-bottom: 1px solid #E2D9C8;
+              }
+
+              &.grand-total-row {
+                background: linear-gradient(135deg, #FAF4E6 0%, #F5E8CB 100%);
+                border: 1.5px solid #C59B43;
+                border-radius: 6px;
+                padding: 0.85rem 1rem;
+                margin-top: 0.35rem;
+
+                .grand-label-col {
+                  display: flex;
+                  flex-direction: column;
+
+                  .grand-title {
+                    font-size: 0.86rem;
+                    font-weight: 800;
+                    letter-spacing: 0.5px;
+                    color: #5B1A24;
+                  }
+
+                  .grand-sub {
+                    font-size: 0.72rem;
+                    color: #7A686B;
+                    font-weight: 500;
+                  }
+                }
+
+                .grand-val-col {
+                  display: flex;
+                  flex-direction: column;
+                  align-items: flex-end;
+
+                  .grand-price {
+                    font-family: var(--font-serif, serif);
+                    font-size: 1.35rem;
+                    font-weight: 800;
+                    color: #5B1A24;
+                    line-height: 1.1;
+                  }
+
+                  .grand-per-head {
+                    font-size: 0.74rem;
+                    font-weight: 700;
+                    color: #C59B43;
+                  }
+                }
+              }
+            }
+          }
+
+          .payment-milestones-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.65rem;
+            padding: 0.85rem 1.15rem;
+            background: #FFFFFF;
+            border-top: 1px solid #EAE5D9;
+
+            @media (max-width: 600px) {
+              grid-template-columns: 1fr;
+            }
+
+            .milestone-box {
+              background: #FAF8F5;
+              border: 1px solid #EADCC8;
+              border-radius: 6px;
+              padding: 0.55rem 0.65rem;
+              display: flex;
+              flex-direction: column;
+              gap: 0.15rem;
+
+              .ms-label {
+                font-size: 0.68rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                color: #7A686B;
+              }
+
+              .ms-val {
+                font-size: 0.92rem;
+                color: #5B1A24;
+              }
+
+              .ms-note {
+                font-size: 0.68rem;
+                color: #8C7B7D;
+              }
+            }
+          }
+        }
       }
     }
 
@@ -2957,6 +3207,258 @@
 }
 
 /* ==========================================================================
+   OFFICIAL BEO COMMERCIAL ESTIMATE & BILLING STATEMENT
+   ========================================================================== */
+.report-financial-section {
+  border: 1.5px solid #D4AF37;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  background: #FFFFFF;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.04);
+  width: 100%;
+  box-sizing: border-box;
+
+  .report-fin-header {
+    background: linear-gradient(135deg, #5B1A24 0%, #3D1017 100%);
+    color: #FFFFFF;
+    padding: 0.75rem 1.1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+
+    .fin-title-group {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+
+      .fin-header-icon {
+        font-size: 1.25rem;
+        color: #E2C067;
+      }
+
+      .sec-title {
+        margin: 0;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #FFFFFF;
+        letter-spacing: 0.3px;
+      }
+    }
+
+    .fin-ref-tag {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #E2C067;
+      letter-spacing: 0.5px;
+    }
+  }
+
+  .report-table-scroll {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .report-financial-table {
+    width: 100%;
+    min-width: 600px;
+    border-collapse: collapse;
+    font-size: 0.84rem;
+
+    thead th {
+      background: #FAF7F2;
+      padding: 0.65rem 0.85rem;
+      text-align: left;
+      font-weight: 700;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      color: #5B1A24;
+      border-bottom: 1.5px solid #E5DEC9;
+
+      &.text-center { text-align: center; }
+      &.text-right { text-align: right; }
+    }
+
+    tbody td {
+      padding: 0.65rem 0.85rem;
+      border-bottom: 1px solid #F0ECE4;
+      color: #382F2D;
+
+      &.text-center { text-align: center; }
+      &.text-right { text-align: right; }
+      &.text-muted { color: #7A686B; }
+      &.font-medium { font-weight: 500; }
+      &.font-bold { font-weight: 700; color: #2D2424; }
+      &.text-maroon { color: #5B1A24; }
+      &.text-green { color: #1B7A43; }
+
+      .fin-item-sub {
+        font-size: 0.72rem;
+        color: #7A686B;
+        margin-top: 0.15rem;
+        line-height: 1.3;
+      }
+    }
+
+    .subtotal-tr td {
+      background: #FAF8F5;
+      border-top: 1.5px solid #E5DEC9;
+      border-bottom: 1.5px solid #E5DEC9;
+      font-size: 0.88rem;
+    }
+
+    .fee-tr td {
+      background: #FFFFFF;
+      border-bottom: 1px dashed #E5DEC9;
+    }
+
+    .taxable-tr td {
+      background: #FAF8F5;
+      border-top: 1px solid #E5DEC9;
+      border-bottom: 1px solid #E5DEC9;
+    }
+
+    .tax-tr td {
+      background: #FFFFFF;
+      border-bottom: 1.5px solid #E2D9C8;
+    }
+
+    .grand-total-tr td {
+      background: linear-gradient(135deg, #FAF4E6 0%, #F5E8CB 100%);
+      padding: 1.1rem 1rem;
+      border-top: 2px solid #C59B43;
+      border-bottom: 2px solid #C59B43;
+
+      .grand-badge {
+        display: inline-block;
+        font-size: 0.68rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: #7A4213;
+        background: #F4DFB2;
+        padding: 0.15rem 0.5rem;
+        border-radius: 4px;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.35rem;
+      }
+
+      h3 {
+        margin: 0;
+        font-size: 1.15rem;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        color: #5B1A24;
+      }
+
+      .grand-note {
+        font-size: 0.74rem;
+        color: #6A5557;
+        display: block;
+        margin-top: 0.2rem;
+      }
+
+      .grand-price-big {
+        font-family: var(--font-serif, serif);
+        font-size: 1.65rem;
+        font-weight: 800;
+        color: #5B1A24;
+        line-height: 1.1;
+      }
+
+      .grand-per-guest-calc {
+        font-size: 0.80rem;
+        font-weight: 700;
+        color: #8C2435;
+        margin-top: 0.25rem;
+      }
+    }
+  }
+
+  .report-payment-terms-box {
+    padding: 1rem 1.15rem;
+    background: #FAF8F5;
+    border-top: 1px solid #E5DEC9;
+
+    .terms-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+
+      .terms-icon {
+        font-size: 1.15rem;
+        color: #B8860B;
+      }
+
+      h5 {
+        margin: 0;
+        font-size: 0.86rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #5B1A24;
+      }
+    }
+
+    .terms-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 0.85rem;
+
+      @media (max-width: 680px) {
+        grid-template-columns: 1fr;
+      }
+
+      .term-card {
+        background: #FFFFFF;
+        border: 1px solid #E2D9C8;
+        border-radius: 6px;
+        padding: 0.65rem 0.75rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+
+        .term-milestone {
+          font-size: 0.72rem;
+          font-weight: 700;
+          color: #7A686B;
+        }
+
+        .term-amount {
+          font-size: 1.05rem;
+          font-weight: 800;
+          color: #5B1A24;
+        }
+
+        .term-desc {
+          font-size: 0.68rem;
+          color: #8C7B7D;
+          line-height: 1.3;
+        }
+      }
+    }
+
+    .bank-remittance-note {
+      font-size: 0.72rem;
+      color: #5A4C4E;
+      background: #FFFFFF;
+      border: 1px dashed #C59B43;
+      border-radius: 4px;
+      padding: 0.5rem 0.75rem;
+      line-height: 1.4;
+
+      strong {
+        color: #5B1A24;
+      }
+    }
+  }
+}
+
+/* ==========================================================================
    PRINT MEDIA QUERY FOR OFFICIAL BEO / PDF GENERATION
    ========================================================================== */
 
@@ -3006,6 +3508,24 @@
     tr {
       page-break-inside: avoid;
     }
+  }
+
+  .report-financial-section {
+    page-break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid #5B1A24 !important;
+  }
+
+  .report-financial-table {
+    page-break-inside: auto;
+
+    tr {
+      page-break-inside: avoid;
+    }
+  }
+
+  .report-payment-terms-box {
+    page-break-inside: avoid;
   }
 
   .report-raw-provisions {

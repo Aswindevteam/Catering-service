@@ -4732,3 +4732,108 @@
     letter-spacing: 0.4px;
   }
 }
+
+.add-session-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border: 1.5px dashed #C59B43 !important;
+  background: #FFFDF9 !important;
+  color: #92400E !important;
+  font-weight: 700 !important;
+  min-width: 120px;
+
+  &:hover {
+    background: #FEF3C7 !important;
+  }
+}
+
+.add-session-presets-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  background: #FFFBEB;
+  border: 1px solid #FDE68A;
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+  margin-bottom: 0.85rem;
+
+  .presets-lbl {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #92400E;
+    margin-right: 0.25rem;
+  }
+
+  .preset-chip {
+    background: #FFFFFF;
+    border: 1px solid #E5DEC9;
+    border-radius: 6px;
+    padding: 0.3rem 0.65rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #5B1A24;
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:hover {
+      background: #5B1A24;
+      color: #FFFFFF;
+      border-color: #5B1A24;
+    }
+
+    &.custom {
+      border-color: #C59B43;
+      color: #92400E;
+      font-weight: 700;
+
+      &:hover {
+        background: #C59B43;
+        color: #FFFFFF;
+      }
+    }
+  }
+}
+
+.session-name-edit-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.35rem;
+  width: 100%;
+
+  .session-name-edit-input {
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    color: #5B1A24 !important;
+    padding: 0.3rem 0.55rem !important;
+    border: 1px solid #E5DEC9;
+    border-radius: 6px;
+    background: #FFFFFF;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .btn-remove-sess {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    border: 1px solid #FECACA;
+    background: #FEF2F2;
+    color: #DC2626;
+    cursor: pointer;
+    flex-shrink: 0;
+
+    .material-symbols-outlined { font-size: 16px; }
+
+    &:hover {
+      background: #DC2626;
+      color: #FFFFFF;
+    }
+  }
+}

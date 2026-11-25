@@ -1014,6 +1014,59 @@
         color: #FFFFFF;
       }
     }
+
+    &.add-sess-tab-btn {
+      border: 1.5px dashed #C59B43;
+      border-bottom: none;
+      background: #FFFDF9;
+      color: #92400E;
+      font-weight: 700;
+
+      &:hover {
+        background: #FEF3C7;
+      }
+    }
+  }
+}
+
+.sel-add-session-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  background: #FFFBEB;
+  border: 1px solid #FDE68A;
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+  margin-bottom: 1rem;
+
+  .sel-preset-btn {
+    background: #FFFFFF;
+    border: 1px solid #E5DEC9;
+    border-radius: 6px;
+    padding: 0.28rem 0.6rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #5B1A24;
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:hover {
+      background: #5B1A24;
+      color: #FFFFFF;
+      border-color: #5B1A24;
+    }
+
+    &.custom {
+      border-color: #C59B43;
+      color: #92400E;
+      font-weight: 700;
+
+      &:hover {
+        background: #C59B43;
+        color: #FFFFFF;
+      }
+    }
   }
 }
 
@@ -1029,16 +1082,70 @@
   flex-wrap: wrap;
   gap: 0.75rem;
 
-  .cur-sess-title {
-    font-size: 0.95rem;
-    color: #5B1A24;
-    font-weight: 700;
-    margin: 0;
-  }
+  .sess-info-left {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    flex: 1;
+    min-width: 220px;
 
-  .cur-sess-time {
-    font-size: 0.78rem;
-    color: #7A686B;
+    .sess-edit-row {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+
+      .sess-name-input {
+        font-size: 0.92rem !important;
+        font-weight: 700 !important;
+        color: #5B1A24 !important;
+        padding: 0.3rem 0.55rem !important;
+        border: 1px solid #E5DEC9;
+        border-radius: 6px;
+        background: #FFFFFF;
+        flex: 1;
+        min-width: 0;
+      }
+
+      .btn-del-session {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 6px;
+        border: 1px solid #FECACA;
+        background: #FEF2F2;
+        color: #DC2626;
+        cursor: pointer;
+        flex-shrink: 0;
+
+        .material-symbols-outlined { font-size: 16px; }
+
+        &:hover {
+          background: #DC2626;
+          color: #FFFFFF;
+        }
+      }
+    }
+
+    .sess-time-edit-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+
+      .time-ico { font-size: 0.85rem; }
+
+      .sess-time-input {
+        font-size: 0.78rem !important;
+        color: #5E5356 !important;
+        padding: 0.22rem 0.45rem !important;
+        border: 1px solid #E5DEC9;
+        border-radius: 5px;
+        background: #FFFFFF;
+        width: 190px !important;
+        max-width: 100%;
+      }
+    }
   }
 
   .sess-guest-adjust {

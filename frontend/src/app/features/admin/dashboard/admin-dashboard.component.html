@@ -582,7 +582,7 @@
                     (click)="activeSessionTab.set(session.id)"
                   >
                     <div class="tab-top">
-                      <span class="session-tab-icon">{{ session.shortName === 'Morning' ? '🌅' : session.shortName === 'Lunch' ? '☀️' : session.shortName === 'Evening' ? '☕' : '🌙' }}</span>
+                      <span class="session-tab-icon">{{ session.shortName === 'Morning' ? '🌅' : session.shortName === 'Lunch' ? '☀️' : session.shortName === 'Evening' ? '☕' : session.shortName === 'Dinner' ? '🌙' : '✨' }}</span>
                       <span class="session-tab-name">{{ session.shortName }}</span>
                       <input 
                         type="checkbox" 
@@ -602,15 +602,54 @@
                     }
                   </button>
                 }
+
+                <button 
+                  type="button" 
+                  class="session-tab-btn add-session-tab" 
+                  (click)="showDashboardAddSession.set(!showDashboardAddSession())"
+                  title="Add another meal session"
+                >
+                  <span class="material-symbols-outlined">add_circle</span>
+                  <span>+ Add Session</span>
+                </button>
               </div>
+
+              @if (showDashboardAddSession()) {
+                <div class="add-session-presets-bar">
+                  <span class="presets-lbl">Add Course Session:</span>
+                  <button type="button" class="preset-chip" (click)="addMealSession('morning')">🌅 Morning</button>
+                  <button type="button" class="preset-chip" (click)="addMealSession('afternoon')">☀️ Lunch</button>
+                  <button type="button" class="preset-chip" (click)="addMealSession('evening')">☕ Hi-Tea</button>
+                  <button type="button" class="preset-chip" (click)="addMealSession('night')">🌙 Dinner</button>
+                  <button type="button" class="preset-chip custom" (click)="addMealSession('custom')">✨ + Custom Session</button>
+                </div>
+              }
 
               <!-- Active Session Configuration Card -->
               @if (currentSession(); as cur) {
                 <div class="current-session-card">
-                  <!-- Session Top Bar: Guest Count & Time Slot -->
+                  <!-- Session Top Bar: Session Name, Guest Count & Time Slot -->
                   <div class="session-config-bar">
                     <div class="config-identity">
-                      <h4>{{ cur.name }}</h4>
+                      <div class="session-name-edit-wrap">
+                        <input 
+                          type="text" 
+                          class="session-name-edit-input" 
+                          [ngModel]="cur.name"
+                          (ngModelChange)="syncMealSessionShortName(cur, $event)"
+                          placeholder="Session Title (e.g. Morning Breakfast)"
+                        />
+                        @if (mealSessions().length > 1) {
+                          <button 
+                            type="button" 
+                            class="btn-remove-sess" 
+                            (click)="removeMealSession(cur.id, $event)" 
+                            title="Delete this session"
+                          >
+                            <span class="material-symbols-outlined">delete</span>
+                          </button>
+                        }
+                      </div>
                       <label class="enable-switch">
                         <input type="checkbox" [checked]="cur.enabled" (change)="toggleSession(cur)" />
                         <span>Include in Wedding Schedule</span>

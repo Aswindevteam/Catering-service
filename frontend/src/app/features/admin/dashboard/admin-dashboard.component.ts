@@ -672,11 +672,15 @@ export class AdminDashboardComponent implements OnInit {
     };
 
     if (ev.sessions && ev.sessions.length > 0) {
-      this.mealSessions.set(JSON.parse(JSON.stringify(ev.sessions)));
+      const cloned: MealSession[] = JSON.parse(JSON.stringify(ev.sessions));
+      this.mealSessions.set(cloned);
+      this.activeSessionTab.set(cloned[0].id);
     } else {
+      const preservedSource = ev.source || 'admin';
       this.resetScheduleForm();
       this.isEditingEvent.set(true);
       this.editingEventId.set(ev.id);
+      this.editingEventSource.set(preservedSource);
       this.newEvent.customer_name = ev.customer_name || '';
       this.newEvent.customer_phone = ev.customer_phone || '';
       this.newEvent.customer_email = ev.customer_email || '';
@@ -709,7 +713,7 @@ export class AdminDashboardComponent implements OnInit {
       guest_count: 600
     };
 
-    // Reset default sessions with sample South Indian feast courses
+    // Reset default sessions cleanly with NO auto-added dishes (admin selects dishes manually)
     this.mealSessions.set([
       {
         id: 'morning',
@@ -719,11 +723,7 @@ export class AdminDashboardComponent implements OnInit {
         icon: 'wb_twilight',
         enabled: true,
         guest_count: 350,
-        dishes: [
-          { dish_id: 'd1', name: 'Malli Poo Idli with 3 Chutneys', category_name: 'Breakfast', price_per_person: 6500, serving_quantity: 4, serving_unit: 'pcs' },
-          { dish_id: 'd2', name: 'Crispy Medu Vada & Sambar', category_name: 'Breakfast', price_per_person: 5500, serving_quantity: 2, serving_unit: 'pcs' },
-          { dish_id: 'd3', name: 'Ghee Cashew Ven Pongal', category_name: 'Breakfast', price_per_person: 8500, serving_quantity: 150, serving_unit: 'g' }
-        ]
+        dishes: []
       },
       {
         id: 'afternoon',
@@ -733,11 +733,7 @@ export class AdminDashboardComponent implements OnInit {
         icon: 'restaurant',
         enabled: true,
         guest_count: 600,
-        dishes: [
-          { dish_id: 'd4', name: 'Traditional Tirunelveli Halwa', category_name: 'Desserts', price_per_person: 9500, serving_quantity: 100, serving_unit: 'g' },
-          { dish_id: 'd5', name: 'Royal Basmati Steamed Rice & Ghee', category_name: 'Main Course', price_per_person: 7000, serving_quantity: 250, serving_unit: 'g' },
-          { dish_id: 'd6', name: 'Elaneer Payasam (Tender Coconut)', category_name: 'Desserts', price_per_person: 11000, serving_quantity: 120, serving_unit: 'ml' }
-        ]
+        dishes: []
       },
       {
         id: 'evening',
@@ -757,12 +753,109 @@ export class AdminDashboardComponent implements OnInit {
         icon: 'nightlife',
         enabled: true,
         guest_count: 500,
-        dishes: [
-          { dish_id: 'd7', name: 'Hyderabadi Dum Biryani with Raita', category_name: 'Rice & Biryani', price_per_person: 18000, serving_quantity: 300, serving_unit: 'g' },
-          { dish_id: 'd8', name: 'Paneer Butter Masala & Butter Naan', category_name: 'Main Course', price_per_person: 14000, serving_quantity: 200, serving_unit: 'g' }
-        ]
+        dishes: []
       }
     ]);
+  }
+
+  showDashboardAddSession = signal(false);
+
+  addMealSession(preset?: 'morning' | 'afternoon' | 'evening' | 'night' | 'custom') {
+    const existing = this.mealSessions();
+    const defaultGuests = Number(this.newEvent.guest_count) || 600;
+
+    const presets: Record<string, Omit<MealSession, 'dishes'>> = {
+      morning: {
+        id: 'morning',
+        name: 'Morning (Breakfast / Muhurtham Tiffin)',
+        shortName: 'Morning',
+        timeSlot: '07:30 AM - 10:00 AM',
+        icon: 'wb_twilight',
+        enabled: true,
+        guest_count: defaultGuests
+      },
+      afternoon: {
+        id: 'afternoon',
+        name: 'Afternoon (Banquet Lunch / Virundhu)',
+        shortName: 'Lunch',
+        timeSlot: '12:00 PM - 03:00 PM',
+        icon: 'restaurant',
+        enabled: true,
+        guest_count: defaultGuests
+      },
+      evening: {
+        id: 'evening',
+        name: 'Evening (Hi-Tea & Snacks)',
+        shortName: 'Evening',
+        timeSlot: '04:30 PM - 06:30 PM',
+        icon: 'coffee',
+        enabled: true,
+        guest_count: Math.round(defaultGuests * 0.75)
+      },
+      night: {
+        id: 'night',
+        name: 'Night (Dinner / Reception Feast)',
+        shortName: 'Dinner',
+        timeSlot: '07:30 PM - 10:30 PM',
+        icon: 'nightlife',
+        enabled: true,
+        guest_count: defaultGuests
+      }
+    };
+
+    if (preset && preset !== 'custom' && presets[preset]) {
+      const already = existing.find(s => s.id === preset);
+      if (already) {
+        already.enabled = true;
+        this.mealSessions.set([...existing]);
+        this.activeSessionTab.set(already.id);
+        this.showDashboardAddSession.set(false);
+        return;
+      }
+      const added: MealSession = { ...presets[preset], dishes: [] };
+      this.mealSessions.set([...existing, added]);
+      this.activeSessionTab.set(added.id);
+      this.showDashboardAddSession.set(false);
+      return;
+    }
+
+    const customNum = existing.length + 1;
+    const customSession: MealSession = {
+      id: `custom_${Date.now()}`,
+      name: `Special Session ${customNum} (Custom)`,
+      shortName: `Session ${customNum}`,
+      timeSlot: '06:00 PM - 08:30 PM',
+      icon: 'celebration',
+      enabled: true,
+      guest_count: defaultGuests,
+      dishes: []
+    };
+    this.mealSessions.set([...existing, customSession]);
+    this.activeSessionTab.set(customSession.id);
+    this.showDashboardAddSession.set(false);
+  }
+
+  removeMealSession(sessionId: string, event?: Event) {
+    if (event) event.stopPropagation();
+    const list = this.mealSessions();
+    if (list.length <= 1) {
+      this.toast.error('At least one meal session is required.');
+      return;
+    }
+    const filtered = list.filter(s => s.id !== sessionId);
+    this.mealSessions.set(filtered);
+    if (this.activeSessionTab() === sessionId && filtered.length > 0) {
+      this.activeSessionTab.set(filtered[0].id);
+    }
+  }
+
+  syncMealSessionShortName(session: MealSession, fullName: string) {
+    session.name = fullName;
+    const trimmed = (fullName || '').trim();
+    if (trimmed) {
+      const firstPart = trimmed.split('(')[0].trim();
+      session.shortName = firstPart.length > 16 ? firstPart.slice(0, 15) + '…' : firstPart;
+    }
   }
 
   // Session Dish Management

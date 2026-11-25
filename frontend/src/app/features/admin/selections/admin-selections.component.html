@@ -459,14 +459,59 @@
                     <span class="sess-count-badge">{{ sess.dishes.length }}</span>
                   </button>
                 }
+
+                <button 
+                  type="button" 
+                  class="session-tab-btn add-sess-tab-btn" 
+                  (click)="showAddSessionBar.set(!showAddSessionBar())"
+                  title="Add another course session"
+                >
+                  <span>+ Session</span>
+                </button>
               </div>
 
-              <!-- Active Session Details Bar -->
+              @if (showAddSessionBar()) {
+                <div class="sel-add-session-bar">
+                  <button type="button" class="sel-preset-btn" (click)="addSession('morning')">🌅 Breakfast</button>
+                  <button type="button" class="sel-preset-btn" (click)="addSession('lunch')">☀️ Muhurtham Feast</button>
+                  <button type="button" class="sel-preset-btn" (click)="addSession('evening')">☕ High Tea</button>
+                  <button type="button" class="sel-preset-btn" (click)="addSession('dinner')">🌙 Reception Dinner</button>
+                  <button type="button" class="sel-preset-btn custom" (click)="addSession('custom')">✨ + Custom Session</button>
+                </div>
+              }
+
+              <!-- Active Session Details Bar (Editable Name, Time & Guests) -->
               @if (currentModalSession(); as curSess) {
                 <div class="active-session-bar">
                   <div class="sess-info-left">
-                    <h4 class="cur-sess-title">{{ curSess.name }}</h4>
-                    <span class="cur-sess-time">⏰ Serving: {{ curSess.timeSlot }}</span>
+                    <div class="sess-edit-row">
+                      <input 
+                        type="text" 
+                        class="sess-name-input" 
+                        [ngModel]="curSess.name"
+                        (ngModelChange)="syncSessionShortName(curSess, $event)"
+                        placeholder="Session Title"
+                      />
+                      @if (modalSessions().length > 1) {
+                        <button 
+                          type="button" 
+                          class="btn-del-session" 
+                          (click)="removeSession(curSess.id, $event)" 
+                          title="Remove this session"
+                        >
+                          <span class="material-symbols-outlined">delete</span>
+                        </button>
+                      }
+                    </div>
+                    <div class="sess-time-edit-wrap">
+                      <span class="time-ico">⏰</span>
+                      <input 
+                        type="text" 
+                        class="sess-time-input" 
+                        [(ngModel)]="curSess.timeSlot"
+                        placeholder="07:30 AM - 10:00 AM"
+                      />
+                    </div>
                   </div>
 
                   <div class="sess-guest-adjust">

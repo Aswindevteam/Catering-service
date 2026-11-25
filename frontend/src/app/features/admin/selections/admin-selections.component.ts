@@ -473,6 +473,96 @@ export class AdminSelectionsComponent implements OnInit {
 
   closeModal() {
     this.isModalOpen.set(false);
+    this.showAddSessionBar.set(false);
+  }
+
+  showAddSessionBar = signal(false);
+
+  addSession(preset?: 'morning' | 'lunch' | 'evening' | 'dinner' | 'custom') {
+    const existing = this.modalSessions();
+    const defaultGuests = Number(this.bookingForm.guest_count) || 600;
+
+    const presets: Record<string, Omit<BookingSession, 'dishes'>> = {
+      morning: {
+        id: 'morning',
+        name: 'Morning Breakfast & Tiffin (காலை உணவு)',
+        shortName: 'Breakfast',
+        timeSlot: '07:30 AM - 10:00 AM',
+        guest_count: defaultGuests
+      },
+      lunch: {
+        id: 'lunch',
+        name: 'Grand Muhurtham Wedding Feast (மதிய விருந்து)',
+        shortName: 'Muhurtham Feast',
+        timeSlot: '11:30 AM - 02:30 PM',
+        guest_count: defaultGuests
+      },
+      evening: {
+        id: 'evening',
+        name: 'High Tea & Traditional Sweets (மாலை சிற்றுண்டி)',
+        shortName: 'High Tea',
+        timeSlot: '04:30 PM - 06:30 PM',
+        guest_count: Math.round(defaultGuests * 0.75)
+      },
+      dinner: {
+        id: 'dinner',
+        name: 'Grand Reception Dinner (இரவு விருந்து)',
+        shortName: 'Reception Dinner',
+        timeSlot: '07:00 PM - 10:30 PM',
+        guest_count: defaultGuests
+      }
+    };
+
+    if (preset && preset !== 'custom' && presets[preset]) {
+      const exists = existing.find(s => s.id === preset);
+      if (exists) {
+        this.modalActiveSessionId.set(exists.id);
+        this.showAddSessionBar.set(false);
+        this.toastService.info(`${exists.shortName} is already in this booking`);
+        return;
+      }
+      const created: BookingSession = { ...presets[preset], dishes: [] };
+      this.modalSessions.set([...existing, created]);
+      this.modalActiveSessionId.set(created.id);
+      this.showAddSessionBar.set(false);
+      return;
+    }
+
+    const num = existing.length + 1;
+    const customSess: BookingSession = {
+      id: `custom_${Date.now()}`,
+      name: `Special Session ${num}`,
+      shortName: `Session ${num}`,
+      timeSlot: '06:00 PM - 08:30 PM',
+      guest_count: defaultGuests,
+      dishes: []
+    };
+    this.modalSessions.set([...existing, customSess]);
+    this.modalActiveSessionId.set(customSess.id);
+    this.showAddSessionBar.set(false);
+  }
+
+  removeSession(sessionId: string, event?: Event) {
+    if (event) event.stopPropagation();
+    const list = this.modalSessions();
+    if (list.length <= 1) {
+      this.toastService.error('At least one course session is required.');
+      return;
+    }
+    const filtered = list.filter(s => s.id !== sessionId);
+    this.modalSessions.set(filtered);
+    if (this.modalActiveSessionId() === sessionId && filtered.length > 0) {
+      this.modalActiveSessionId.set(filtered[0].id);
+    }
+  }
+
+  syncSessionShortName(sess: BookingSession, fullName: string) {
+    sess.name = fullName;
+    const trimmed = (fullName || '').trim();
+    if (trimmed) {
+      const firstPart = trimmed.split('(')[0].trim();
+      sess.shortName = firstPart.length > 18 ? firstPart.slice(0, 17) + '…' : firstPart;
+    }
   }
 
   // Session Dish Management in Modal

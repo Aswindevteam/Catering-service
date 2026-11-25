@@ -1308,7 +1308,16 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   printCurrentReport() {
-    window.print();
+    document.body.classList.add('printing-beo');
+    const cleanup = () => {
+      document.body.classList.remove('printing-beo');
+      window.removeEventListener('afterprint', cleanup);
+    };
+    window.addEventListener('afterprint', cleanup);
+    setTimeout(() => {
+      window.print();
+      setTimeout(cleanup, 1000);
+    }, 50);
   }
 
   calculateBatchRequirement(servingQty: number | undefined, servingUnit: string | undefined, guestCount: number): string {

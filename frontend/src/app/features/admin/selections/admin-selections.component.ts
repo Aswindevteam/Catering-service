@@ -677,7 +677,16 @@ export class AdminSelectionsComponent implements OnInit {
   }
 
   printBEOReport() {
-    window.print();
+    document.body.classList.add('printing-beo');
+    const cleanup = () => {
+      document.body.classList.remove('printing-beo');
+      window.removeEventListener('afterprint', cleanup);
+    };
+    window.addEventListener('afterprint', cleanup);
+    setTimeout(() => {
+      window.print();
+      setTimeout(cleanup, 1000);
+    }, 50);
   }
 
   shareBEOViaWhatsApp(b: UnifiedBooking) {

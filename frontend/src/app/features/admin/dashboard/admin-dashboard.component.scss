@@ -3480,9 +3480,17 @@
     color: #000000 !important;
   }
 
-  /* Hide app navigation, header, other modals */
-  nav, header, aside, .modal-header, .modal-footer, .no-print, .modal-backdrop {
+  /* Hide app navigation, header, modal toolbars */
+  nav, header, aside, .modal-header, .modal-footer, .no-print {
     display: none !important;
+  }
+
+  .modal-backdrop {
+    position: static !important;
+    background: #FFFFFF !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    display: block !important;
   }
 
   .report-dialog {

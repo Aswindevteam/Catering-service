@@ -470,3 +470,132 @@ textarea, .editorial-textarea {
     margin: 0 auto !important;
   }
 }
+
+/* =========================================================================
+   Global Print Stylesheet for BEO Reports & PDF Export
+   Works across Angular ViewEncapsulation boundaries for both Dashboard &
+   Customer Selections BEO Spec Sheet modals.
+   ========================================================================= */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm;
+  }
+
+  html, body {
+    background: #FFFFFF !important;
+    color: #1F2937 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Always hide sidebar, header, toasts, and report modal action toolbars */
+  app-admin-sidebar,
+  app-admin-header,
+  app-toast,
+  .no-print,
+  .beo-actions-bar,
+  .modal-header.no-print,
+  .report-top-actions {
+    display: none !important;
+  }
+
+  /* When a BEO Report modal is active, hide background page sections completely */
+  body.printing-beo,
+  body:has(.beo-print-container, .report-dialog) {
+    .page-head,
+    .kpi-grid,
+    .filters-toolbar,
+    .table-card,
+    .executive-header,
+    .kpi-metrics-grid,
+    .overview-main-grid {
+      display: none !important;
+    }
+
+    .admin-wrapper,
+    .admin-main,
+    .admin-content,
+    .selections-page,
+    .executive-overview-page {
+      display: block !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      max-width: 100% !important;
+      width: 100% !important;
+      min-height: 0 !important;
+      overflow: visible !important;
+      background: #FFFFFF !important;
+    }
+
+    /* Reset fixed modal backdrop & dialog constraints so full multi-page BEO prints cleanly */
+    .modal-backdrop,
+    .beo-modal-backdrop {
+      position: static !important;
+      inset: auto !important;
+      display: block !important;
+      background: #FFFFFF !important;
+      backdrop-filter: none !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      overflow: visible !important;
+      z-index: auto !important;
+    }
+
+    .beo-print-container,
+    .report-dialog,
+    .modal-dialog.report-dialog {
+      position: static !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      max-height: none !important;
+      height: auto !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      border: none !important;
+      box-shadow: none !important;
+      overflow: visible !important;
+      display: block !important;
+    }
+
+    .beo-document-body,
+    .report-modal-body,
+    .report-sheet {
+      padding: 0 !important;
+      margin: 0 !important;
+      max-height: none !important;
+      height: auto !important;
+      overflow: visible !important;
+      box-shadow: none !important;
+    }
+
+    .beo-table-scroll,
+    .report-table-scroll {
+      overflow: visible !important;
+      width: 100% !important;
+    }
+
+    .beo-dishes-table,
+    .report-dishes-table,
+    .report-financial-table {
+      min-width: 0 !important;
+      width: 100% !important;
+    }
+
+    .beo-session-block,
+    .report-session-section,
+    .beo-commercial-section,
+    .report-financial-section,
+    .beo-footer,
+    .report-footer {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+  }
+}

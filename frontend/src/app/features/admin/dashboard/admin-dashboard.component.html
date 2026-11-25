@@ -191,6 +191,36 @@
                 <span>Timeline List</span>
               </button>
             </div>
+
+            <!-- Booking Creator Filter -->
+            <div class="creator-filter-pill">
+              <button 
+                type="button" 
+                class="creator-btn" 
+                [class.active]="filterEventSource() === 'all'" 
+                (click)="filterEventSource.set('all')"
+              >
+                All
+              </button>
+              <button 
+                type="button" 
+                class="creator-btn" 
+                [class.active]="filterEventSource() === 'admin'" 
+                (click)="filterEventSource.set('admin')"
+                title="Events scheduled by Admin"
+              >
+                👑 By Me (Admin)
+              </button>
+              <button 
+                type="button" 
+                class="creator-btn" 
+                [class.active]="filterEventSource() === 'user'" 
+                (click)="filterEventSource.set('user')"
+                title="Events booked by Customer"
+              >
+                🌐 By Users
+              </button>
+            </div>
           </div>
 
           <div class="head-right-actions">
@@ -291,14 +321,19 @@
           <div class="events-table-wrap">
             <table class="timeline-table">
               <tbody>
-                @for (ev of timelineEvents(); track ev.id) {
+                @for (ev of filteredTimelineEvents(); track ev.id) {
                   <tr class="timeline-row" (click)="openEventDetailModal(ev)" style="cursor: pointer;">
                     <td class="cell-date">
                       <span class="date-badge">{{ ev.dateStr }}</span>
                     </td>
                     <td class="cell-name">
                       <div class="name-block">
-                        <span class="event-title">{{ ev.name }}</span>
+                        <div class="event-title-line">
+                          <span class="event-title">{{ ev.name }}</span>
+                          <span class="source-mini-tag" [class.admin]="ev.source === 'admin'" [class.user]="ev.source === 'user'">
+                            {{ ev.source === 'admin' ? '👑 Admin' : '🌐 Customer' }}
+                          </span>
+                        </div>
                         @if (ev.sessions && ev.sessions.length > 0) {
                           <div class="row-sessions-badges">
                             @for (s of ev.sessions; track s.id) {
@@ -317,6 +352,14 @@
                       <span class="status-badge" [ngClass]="ev.statusClass">
                         {{ ev.status }}
                       </span>
+                      <button 
+                        type="button" 
+                        class="btn-row-edit" 
+                        (click)="$event.stopPropagation(); openEditEventModal(ev)"
+                        title="Edit Booking, Sessions & Dish Offer Rates"
+                      >
+                        <span class="material-symbols-outlined">edit</span>
+                      </button>
                       <button 
                         type="button" 
                         class="btn-row-report" 
@@ -408,8 +451,8 @@
         <!-- Modal Header -->
         <div class="modal-header">
           <div class="header-titles">
-            <h3>Schedule Wedding Celebration</h3>
-            <span class="modal-sub">Multi-Session Banquet Curating & Categorized Dishes</span>
+            <h3>{{ isEditingEvent() ? 'Edit Celebration Booking' : 'Schedule Wedding Celebration' }}</h3>
+            <span class="modal-sub">{{ isEditingEvent() ? 'Modify event sessions, dishes, portions, and custom offer rates' : 'Multi-Session Banquet Curating & Categorized Dishes' }}</span>
           </div>
           <button class="close-btn" (click)="showScheduleModal.set(false)">
             <span class="material-symbols-outlined">close</span>
@@ -712,7 +755,15 @@
                                   <span class="material-symbols-outlined tray-view-icon">visibility</span>
                                 </div>
                                 <div class="tray-meta-line">
-                                  <span class="tray-sub">{{ d.category_name }} • ₹{{ (d.price_per_person / 100).toFixed(0) }}/guest</span>
+                                  <span class="tray-sub">
+                                    {{ d.category_name }} • 
+                                    @if (d.is_offer_applied && d.original_price_per_person) {
+                                      <span class="offer-rate-val">₹{{ (d.price_per_person / 100).toFixed(0) }}</span>
+                                      <del class="orig-rate-val">₹{{ (d.original_price_per_person / 100).toFixed(0) }}</del>
+                                    } @else {
+                                      <span>₹{{ (d.price_per_person / 100).toFixed(0) }}</span>
+                                    }/guest
+                                  </span>
                                   <span class="tray-batch-pill" title="Total kitchen preparation needed for {{ cur.guest_count || 600 }} guests">
                                     {{ calculateBatchRequirement(d.serving_quantity, d.serving_unit, cur.guest_count || 600) }}
                                   </span>
@@ -726,6 +777,21 @@
                                   <button type="button" class="btn-unit-toggle" (click)="cycleTrayDishUnit(d.dish_id, $event)" title="Click to switch unit (g, pcs, ml, cups)">
                                     {{ d.serving_unit || 'g' }}
                                   </button>
+                                </div>
+                                <!-- Quick Admin Offer Rate Input -->
+                                <div class="tray-offer-input-row" (click)="$event.stopPropagation()">
+                                  <span class="offer-lbl">Offer: ₹</span>
+                                  <input 
+                                    type="number" 
+                                    class="tray-offer-input" 
+                                    [ngModel]="getDishOfferPriceInr(d)"
+                                    (ngModelChange)="updateDishOfferPrice(d.dish_id, $event, cur)"
+                                    placeholder="{{ ((d.original_price_per_person || d.price_per_person) / 100).toFixed(0) }}"
+                                    title="Enter custom offer price per guest for this dish (admin only)"
+                                  />
+                                  @if (d.is_offer_applied) {
+                                    <span class="offer-applied-badge">Offer Active</span>
+                                  }
                                 </div>
                               </div>
                               <button 
@@ -803,9 +869,39 @@
                           </div>
                         </div>
 
-                        <div class="row-dishes-chips">
+                        <div class="row-dishes-pricing-table">
                           @for (d of s.dishes; track d.dish_id) {
-                            <span class="dish-tag">{{ d.name }}</span>
+                            <div class="dish-pricing-item">
+                              <div class="dp-info">
+                                <span class="dp-name">{{ d.name }}</span>
+                                <span class="dp-portion">({{ d.serving_quantity || 100 }}{{ d.serving_unit || 'g' }}/guest)</span>
+                                @if (d.is_offer_applied) {
+                                  <span class="dp-offer-badge">OFFER RATE</span>
+                                }
+                              </div>
+
+                              <div class="dp-rates-col">
+                                <div class="dp-rate-display">
+                                  @if (d.is_offer_applied && d.original_price_per_person) {
+                                    <del class="dp-orig-rate">₹{{ (d.original_price_per_person / 100).toFixed(0) }}</del>
+                                  }
+                                  <strong class="dp-eff-rate">₹{{ (d.price_per_person / 100).toFixed(0) }}</strong>
+                                  <span class="dp-per-pax">/pax</span>
+                                </div>
+
+                                <div class="dp-offer-control">
+                                  <span class="dp-offer-tag">Offer ₹</span>
+                                  <input 
+                                    type="number" 
+                                    class="dp-offer-input"
+                                    [ngModel]="getDishOfferPriceInr(d)"
+                                    (ngModelChange)="updateDishOfferPrice(d.dish_id, $event, s)"
+                                    placeholder="{{ ((d.original_price_per_person || d.price_per_person) / 100).toFixed(0) }}"
+                                    title="Custom offer price for this event only"
+                                  />
+                                </div>
+                              </div>
+                            </div>
                           }
                         </div>
                       </div>
@@ -957,7 +1053,7 @@
               </button>
             } @else {
               <button type="button" class="btn-submit" (click)="saveScheduledEvent()">
-                Confirm & Save Celebration Event
+                {{ isEditingEvent() ? 'Save & Update Booking Changes' : 'Confirm & Save Celebration Event' }}
               </button>
             }
           </div>
@@ -1037,6 +1133,10 @@
 
         <div class="modal-footer">
           <button type="button" class="btn-cancel" (click)="closeEventDetailModal()">Close</button>
+          <button type="button" class="btn-edit-action" (click)="openEditEventModal(ev)">
+            <span class="material-symbols-outlined">edit</span>
+            <span>Edit Booking & Rates</span>
+          </button>
           <button type="button" class="btn-report-action" (click)="openFinalReport(ev)">
             <span class="material-symbols-outlined">description</span>
             <span>Final Banquet Report (BEO)</span>
@@ -1258,7 +1358,17 @@
                               <td class="batch-cell">
                                 <strong>{{ calculateBatchRequirement(d.serving_quantity, d.serving_unit, s.guest_count) }}</strong>
                               </td>
-                              <td class="text-right text-muted">₹{{ ((d.price_per_person || 7500) / 100).toFixed(0) }}</td>
+                              <td class="text-right per-head-td">
+                                @if (d.is_offer_applied && d.original_price_per_person) {
+                                  <div class="beo-offer-block">
+                                    <span class="beo-offer-price font-bold text-green">₹{{ ((d.offer_price_per_person || d.price_per_person) / 100).toFixed(0) }}</span>
+                                    <del class="beo-orig-price text-muted">₹{{ (d.original_price_per_person / 100).toFixed(0) }}</del>
+                                    <span class="beo-offer-pill">OFFER</span>
+                                  </div>
+                                } @else {
+                                  <span class="font-bold">₹{{ ((d.price_per_person || 7500) / 100).toFixed(0) }}</span>
+                                }
+                              </td>
                             </tr>
                           } @empty {
                             <tr>
@@ -1660,6 +1770,44 @@
                 <span class="batch-calc-highlight">
                   {{ calculateBatchRequirement(modalServingQuantity(), modalServingUnit(), currentSession().guest_count || newEvent.guest_count || 600) }}
                 </span>
+              </div>
+            </div>
+
+            <!-- ADMIN SPECIAL OFFER PRICE PER HEAD -->
+            <div class="admin-dish-offer-box">
+              <div class="offer-header">
+                <span class="material-symbols-outlined offer-icon">local_offer</span>
+                <div>
+                  <h5 class="offer-title">Admin Offer Price / Per Guest (₹)</h5>
+                  <p class="offer-sub">Set a custom negotiated rate for this event. Master catalog dish price remains unchanged.</p>
+                </div>
+              </div>
+
+              <div class="offer-input-row">
+                <div class="catalog-base-badge">
+                  <span class="lbl">Catalog Base Rate:</span>
+                  <span class="val">₹{{ ((dish.price_per_person || 7500) / 100).toFixed(0) }}</span>
+                </div>
+                <span class="arrow-sep">&rarr;</span>
+                <div class="offer-field-wrap">
+                  <span class="currency-prefix">₹</span>
+                  <input 
+                    type="number" 
+                    class="offer-number-input" 
+                    [ngModel]="modalOfferPrice()" 
+                    (ngModelChange)="modalOfferPrice.set($event ? +$event : null)"
+                    placeholder="Enter Offer ₹"
+                    min="1"
+                    max="10000"
+                  />
+                  <span class="per-head-suf">/ guest</span>
+                </div>
+                @if (modalOfferPrice()) {
+                  <button type="button" class="btn-clear-offer" (click)="modalOfferPrice.set(null)" title="Reset to catalog rate">
+                    <span class="material-symbols-outlined">restart_alt</span>
+                    <span>Reset</span>
+                  </button>
+                }
               </div>
             </div>
           </div>

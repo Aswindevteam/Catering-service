@@ -198,4 +198,19 @@ export class SelectionService {
       { headers: this.auth.getAuthHeaders() }
     );
   }
+
+  updateEvent(id: string, event: Partial<WeddingEvent>): Observable<{ success: boolean; data: WeddingEvent }> {
+    return this.http.put<{ success: boolean; data: WeddingEvent }>(
+      `${environment.apiUrl}/events/${id}`,
+      event,
+      { headers: this.auth.getAuthHeaders() }
+    );
+  }
+
+  deleteEvent(id: string): Observable<{ success: boolean }> {
+    return this.http.delete<{ success: boolean }>(
+      `${environment.apiUrl}/events/${id}`,
+      { headers: this.auth.getAuthHeaders() }
+    );
+  }
 }

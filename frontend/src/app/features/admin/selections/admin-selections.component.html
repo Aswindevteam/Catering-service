@@ -1,0 +1,921 @@
+<div class="selections-page">
+  <!-- Page Header -->
+  <div class="page-head">
+    <div class="head-text">
+      <div class="title-row">
+        <h1 class="main-title">Customer Selections & Bookings</h1>
+        <span class="heritage-badge">திருமலா முன்பதிவுகள்</span>
+      </div>
+      <p class="subtitle">Review customer wedding catering selections, scheduled banquet events, and negotiate custom dish offer rates.</p>
+    </div>
+
+    <div class="head-actions">
+      <button type="button" class="btn-royal-schedule" (click)="openCreateModal()">
+        <span class="material-symbols-outlined">add_circle</span>
+        <span>+ Schedule Wedding</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI Metric Cards -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-label">Total Bookings</span>
+        <span class="material-symbols-outlined kpi-icon">event_available</span>
+      </div>
+      <div class="kpi-val">{{ metrics().total }}</div>
+      <span class="kpi-sub">All active celebration orders</span>
+    </div>
+
+    <div class="kpi-card highlight-admin">
+      <div class="kpi-top">
+        <span class="kpi-label">Created by Admin</span>
+        <span class="material-symbols-outlined kpi-icon admin-icon">admin_panel_settings</span>
+      </div>
+      <div class="kpi-val admin-val">{{ metrics().adminCount }}</div>
+      <span class="kpi-sub">Directly scheduled bookings</span>
+    </div>
+
+    <div class="kpi-card highlight-user">
+      <div class="kpi-top">
+        <span class="kpi-label">Customer Selections</span>
+        <span class="material-symbols-outlined kpi-icon user-icon">public</span>
+      </div>
+      <div class="kpi-val user-val">{{ metrics().userCount }}</div>
+      <span class="kpi-sub">Inquiries from website menu</span>
+    </div>
+
+    <div class="kpi-card highlight-gold">
+      <div class="kpi-top">
+        <span class="kpi-label">Projected Revenue</span>
+        <span class="material-symbols-outlined kpi-icon gold-icon">payments</span>
+      </div>
+      <div class="kpi-val gold-val">
+        <span class="curr-sym">₹</span>{{ (metrics().totalRevenue / 100).toLocaleString('en-IN') }}
+      </div>
+      <span class="kpi-sub">Grand total across all events</span>
+    </div>
+  </div>
+
+  <!-- Controls & Filters Bar -->
+  <div class="filters-toolbar">
+    <!-- Creator Filter Pill (Requested Feature) -->
+    <div class="creator-filter-pill">
+      <button 
+        type="button" 
+        class="creator-btn" 
+        [class.active]="filterEventSource() === 'all'" 
+        (click)="filterEventSource.set('all')"
+      >
+        All ({{ metrics().total }})
+      </button>
+      <button 
+        type="button" 
+        class="creator-btn" 
+        [class.active]="filterEventSource() === 'admin'" 
+        (click)="filterEventSource.set('admin')"
+        title="Events scheduled by Admin"
+      >
+        👑 By Me (Admin) ({{ metrics().adminCount }})
+      </button>
+      <button 
+        type="button" 
+        class="creator-btn" 
+        [class.active]="filterEventSource() === 'user'" 
+        (click)="filterEventSource.set('user')"
+        title="Events booked by Customer"
+      >
+        🌐 By Users ({{ metrics().userCount }})
+      </button>
+    </div>
+
+    <!-- Search Input & Status Filter -->
+    <div class="toolbar-right">
+      <div class="search-box">
+        <span class="material-symbols-outlined search-icon">search</span>
+        <input 
+          type="text" 
+          placeholder="Search host, phone, event, venue..." 
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+          class="search-input"
+        />
+        @if (searchQuery()) {
+          <button type="button" class="btn-clear-search" (click)="searchQuery.set('')">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        }
+      </div>
+
+      <div class="status-select-wrap">
+        <select 
+          class="status-dropdown" 
+          [ngModel]="filterStatus()"
+          (ngModelChange)="filterStatus.set($event)"
+        >
+          <option value="all">All Statuses</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="pending">Pending</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bookings Table Card -->
+  <div class="wf-card table-card">
+    @if (isLoading()) {
+      <div class="loading-state">
+        <span class="spinner-circle"></span>
+        <p>Loading celebration bookings & menus...</p>
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="wf-table">
+          <thead>
+            <tr>
+              <th>Event & Creator</th>
+              <th>Date & Venue</th>
+              <th>Guests & Sessions</th>
+              <th>Food Subtotal</th>
+              <th>Grand Total</th>
+              <th>Per Pax</th>
+              <th>Status</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (booking of filteredBookings(); track booking.id) {
+              <tr class="booking-row">
+                <!-- Customer & Event Title -->
+                <td>
+                  <div class="cust-info">
+                    <div class="cust-name-row">
+                      <strong class="cust-name">{{ booking.customer_name }}</strong>
+                      <span class="source-tag" [class.admin]="booking.source === 'admin'" [class.user]="booking.source === 'user'">
+                        {{ booking.source === 'admin' ? '👑 Admin' : '🌐 Customer' }}
+                      </span>
+                    </div>
+                    <span class="event-name">{{ booking.event_name }}</span>
+                    <span class="event-type-pill">{{ booking.event_type }}</span>
+                    @if (booking.customer_phone) {
+                      <span class="cust-contact">📞 {{ booking.customer_phone }}</span>
+                    }
+                  </div>
+                </td>
+
+                <!-- Date & Venue -->
+                <td>
+                  <div class="date-venue-col">
+                    <span class="event-date-pill">
+                      <span class="material-symbols-outlined date-icon">calendar_today</span>
+                      {{ booking.event_date }}
+                    </span>
+                    <span class="venue-text" title="{{ booking.venue }}">
+                      <span class="material-symbols-outlined venue-icon">location_on</span>
+                      {{ booking.venue }}
+                    </span>
+                  </div>
+                </td>
+
+                <!-- Headcount & Sessions -->
+                <td>
+                  <div class="headcount-col">
+                    <strong class="guest-num">{{ booking.guest_count }} Guests</strong>
+                    @if (booking.sessions && booking.sessions.length > 0) {
+                      <div class="sessions-mini-pills">
+                        @for (s of booking.sessions; track s.id) {
+                          <span class="s-pill" title="{{ s.name }}: {{ s.dishes.length }} dishes">
+                            {{ s.shortName }} ({{ s.dishes.length }})
+                          </span>
+                        }
+                      </div>
+                    } @else {
+                      <span class="no-session-note">1 Main Feast Session</span>
+                    }
+                  </div>
+                </td>
+
+                <!-- Food Subtotal -->
+                <td>
+                  <span class="subtotal-val">₹{{ (booking.subtotal / 100).toLocaleString('en-IN') }}</span>
+                </td>
+
+                <!-- Grand Total -->
+                <td>
+                  <div class="grand-total-col">
+                    <strong class="grand-price">₹{{ (booking.grand_total / 100).toLocaleString('en-IN') }}</strong>
+                    @if (booking.sessions && booking.sessions.length > 0) {
+                      <span class="incl-fees-note">Incl. 10% Svc + 5% GST</span>
+                    }
+                  </div>
+                </td>
+
+                <!-- Per Pax -->
+                <td>
+                  <span class="per-pax-val">₹{{ (booking.cost_per_guest / 100).toFixed(0) }}</span>
+                </td>
+
+                <!-- Status Badge -->
+                <td>
+                  <span class="status-badge" [ngClass]="booking.status">
+                    {{ booking.status | uppercase }}
+                  </span>
+                </td>
+
+                <!-- Action Buttons -->
+                <td class="text-right">
+                  <div class="action-buttons-wrap">
+                    <button 
+                      type="button" 
+                      class="btn-action edit" 
+                      (click)="openEditModal(booking)"
+                      title="Edit Booking, Sessions & Dish Offer Prices"
+                    >
+                      <span class="material-symbols-outlined">edit</span>
+                      <span>Edit</span>
+                    </button>
+
+                    <button 
+                      type="button" 
+                      class="btn-action report" 
+                      (click)="openBEOReport(booking)"
+                      title="View Banquet Event Order (BEO) Spec Sheet & Quotation"
+                    >
+                      <span class="material-symbols-outlined">description</span>
+                      <span>BEO</span>
+                    </button>
+
+                    <button 
+                      type="button" 
+                      class="btn-action delete" 
+                      (click)="deleteBooking(booking, $event)"
+                      title="Delete this booking"
+                    >
+                      <span class="material-symbols-outlined">delete</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="8" class="no-data-cell">
+                  <div class="empty-state">
+                    <span class="material-symbols-outlined empty-icon">event_busy</span>
+                    <h3>No Celebrations Found</h3>
+                    <p>No wedding events or customer selections match your current filter criteria.</p>
+                    <button type="button" class="btn-royal-schedule sm" (click)="openCreateModal()">
+                      + Schedule New Wedding
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- EDIT / SCHEDULE WEDDING BOOKING MODAL (With Multi-Sessions & Offer Rates) -->
+  <!-- ========================================================================= -->
+  @if (isModalOpen()) {
+    <div class="modal-backdrop" (click)="closeModal()">
+      <div class="modal-card royal-modal" (click)="$event.stopPropagation()">
+        <!-- Modal Header -->
+        <div class="modal-head">
+          <div>
+            <div class="modal-title-row">
+              <h2>{{ isEditing() ? 'Edit Celebration Booking & Offer Rates' : 'Schedule Wedding Celebration' }}</h2>
+              <span class="modal-badge">{{ isEditing() ? '👑 Admin Editor' : '👑 New Booking' }}</span>
+            </div>
+            <p class="modal-sub">
+              {{ isEditing() ? 'Modify event schedule, adjust dish portion weights, and specify custom negotiated offer rates.' : 'Configure celebration dates, course sessions, menu quantities, and commercial quotations.' }}
+            </p>
+          </div>
+          <button type="button" class="btn-close-modal" (click)="closeModal()" aria-label="Close modal">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <!-- Wizard Step Indicators -->
+        <div class="wizard-stepper">
+          <button 
+            type="button" 
+            class="wizard-step-btn" 
+            [class.active]="currentStep() === 1" 
+            (click)="currentStep.set(1)"
+          >
+            <span class="step-num">1</span>
+            <span class="step-text">Event & Host Details</span>
+          </button>
+          <div class="step-connector"></div>
+          <button 
+            type="button" 
+            class="wizard-step-btn" 
+            [class.active]="currentStep() === 2" 
+            (click)="currentStep.set(2)"
+          >
+            <span class="step-num">2</span>
+            <span class="step-text">Course Sessions & Dishes</span>
+          </button>
+          <div class="step-connector"></div>
+          <button 
+            type="button" 
+            class="wizard-step-btn" 
+            [class.active]="currentStep() === 3" 
+            (click)="currentStep.set(3)"
+          >
+            <span class="step-num">3</span>
+            <span class="step-text">Quotation & Offer Rates</span>
+          </button>
+        </div>
+
+        <!-- Modal Body Content -->
+        <div class="modal-body-scrollable">
+          <!-- STEP 1: Basic Event Details -->
+          @if (currentStep() === 1) {
+            <div class="step-content">
+              <h3 class="section-title">Host & Celebration Details</h3>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Host / Family Name <span class="req">*</span></label>
+                  <input 
+                    type="text" 
+                    [(ngModel)]="bookingForm.customer_name" 
+                    placeholder="e.g. Sri. Sundararaman Iyer" 
+                    class="form-control"
+                    required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label>Contact Phone <span class="req">*</span></label>
+                  <input 
+                    type="tel" 
+                    [(ngModel)]="bookingForm.customer_phone" 
+                    placeholder="+91 72998 87725" 
+                    class="form-control"
+                    required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label>Email Address</label>
+                  <input 
+                    type="email" 
+                    [(ngModel)]="bookingForm.customer_email" 
+                    placeholder="host@gmail.com" 
+                    class="form-control"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label>Celebration Title <span class="req">*</span></label>
+                  <input 
+                    type="text" 
+                    [(ngModel)]="bookingForm.event_name" 
+                    placeholder="e.g. Iyer-Krishnan Traditional Wedding" 
+                    class="form-control"
+                    required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label>Event Type</label>
+                  <select [(ngModel)]="bookingForm.event_type" class="form-control">
+                    <option value="Traditional Hindu Wedding">Traditional Hindu Wedding (திருமணம்)</option>
+                    <option value="Muhurtham Feast">Muhurtham Feast (முகூர்த்த விருந்து)</option>
+                    <option value="Grand Reception">Grand Reception (வரவேற்பு)</option>
+                    <option value="Engagement / Betrothal">Engagement / Betrothal (நிச்சயதார்த்தம்)</option>
+                    <option value="Seemantham / Babyshower">Seemantham / Babyshower (சீமந்தம்)</option>
+                    <option value="Upanayanam">Upanayanam (பூணூல் கல்யாணம்)</option>
+                    <option value="Housewarming / Grahapravesam">Housewarming (கிரகப்பிரவேசம்)</option>
+                    <option value="Corporate / Special Feast">Corporate / Special Feast</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label>Event Date <span class="req">*</span></label>
+                  <input 
+                    type="date" 
+                    [(ngModel)]="bookingForm.event_date" 
+                    class="form-control"
+                    required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label>Total Primary Headcount (Guests) <span class="req">*</span></label>
+                  <input 
+                    type="number" 
+                    [(ngModel)]="bookingForm.guest_count" 
+                    min="50" 
+                    max="10000" 
+                    class="form-control"
+                    required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label>Booking Status</label>
+                  <select [(ngModel)]="bookingForm.status" class="form-control">
+                    <option value="confirmed">Confirmed</option>
+                    <option value="pending">Pending Inquiry</option>
+                    <option value="completed">Completed Feast</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </div>
+
+                <div class="form-group full-width">
+                  <label>Banquet Venue / Hall Address</label>
+                  <input 
+                    type="text" 
+                    [(ngModel)]="bookingForm.venue" 
+                    placeholder="e.g. No. 73, Mandhaikaara Street, Tirukoilur" 
+                    class="form-control"
+                  />
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- STEP 2: Course Sessions & Dish Selection -->
+          @if (currentStep() === 2) {
+            <div class="step-content">
+              <!-- Session Tabs -->
+              <div class="sessions-tabs-nav">
+                @for (sess of modalSessions(); track sess.id) {
+                  <button 
+                    type="button" 
+                    class="session-tab-btn" 
+                    [class.active]="modalActiveSessionId() === sess.id" 
+                    (click)="modalActiveSessionId.set(sess.id)"
+                  >
+                    <span class="sess-name">{{ sess.shortName }}</span>
+                    <span class="sess-count-badge">{{ sess.dishes.length }}</span>
+                  </button>
+                }
+              </div>
+
+              <!-- Active Session Details Bar -->
+              @if (currentModalSession(); as curSess) {
+                <div class="active-session-bar">
+                  <div class="sess-info-left">
+                    <h4 class="cur-sess-title">{{ curSess.name }}</h4>
+                    <span class="cur-sess-time">⏰ Serving: {{ curSess.timeSlot }}</span>
+                  </div>
+
+                  <div class="sess-guest-adjust">
+                    <label>Guests for this session:</label>
+                    <input 
+                      type="number" 
+                      [(ngModel)]="curSess.guest_count" 
+                      class="sess-guest-input"
+                      min="10" 
+                      max="10000"
+                    />
+                  </div>
+                </div>
+
+                <!-- Selected Dishes in Active Session (Tray) -->
+                <div class="selected-tray-section">
+                  <div class="tray-head">
+                    <h5>Dishes in {{ curSess.shortName }} ({{ curSess.dishes.length }} Selected)</h5>
+                    <span class="tray-hint">Adjust portion weights or set custom Admin Offer Rates per guest</span>
+                  </div>
+
+                  @if (curSess.dishes.length === 0) {
+                    <div class="empty-tray-box">
+                      <span class="material-symbols-outlined empty-tray-icon">soup_kitchen</span>
+                      <p>No dishes added to {{ curSess.shortName }} yet. Pick dishes from the catalog below.</p>
+                    </div>
+                  } @else {
+                    <div class="tray-chips-grid">
+                      @for (d of curSess.dishes; track d.dish_id) {
+                        <div class="tray-dish-card" [class.has-offer]="d.is_offer_applied">
+                          <div class="dish-card-top">
+                            <div class="dish-title-col">
+                              <span class="dish-cat-mini">{{ d.category_name }}</span>
+                              <strong class="dish-name-main">{{ d.name }}</strong>
+                            </div>
+                            <button 
+                              type="button" 
+                              class="btn-remove-chip" 
+                              (click)="removeDishFromCurrentSession(d.dish_id)" 
+                              title="Remove dish"
+                            >
+                              <span class="material-symbols-outlined">close</span>
+                            </button>
+                          </div>
+
+                          <!-- Portion Stepper -->
+                          <div class="dish-stepper-row">
+                            <span class="portion-lbl">Portion:</span>
+                            <button type="button" class="btn-step" (click)="adjustDishPortion(d.dish_id, -1, $event)">-</button>
+                            <span class="portion-val">{{ d.serving_quantity || 100 }}</span>
+                            <button type="button" class="btn-step" (click)="adjustDishPortion(d.dish_id, 1, $event)">+</button>
+                            <button type="button" class="btn-unit" (click)="cycleDishUnit(d.dish_id, $event)">
+                              {{ d.serving_unit || 'g' }}
+                            </button>
+                          </div>
+
+                          <!-- Admin Offer Price Field -->
+                          <div class="dish-offer-input-row">
+                            <span class="offer-lbl">Offer: ₹</span>
+                            <input 
+                              type="number" 
+                              class="offer-input-inline" 
+                              [ngModel]="getDishOfferPriceInr(d)"
+                              (ngModelChange)="updateDishOfferPrice(d.dish_id, $event, curSess)"
+                              placeholder="{{ ((d.original_price_per_person || d.price_per_person) / 100).toFixed(0) }}"
+                              title="Custom negotiated offer rate per guest (admin only)"
+                            />
+                            @if (d.is_offer_applied) {
+                              <span class="offer-tag-active">Active</span>
+                            }
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+
+                <!-- Catalog Dish Browser -->
+                <div class="catalog-browser-section">
+                  <div class="browser-head">
+                    <h5>Add Dishes to {{ curSess.shortName }}</h5>
+                    <div class="browser-controls">
+                      <input 
+                        type="text" 
+                        class="catalog-search-input" 
+                        placeholder="Search menu catalog..."
+                        [ngModel]="modalDishSearch()"
+                        (ngModelChange)="modalDishSearch.set($event)"
+                      />
+                    </div>
+                  </div>
+
+                  <!-- Category Pills -->
+                  <div class="category-pills-row">
+                    <button 
+                      type="button" 
+                      class="cat-pill-btn" 
+                      [class.active]="modalSelectedCategory() === 'all'" 
+                      (click)="modalSelectedCategory.set('all')"
+                    >
+                      All ({{ allDishes().length }})
+                    </button>
+                    @for (cat of categories(); track cat.id) {
+                      <button 
+                        type="button" 
+                        class="cat-pill-btn" 
+                        [class.active]="modalSelectedCategory() === cat.id" 
+                        (click)="modalSelectedCategory.set(cat.id)"
+                      >
+                        {{ cat.name }}
+                      </button>
+                    }
+                  </div>
+
+                  <!-- Dishes Grid -->
+                  <div class="catalog-dishes-grid">
+                    @for (dish of filteredCatalogDishes(); track dish.id) {
+                      <div class="catalog-item-card" (click)="addDishToCurrentSession(dish)">
+                        <div class="item-img-placeholder">
+                          <span class="material-symbols-outlined">restaurant</span>
+                        </div>
+                        <div class="item-body">
+                          <strong class="item-name">{{ dish.name }}</strong>
+                          <span class="item-cat">{{ dish.category_name || 'Authentic' }}</span>
+                          <div class="item-rate-row">
+                            <span class="item-rate">₹{{ ((dish.price_per_person || 7500) / 100).toFixed(0) }}</span>
+                            <span class="add-plus-badge">+ Add</span>
+                          </div>
+                        </div>
+                      </div>
+                    } @empty {
+                      <div class="empty-catalog-box">
+                        <p>No dishes match the search filter.</p>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- STEP 3: Quotation & Negotiated Offer Rates Summary -->
+          @if (currentStep() === 3) {
+            <div class="step-content">
+              <div class="offer-notice-banner">
+                <span class="material-symbols-outlined banner-icon">verified</span>
+                <div>
+                  <strong>Admin Negotiated Rates Applied</strong>
+                  <p>Custom offer prices entered here apply exclusively to this event booking. Master catalog dish prices remain completely unchanged.</p>
+                </div>
+              </div>
+
+              <!-- Breakdown By Session with Offer Price Inputs -->
+              <div class="sessions-pricing-summary">
+                @for (s of modalSessions(); track s.id) {
+                  <div class="session-pricing-card">
+                    <div class="sess-card-head">
+                      <div>
+                        <strong class="sess-card-name">{{ s.name }}</strong>
+                        <span class="sess-card-sub">{{ s.guest_count }} Guests &bull; {{ s.dishes.length }} Dishes</span>
+                      </div>
+                    </div>
+
+                    <div class="dishes-rates-table">
+                      @for (d of s.dishes; track d.dish_id) {
+                        <div class="dish-rate-row">
+                          <div class="rate-dish-info">
+                            <span class="dish-name-lbl">{{ d.name }}</span>
+                            <span class="dish-portion-lbl">({{ d.serving_quantity || 100 }}{{ d.serving_unit || 'g' }}/guest)</span>
+                            @if (d.is_offer_applied) {
+                              <span class="badge-offer-applied">OFFER RATE</span>
+                            }
+                          </div>
+
+                          <div class="rate-controls-wrap">
+                            <div class="effective-display">
+                              @if (d.is_offer_applied && d.original_price_per_person) {
+                                <del class="orig-strike">₹{{ (d.original_price_per_person / 100).toFixed(0) }}</del>
+                              }
+                              <strong class="eff-val">₹{{ (d.price_per_person / 100).toFixed(0) }}</strong>
+                              <span class="per-pax-lbl">/guest</span>
+                            </div>
+
+                            <div class="offer-input-box">
+                              <span class="prefix">Offer ₹</span>
+                              <input 
+                                type="number" 
+                                class="offer-field"
+                                [ngModel]="getDishOfferPriceInr(d)"
+                                (ngModelChange)="updateDishOfferPrice(d.dish_id, $event, s)"
+                                placeholder="{{ ((d.original_price_per_person || d.price_per_person) / 100).toFixed(0) }}"
+                                title="Custom offer rate per guest for this dish"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      } @empty {
+                        <div class="no-dishes-row">No dishes selected for this session.</div>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <!-- Commercial Estimate Totals Box -->
+              <div class="commercial-totals-card">
+                <h4 class="totals-title">Commercial Estimate Breakdown</h4>
+                <div class="fee-row">
+                  <span>Food Catering Subtotal</span>
+                  <span class="fee-val">₹{{ modalFinancials().subtotal.toLocaleString('en-IN') }}</span>
+                </div>
+                <div class="fee-row">
+                  <span>Catering & Setup Service Fee (10%)</span>
+                  <span class="fee-val">₹{{ modalFinancials().serviceCharge.toLocaleString('en-IN') }}</span>
+                </div>
+                <div class="fee-row">
+                  <span>Banquet Logistics & Transport</span>
+                  <span class="fee-val">₹{{ modalFinancials().transportationCharge.toLocaleString('en-IN') }}</span>
+                </div>
+                <div class="fee-row">
+                  <span>GST (5%)</span>
+                  <span class="fee-val">₹{{ modalFinancials().gstAmount.toLocaleString('en-IN') }}</span>
+                </div>
+                <div class="fee-row grand-total-row">
+                  <span>Grand Total (All Inclusive)</span>
+                  <span class="grand-val">₹{{ modalFinancials().grandTotal.toLocaleString('en-IN') }}</span>
+                </div>
+                <div class="fee-row per-pax-row">
+                  <span>Average Cost Per Guest</span>
+                  <span class="per-pax-badge">₹{{ modalFinancials().perPax.toFixed(0) }} / Guest</span>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Modal Footer Controls -->
+        <div class="modal-foot">
+          <button type="button" class="btn-modal-cancel" (click)="closeModal()">
+            Cancel
+          </button>
+
+          <div class="foot-stepper-actions">
+            @if (currentStep() > 1) {
+              <button type="button" class="btn-step-nav" (click)="currentStep.set(currentStep() - 1)">
+                &larr; Back
+              </button>
+            }
+
+            @if (currentStep() < 3) {
+              <button type="button" class="btn-step-next" (click)="currentStep.set(currentStep() + 1)">
+                Next &rarr;
+              </button>
+            } @else {
+              <button 
+                type="button" 
+                class="btn-save-event" 
+                (click)="saveBooking()" 
+                [disabled]="isSubmitting()"
+              >
+                <span class="material-symbols-outlined">check_circle</span>
+                <span>{{ isSubmitting() ? 'Saving...' : (isEditing() ? 'Save & Update Booking' : 'Confirm & Schedule Booking') }}</span>
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ========================================================================= -->
+  <!-- BANQUET EVENT ORDER (BEO) SPEC SHEET MODAL (PDF Download & WhatsApp Share) -->
+  <!-- ========================================================================= -->
+  @if (selectedBookingForBEO(); as beo) {
+    <div class="modal-backdrop beo-modal-backdrop" (click)="closeBEOReport()">
+      <div class="beo-modal-card beo-print-container" (click)="$event.stopPropagation()">
+        <!-- Action Bar (hidden in print) -->
+        <div class="beo-actions-bar">
+          <div class="beo-action-title">
+            <span class="material-symbols-outlined">menu_book</span>
+            <span>Banquet Event Order (BEO) & Quotation</span>
+          </div>
+
+          <div class="beo-btn-group">
+            <button type="button" class="btn-beo-print" (click)="printBEOReport()">
+              <span class="material-symbols-outlined">print</span>
+              <span>Print / Save PDF</span>
+            </button>
+            <button type="button" class="btn-beo-wa" (click)="shareBEOViaWhatsApp(beo)">
+              <span class="material-symbols-outlined">chat</span>
+              <span>Share WhatsApp</span>
+            </button>
+            <button type="button" class="btn-beo-close" (click)="closeBEOReport()">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Printable Document Body -->
+        <div class="beo-document-body">
+          <!-- Thirumala Royal Letterhead -->
+          <div class="letterhead-header">
+            <div class="letterhead-brand">
+              <span class="brand-sub">ஸ்ரீ திருமலா கேட்டரிங் சர்வீஸ்</span>
+              <h1 class="brand-title">THIRUMALA CATERING SERVICE</h1>
+              <p class="brand-tagline">Authentic Pure Vegetarian South Indian Wedding Feasts</p>
+            </div>
+            <div class="letterhead-contact">
+              <p><strong>HQ:</strong> No. 73, Mandhaikaara Street, Tirukoilur - 607201</p>
+              <p><strong>Chennai:</strong> No. 5, Krishnappa Agraharam Street, Sowcarpet - 600079</p>
+              <p><strong>Concierge:</strong> +91 72998 87725 &bull; info&#64;thirumalacatering.com</p>
+            </div>
+          </div>
+
+          <div class="doc-divider"></div>
+
+          <!-- Event Summary Grid -->
+          <div class="beo-summary-grid">
+            <div class="sum-box">
+              <span class="sum-lbl">Celebration:</span>
+              <strong class="sum-val">{{ beo.event_name }}</strong>
+              <span class="sum-type">{{ beo.event_type }}</span>
+            </div>
+            <div class="sum-box">
+              <span class="sum-lbl">Host / Family:</span>
+              <strong class="sum-val">{{ beo.customer_name }}</strong>
+              <span class="sum-sub">{{ beo.customer_phone }}</span>
+            </div>
+            <div class="sum-box">
+              <span class="sum-lbl">Event Date:</span>
+              <strong class="sum-val date-val">{{ beo.event_date }}</strong>
+              <span class="sum-sub">Headcount: {{ beo.guest_count }} Guests</span>
+            </div>
+            <div class="sum-box">
+              <span class="sum-lbl">Banquet Venue:</span>
+              <strong class="sum-val venue-val">{{ beo.venue }}</strong>
+            </div>
+          </div>
+
+          <!-- Course Sessions & Dish Batches -->
+          @if (beo.sessions && beo.sessions.length > 0) {
+            <div class="beo-sessions-section">
+              <h3 class="beo-section-title">Menu Specification & Batch Preparation Schedule</h3>
+              @for (sess of beo.sessions; track sess.id) {
+                <div class="beo-session-block">
+                  <div class="beo-session-head">
+                    <div>
+                      <strong class="sess-title">{{ sess.name }}</strong>
+                      <span class="sess-time-tag">Serving: {{ sess.timeSlot }}</span>
+                    </div>
+                    <span class="sess-guests-badge">{{ sess.guest_count }} Guests</span>
+                  </div>
+
+                  <table class="beo-dishes-table">
+                    <thead>
+                      <tr>
+                        <th style="width: 40px;">#</th>
+                        <th>Category</th>
+                        <th>Dish Name</th>
+                        <th>Portion / Guest</th>
+                        <th>Batch Requirement</th>
+                        <th class="text-right">Rate / Guest</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (d of sess.dishes; track d.dish_id; let i = $index) {
+                        <tr>
+                          <td>{{ i + 1 }}</td>
+                          <td><span class="cat-chip">{{ d.category_name }}</span></td>
+                          <td><strong class="dish-tbl-name">{{ d.name }}</strong></td>
+                          <td>{{ d.serving_quantity || 100 }}{{ d.serving_unit || 'g' }}</td>
+                          <td>
+                            <strong class="batch-req">
+                              {{ calculateBatchRequirement(d.serving_quantity, d.serving_unit, sess.guest_count) }}
+                            </strong>
+                          </td>
+                          <td class="text-right">
+                            @if (d.is_offer_applied && d.original_price_per_person) {
+                              <div class="beo-rate-offer">
+                                <span class="rate-offer-val">₹{{ ((d.offer_price_per_person || d.price_per_person) / 100).toFixed(0) }}</span>
+                                <del class="rate-orig-strike">₹{{ (d.original_price_per_person / 100).toFixed(0) }}</del>
+                                <span class="beo-pill-offer">OFFER</span>
+                              </div>
+                            } @else {
+                              <span class="rate-standard">₹{{ ((d.price_per_person || 7500) / 100).toFixed(0) }}</span>
+                            }
+                          </td>
+                        </tr>
+                      } @empty {
+                        <tr>
+                          <td colspan="6" class="text-muted text-center py-2">Dishes to be finalized with head chef and host.</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Commercial Statement -->
+          <div class="beo-commercial-section">
+            <h3 class="beo-section-title">Commercial Estimate & Account Summary</h3>
+            <div class="beo-comm-table">
+              <div class="comm-row">
+                <span>Food Catering Subtotal</span>
+                <span>₹{{ (beo.subtotal / 100).toLocaleString('en-IN') }}</span>
+              </div>
+              <div class="comm-row">
+                <span>Catering & Setup Service Charges (10%)</span>
+                <span>₹{{ (beo.service_charge / 100).toLocaleString('en-IN') }}</span>
+              </div>
+              <div class="comm-row">
+                <span>Banquet Transportation & Logistics</span>
+                <span>₹{{ (beo.transportation_charge / 100).toLocaleString('en-IN') }}</span>
+              </div>
+              <div class="comm-row">
+                <span>GST (5%)</span>
+                <span>₹{{ (beo.gst_amount / 100).toLocaleString('en-IN') }}</span>
+              </div>
+              <div class="comm-row grand-total">
+                <span>Grand Total (All Inclusive)</span>
+                <span>₹{{ (beo.grand_total / 100).toLocaleString('en-IN') }}</span>
+              </div>
+              <div class="comm-row per-pax">
+                <span>Average Cost Per Guest</span>
+                <span>₹{{ (beo.cost_per_guest / 100).toFixed(0) }} / Guest</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Document Footer -->
+          <div class="beo-footer">
+            <p class="footer-note">
+              * Rates are inclusive of authentic pure vegetarian ingredients, professional traditional service staff, and banquet presentation.
+            </p>
+            <div class="signatures-row">
+              <div class="sig-box">
+                <div class="sig-line"></div>
+                <span>Authorized Signatory (Thirumala Catering)</span>
+              </div>
+              <div class="sig-box">
+                <div class="sig-line"></div>
+                <span>Host Confirmation Signature</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

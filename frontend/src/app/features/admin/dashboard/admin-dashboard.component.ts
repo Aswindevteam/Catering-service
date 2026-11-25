@@ -16,7 +16,10 @@ export interface MealSessionItem {
   dish_id: string;
   name: string;
   category_name?: string;
-  price_per_person: number; // in paise
+  price_per_person: number; // in paise (effective rate used in calculations)
+  original_price_per_person?: number; // base catalog rate in paise
+  offer_price_per_person?: number; // admin entered offer rate in paise
+  is_offer_applied?: boolean; // true if custom offer price entered
   serving_quantity?: number;
   serving_unit?: string;
 }
@@ -62,10 +65,13 @@ export interface TimelineEvent {
   name: string;
   customer_name?: string;
   customer_phone?: string;
+  customer_email?: string;
   venue?: string;
   guestCount: number;
   status: string;
   statusClass: string;
+  source?: 'admin' | 'user';
+  created_at?: string;
   sessions?: MealSession[];
   financials?: FinancialBreakdown;
 }
@@ -144,17 +150,23 @@ export class AdminDashboardComponent implements OnInit {
 
   // Modals state
   showScheduleModal = signal(false);
+  isEditingEvent = signal<boolean>(false);
+  editingEventId = signal<string | null>(null);
   showPurchaseModal = signal(false);
   selectedEventDetail = signal<TimelineEvent | null>(null);
   showReportModal = signal(false);
   selectedReportEvent = signal<TimelineEvent | null>(null);
 
-  // Dish Profile & Recipe Modal State (Portion / Grams / Pieces customizer)
+  // Booking Source Filter ('all' | 'admin' | 'user')
+  filterEventSource = signal<'all' | 'admin' | 'user'>('all');
+
+  // Dish Profile & Recipe Modal State (Portion / Grams / Pieces customizer & Offer Price)
   activeDishModal = signal<Dish | null>(null);
   modalRecipe = signal<Recipe | null>(null);
   modalLoadingRecipe = signal<boolean>(false);
   modalServingQuantity = signal<number>(100);
   modalServingUnit = signal<string>('g');
+  modalOfferPrice = signal<number | null>(null); // In Rupees (e.g. 70)
   modalImages = signal<string[]>([]);
   activeModalImageIndex = signal<number>(0);
 
@@ -327,7 +339,7 @@ export class AdminDashboardComponent implements OnInit {
     };
   });
 
-  // Accurate catering quotation & fees calculation
+  // Accurate catering quotation & fees calculation using offer or standard rates
   calculateSessionsFinancials(sessions?: MealSession[], fallbackGuests?: number): FinancialBreakdown {
     const settings = this.pricingSettings();
     const activeSessions = (sessions || []).filter(s => s.enabled !== false);
@@ -336,7 +348,12 @@ export class AdminDashboardComponent implements OnInit {
     let totalFoodSubtotalPaise = 0;
     const sessionsCost: FinancialSessionCost[] = activeSessions.map(s => {
       const dishes = s.dishes || [];
-      const perGuestPaise = dishes.reduce((acc, d) => acc + (d.price_per_person || 0), 0);
+      const perGuestPaise = dishes.reduce((acc, d) => {
+        const rate = (d.is_offer_applied && d.offer_price_per_person !== undefined)
+          ? d.offer_price_per_person
+          : (d.price_per_person || 0);
+        return acc + rate;
+      }, 0);
       const guestCount = Number(s.guest_count) || Number(fallbackGuests) || 100;
       const totalFoodCostPaise = perGuestPaise * guestCount;
       totalFoodSubtotalPaise += totalFoodCostPaise;
@@ -376,6 +393,37 @@ export class AdminDashboardComponent implements OnInit {
       peakGuests,
       costPerGuestPaise
     };
+  }
+
+  // Update offer price (in INR) for a dish in a session
+  updateDishOfferPrice(dishId: string, offerPriceInr: any, session?: MealSession) {
+    const s = session || this.currentSession();
+    const item = s.dishes.find(d => d.dish_id === dishId);
+    if (!item) return;
+
+    if (!item.original_price_per_person) {
+      item.original_price_per_person = item.price_per_person || 7500;
+    }
+
+    const numVal = Number(offerPriceInr);
+    if (offerPriceInr !== null && offerPriceInr !== undefined && offerPriceInr !== '' && !isNaN(numVal) && numVal > 0) {
+      item.offer_price_per_person = Math.round(numVal * 100);
+      item.price_per_person = item.offer_price_per_person;
+      item.is_offer_applied = true;
+    } else {
+      item.offer_price_per_person = undefined;
+      item.price_per_person = item.original_price_per_person;
+      item.is_offer_applied = false;
+    }
+
+    this.mealSessions.update(list => [...list]);
+  }
+
+  getDishOfferPriceInr(item: MealSessionItem): number | null {
+    if (item.is_offer_applied && item.offer_price_per_person !== undefined) {
+      return Math.round(item.offer_price_per_person / 100);
+    }
+    return null;
   }
 
   // Real-time calculation for scheduling modal (Step 3)
@@ -493,6 +541,9 @@ export class AdminDashboardComponent implements OnInit {
               statusClass = 'advance';
             }
 
+            const isUserCreated = ev.notes?.includes('"source":"user"') || Boolean((ev as any).selection_id);
+            const source: 'admin' | 'user' = isUserCreated ? 'user' : 'admin';
+
             return {
               id: ev.id,
               rawDate: ev.event_date,
@@ -500,10 +551,13 @@ export class AdminDashboardComponent implements OnInit {
               name: `${ev.event_name} (${ev.venue || 'Banqueting'})`,
               customer_name: ev.customer_name,
               customer_phone: ev.customer_phone,
+              customer_email: ev.customer_email,
               venue: ev.venue,
               guestCount: ev.guest_count,
               status,
               statusClass,
+              source,
+              created_at: ev.created_at,
               sessions: parsedSessions,
               financials: parsedFinancials
             };
@@ -520,6 +574,14 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
+  // Filtered timeline events by creator ('all' | 'admin' | 'user')
+  filteredTimelineEvents = computed(() => {
+    const filter = this.filterEventSource();
+    const list = this.timelineEvents();
+    if (filter === 'all') return list;
+    return list.filter(e => e.source === filter);
+  });
+
   private formatDateISO(d: Date): string {
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -528,7 +590,9 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   private getEventsForDate(dateStr: string): TimelineEvent[] {
+    const filter = this.filterEventSource();
     return this.timelineEvents().filter(ev => {
+      if (filter !== 'all' && ev.source !== filter) return false;
       if (ev.rawDate === dateStr) return true;
       const evDate = new Date(ev.rawDate);
       if (!isNaN(evDate.getTime())) {
@@ -572,17 +636,63 @@ export class AdminDashboardComponent implements OnInit {
 
   // Scheduling Modal
   openScheduleModal() {
+    this.isEditingEvent.set(false);
+    this.editingEventId.set(null);
     this.resetScheduleForm();
     this.showScheduleModal.set(true);
   }
 
   openScheduleModalForDate(dateStr: string) {
+    this.isEditingEvent.set(false);
+    this.editingEventId.set(null);
     this.resetScheduleForm();
     this.newEvent.event_date = dateStr;
     this.showScheduleModal.set(true);
   }
 
+  // Open Edit Event Modal pre-populated with event & dishes
+  openEditEventModal(ev: TimelineEvent) {
+    this.scheduleStep.set(1);
+    this.activeSessionTab.set('morning');
+    this.isEditingEvent.set(true);
+    this.editingEventId.set(ev.id);
+
+    this.newEvent = {
+      id: ev.id,
+      customer_name: ev.customer_name || '',
+      customer_phone: ev.customer_phone || '',
+      customer_email: ev.customer_email || '',
+      event_name: ev.name ? ev.name.replace(/\s*\(.*?\)$/, '') : '',
+      event_type: 'Wedding Reception',
+      event_date: ev.rawDate,
+      venue: ev.venue || 'No. 73, Mandhaikaara Street, Tirukoilur - 607201',
+      guest_count: ev.guestCount || 600
+    };
+
+    if (ev.sessions && ev.sessions.length > 0) {
+      this.mealSessions.set(JSON.parse(JSON.stringify(ev.sessions)));
+    } else {
+      this.resetScheduleForm();
+      this.isEditingEvent.set(true);
+      this.editingEventId.set(ev.id);
+      this.newEvent.customer_name = ev.customer_name || '';
+      this.newEvent.customer_phone = ev.customer_phone || '';
+      this.newEvent.customer_email = ev.customer_email || '';
+      this.newEvent.event_date = ev.rawDate;
+      this.newEvent.venue = ev.venue || 'No. 73, Mandhaikaara Street, Tirukoilur - 607201';
+      this.newEvent.guest_count = ev.guestCount || 600;
+      this.newEvent.event_name = ev.name ? ev.name.replace(/\s*\(.*?\)$/, '') : '';
+    }
+
+    if (this.selectedEventDetail()) {
+      this.selectedEventDetail.set(null);
+    }
+    this.showScheduleModal.set(true);
+  }
+
   private resetScheduleForm() {
+    this.isEditingEvent.set(false);
+    this.editingEventId.set(null);
     this.scheduleStep.set(1);
     this.activeSessionTab.set('morning');
     this.newEvent = {
@@ -717,9 +827,15 @@ export class AdminDashboardComponent implements OnInit {
     if (existing) {
       this.modalServingQuantity.set(existing.serving_quantity || dish.quantity_per_person || 100);
       this.modalServingUnit.set(existing.serving_unit || dish.serving_unit || 'g');
+      if (existing.is_offer_applied && existing.offer_price_per_person !== undefined) {
+        this.modalOfferPrice.set(Math.round(existing.offer_price_per_person / 100));
+      } else {
+        this.modalOfferPrice.set(null);
+      }
     } else {
       this.modalServingQuantity.set(dish.quantity_per_person || 100);
       this.modalServingUnit.set(dish.serving_unit || 'g');
+      this.modalOfferPrice.set(null);
     }
 
     this.activeModalImageIndex.set(0);
@@ -867,18 +983,37 @@ export class AdminDashboardComponent implements OnInit {
     const cur = this.currentSession();
     const qty = this.modalServingQuantity() || (this.modalServingUnit() === 'pcs' ? 2 : 100);
     const unit = this.modalServingUnit() || 'g';
+    const baseCatalogPrice = dish.price_per_person || 7500;
+    const offerPriceVal = this.modalOfferPrice();
+
+    let effectivePrice = baseCatalogPrice;
+    let offerPaise: number | undefined = undefined;
+    let isOffer = false;
+
+    if (offerPriceVal !== null && offerPriceVal !== undefined && !isNaN(Number(offerPriceVal)) && Number(offerPriceVal) > 0) {
+      offerPaise = Math.round(Number(offerPriceVal) * 100);
+      effectivePrice = offerPaise;
+      isOffer = true;
+    }
 
     const existingIdx = cur.dishes.findIndex(d => d.dish_id === dish.id);
     if (existingIdx >= 0) {
       cur.dishes[existingIdx].serving_quantity = qty;
       cur.dishes[existingIdx].serving_unit = unit;
-      this.toast.success(`Updated portion for "${dish.name}" to ${qty} ${unit} in ${cur.shortName}.`);
+      cur.dishes[existingIdx].original_price_per_person = baseCatalogPrice;
+      cur.dishes[existingIdx].offer_price_per_person = offerPaise;
+      cur.dishes[existingIdx].is_offer_applied = isOffer;
+      cur.dishes[existingIdx].price_per_person = effectivePrice;
+      this.toast.success(`Updated portion & rate for "${dish.name}" in ${cur.shortName}.`);
     } else {
       cur.dishes.push({
         dish_id: dish.id,
         name: dish.name,
         category_name: dish.category_name,
-        price_per_person: dish.price_per_person || 7500,
+        price_per_person: effectivePrice,
+        original_price_per_person: baseCatalogPrice,
+        offer_price_per_person: offerPaise,
+        is_offer_applied: isOffer,
         serving_quantity: qty,
         serving_unit: unit
       });
@@ -1034,6 +1169,8 @@ export class AdminDashboardComponent implements OnInit {
       ...this.newEvent,
       guest_count: peakGuests,
       notes: JSON.stringify({
+        source: 'admin',
+        creator: 'admin',
         sessions: activeSessions,
         totalDishes: activeSessions.reduce((acc, s) => acc + s.dishes.length, 0),
         venue: this.newEvent.venue || 'No. 73, Mandhaikaara Street, Tirukoilur',
@@ -1041,7 +1178,63 @@ export class AdminDashboardComponent implements OnInit {
       })
     };
 
-    // Save to backend API
+    // If editing existing event, call updateEvent
+    if (this.isEditingEvent() && this.editingEventId()) {
+      const eventId = this.editingEventId()!;
+      this.selectionService.updateEvent(eventId, eventPayload).subscribe({
+        next: (res) => {
+          const updatedEv: TimelineEvent = {
+            id: eventId,
+            rawDate: this.newEvent.event_date || this.formatDateISO(new Date()),
+            dateStr,
+            name: `${this.newEvent.event_name} (${this.newEvent.venue || 'Banqueting'})`,
+            customer_name: this.newEvent.customer_name,
+            customer_phone: this.newEvent.customer_phone,
+            customer_email: this.newEvent.customer_email,
+            venue: this.newEvent.venue,
+            guestCount: peakGuests,
+            status: 'Confirming Menu',
+            statusClass: 'confirming',
+            source: 'admin',
+            sessions: activeSessions,
+            financials: financials
+          };
+
+          this.timelineEvents.update(list => list.map(e => e.id === eventId ? updatedEv : e));
+          this.toast.success(`Booking "${this.newEvent.event_name}" updated successfully with grand total ₹${this.formatInr(financials.grandTotalPaise)}!`);
+          this.showScheduleModal.set(false);
+          this.isEditingEvent.set(false);
+          this.editingEventId.set(null);
+        },
+        error: () => {
+          const updatedEv: TimelineEvent = {
+            id: eventId,
+            rawDate: this.newEvent.event_date || this.formatDateISO(new Date()),
+            dateStr,
+            name: `${this.newEvent.event_name} (${this.newEvent.venue || 'Banqueting'})`,
+            customer_name: this.newEvent.customer_name,
+            customer_phone: this.newEvent.customer_phone,
+            customer_email: this.newEvent.customer_email,
+            venue: this.newEvent.venue,
+            guestCount: peakGuests,
+            status: 'Confirming Menu',
+            statusClass: 'confirming',
+            source: 'admin',
+            sessions: activeSessions,
+            financials: financials
+          };
+
+          this.timelineEvents.update(list => list.map(e => e.id === eventId ? updatedEv : e));
+          this.toast.success(`Booking "${this.newEvent.event_name}" updated locally.`);
+          this.showScheduleModal.set(false);
+          this.isEditingEvent.set(false);
+          this.editingEventId.set(null);
+        }
+      });
+      return;
+    }
+
+    // Save newly scheduled event to backend API
     this.selectionService.createEvent(eventPayload).subscribe({
       next: (res) => {
         const newEv: TimelineEvent = {
@@ -1051,10 +1244,12 @@ export class AdminDashboardComponent implements OnInit {
           name: `${this.newEvent.event_name} (${this.newEvent.venue || 'Banqueting'})`,
           customer_name: this.newEvent.customer_name,
           customer_phone: this.newEvent.customer_phone,
+          customer_email: this.newEvent.customer_email,
           venue: this.newEvent.venue,
           guestCount: peakGuests,
           status: 'Confirming Menu',
           statusClass: 'confirming',
+          source: 'admin',
           sessions: activeSessions,
           financials: financials
         };
@@ -1072,10 +1267,12 @@ export class AdminDashboardComponent implements OnInit {
           name: `${this.newEvent.event_name} (${this.newEvent.venue || 'Banqueting'})`,
           customer_name: this.newEvent.customer_name,
           customer_phone: this.newEvent.customer_phone,
+          customer_email: this.newEvent.customer_email,
           venue: this.newEvent.venue,
           guestCount: peakGuests,
           status: 'Confirming Menu',
           statusClass: 'confirming',
+          source: 'admin',
           sessions: activeSessions,
           financials: financials
         };
@@ -1170,7 +1367,13 @@ export class AdminDashboardComponent implements OnInit {
         text += `⏰ Slot: ${s.timeSlot} | 👥 Guests: ${s.guest_count} Pax\n`;
         text += `*Menu Items (${s.dishes.length}):*\n`;
         s.dishes.forEach((d, idx) => {
-          text += `  ${idx + 1}. ${d.name} (${d.category_name || 'Special'})\n`;
+          let priceStr = '';
+          if (d.is_offer_applied && d.offer_price_per_person) {
+            priceStr = ` • ₹${(d.offer_price_per_person / 100).toFixed(0)}/pax (Special Offer)`;
+          } else if (d.price_per_person) {
+            priceStr = ` • ₹${(d.price_per_person / 100).toFixed(0)}/pax`;
+          }
+          text += `  ${idx + 1}. ${d.name} (${d.serving_quantity || 100}${d.serving_unit || 'g'}${priceStr})\n`;
         });
         text += `\n`;
       }

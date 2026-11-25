@@ -4267,3 +4267,442 @@
     }
   }
 }
+
+/* ==========================================================================
+   Creator Filters, Offer Pricing & Edit Booking Enhancements
+   ========================================================================== */
+.creator-filter-pill {
+  display: inline-flex;
+  align-items: center;
+  background: #FAF8F5;
+  border: 1px solid #E5DEC9;
+  border-radius: 8px;
+  padding: 3px;
+  gap: 3px;
+
+  @media (max-width: 600px) {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .creator-btn {
+    padding: 0.35rem 0.75rem;
+    border: none;
+    background: transparent;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #7A686B;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+
+    @media (max-width: 600px) {
+      flex: 1;
+      text-align: center;
+      padding: 0.35rem 0.45rem;
+      font-size: 0.72rem;
+    }
+
+    &:hover {
+      background: rgba(91, 26, 36, 0.05);
+      color: #5B1A24;
+    }
+
+    &.active {
+      background: #5B1A24;
+      color: #FAF8F5;
+      font-weight: 700;
+      box-shadow: 0 1px 4px rgba(91, 26, 36, 0.15);
+    }
+  }
+}
+
+.source-mini-tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.12rem 0.45rem;
+  border-radius: 4px;
+  margin-left: 0.45rem;
+  vertical-align: middle;
+
+  &.admin {
+    background: rgba(91, 26, 36, 0.08);
+    color: #5B1A24;
+    border: 1px solid rgba(91, 26, 36, 0.2);
+  }
+
+  &.user {
+    background: rgba(14, 116, 144, 0.08);
+    color: #0E7490;
+    border: 1px solid rgba(14, 116, 144, 0.2);
+  }
+}
+
+.btn-row-edit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid #E5DEC9;
+  background: #FAF8F5;
+  color: #5B1A24;
+  cursor: pointer;
+  margin-right: 0.35rem;
+  transition: all 0.15s ease;
+
+  .material-symbols-outlined {
+    font-size: 16px;
+  }
+
+  &:hover {
+    background: #5B1A24;
+    color: #FFFFFF;
+    border-color: #5B1A24;
+    transform: translateY(-1px);
+  }
+}
+
+.btn-edit-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #C59B43;
+  color: #FFFFFF;
+  border: none;
+  padding: 0.6rem 1.1rem;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  .material-symbols-outlined {
+    font-size: 18px;
+  }
+
+  &:hover {
+    background: #A88232;
+    transform: translateY(-1px);
+  }
+}
+
+.tray-offer-input-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+  font-size: 0.72rem;
+  color: #7A686B;
+
+  .offer-lbl {
+    font-weight: 700;
+    color: #C59B43;
+  }
+
+  .tray-offer-input {
+    width: 68px;
+    padding: 0.18rem 0.35rem;
+    border: 1px solid #C59B43;
+    border-radius: 4px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #5B1A24;
+    background: #FFFDF9;
+    outline: none;
+
+    &:focus {
+      border-color: #5B1A24;
+      box-shadow: 0 0 0 2px rgba(91, 26, 36, 0.1);
+    }
+  }
+
+  .offer-applied-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    background: #DCFCE7;
+    color: #15803D;
+    padding: 0.1rem 0.35rem;
+    border-radius: 3px;
+    border: 1px solid #86EFAC;
+    text-transform: uppercase;
+  }
+}
+
+.row-dishes-pricing-table {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  background: #FAF8F5;
+  border: 1px solid #E5DEC9;
+  border-radius: 8px;
+  padding: 0.75rem;
+
+  .dish-pricing-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.7rem;
+    background: #FFFFFF;
+    border: 1px solid #EAE5D9;
+    border-radius: 6px;
+    gap: 0.75rem;
+
+    @media (max-width: 640px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.4rem;
+    }
+
+    .dp-info {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+
+      .dp-name {
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: #382F2D;
+      }
+
+      .dp-portion {
+        font-size: 0.75rem;
+        color: #7A686B;
+      }
+
+      .dp-offer-badge {
+        font-size: 0.62rem;
+        font-weight: 800;
+        background: #DCFCE7;
+        color: #166534;
+        padding: 0.1rem 0.35rem;
+        border-radius: 3px;
+        letter-spacing: 0.4px;
+      }
+    }
+
+    .dp-rates-col {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+
+      @media (max-width: 640px) {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .dp-rate-display {
+        display: flex;
+        align-items: baseline;
+        gap: 0.25rem;
+
+        .dp-orig-rate {
+          font-size: 0.78rem;
+          color: #9CA3AF;
+          text-decoration: line-through;
+        }
+
+        .dp-eff-rate {
+          font-size: 0.92rem;
+          color: #5B1A24;
+          font-weight: 700;
+        }
+
+        .dp-per-pax {
+          font-size: 0.72rem;
+          color: #7A686B;
+        }
+      }
+
+      .dp-offer-control {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+
+        .dp-offer-tag {
+          font-size: 0.72rem;
+          font-weight: 700;
+          color: #C59B43;
+        }
+
+        .dp-offer-input {
+          width: 76px;
+          padding: 0.25rem 0.45rem;
+          border: 1.5px solid #C59B43;
+          border-radius: 5px;
+          font-size: 0.82rem;
+          font-weight: 700;
+          color: #5B1A24;
+          background: #FFFDF9;
+
+          &:focus {
+            outline: none;
+            border-color: #5B1A24;
+            box-shadow: 0 0 0 2px rgba(91, 26, 36, 0.1);
+          }
+        }
+      }
+    }
+  }
+}
+
+.admin-dish-offer-box {
+  margin-top: 1rem;
+  background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+  border: 1.5px dashed #D97706;
+  border-radius: 10px;
+  padding: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+
+  .offer-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+
+    .offer-icon {
+      font-size: 22px;
+      color: #B45309;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .offer-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #92400E;
+      margin: 0;
+    }
+
+    .offer-sub {
+      font-size: 0.72rem;
+      color: #B45309;
+      margin: 0.15rem 0 0 0;
+      line-height: 1.3;
+    }
+  }
+
+  .offer-input-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+
+    .catalog-base-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.78rem;
+      color: #78350F;
+      background: rgba(255, 255, 255, 0.7);
+      padding: 0.3rem 0.55rem;
+      border-radius: 6px;
+
+      .lbl {
+        font-weight: 500;
+      }
+
+      .val {
+        font-weight: 800;
+        color: #92400E;
+      }
+    }
+
+    .arrow-sep {
+      color: #B45309;
+      font-weight: bold;
+      font-size: 1rem;
+    }
+
+    .offer-field-wrap {
+      display: flex;
+      align-items: center;
+      background: #FFFFFF;
+      border: 1.5px solid #D97706;
+      border-radius: 6px;
+      padding: 0.2rem 0.5rem;
+      gap: 0.25rem;
+
+      .currency-prefix {
+        font-weight: 700;
+        color: #92400E;
+        font-size: 0.85rem;
+      }
+
+      .offer-number-input {
+        border: none;
+        outline: none;
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: #92400E;
+        width: 100px;
+        background: transparent;
+      }
+
+      .per-head-suf {
+        font-size: 0.72rem;
+        color: #B45309;
+        font-weight: 600;
+      }
+    }
+
+    .btn-clear-offer {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+      background: #FFFFFF;
+      border: 1px solid #D97706;
+      color: #B45309;
+      padding: 0.3rem 0.55rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+
+      .material-symbols-outlined {
+        font-size: 15px;
+      }
+
+      &:hover {
+        background: #FEF3C7;
+      }
+    }
+  }
+}
+
+.beo-offer-block {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.4rem;
+
+  .beo-offer-price {
+    font-weight: 800;
+    color: #15803D;
+    font-size: 0.92rem;
+  }
+
+  .beo-orig-price {
+    font-size: 0.76rem;
+    color: #9CA3AF;
+    text-decoration: line-through;
+  }
+
+  .beo-offer-pill {
+    font-size: 0.62rem;
+    font-weight: 800;
+    background: #DCFCE7;
+    color: #166534;
+    padding: 0.1rem 0.35rem;
+    border-radius: 3px;
+    letter-spacing: 0.4px;
+  }
+}

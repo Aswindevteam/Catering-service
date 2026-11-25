@@ -152,6 +152,7 @@ export class AdminDashboardComponent implements OnInit {
   showScheduleModal = signal(false);
   isEditingEvent = signal<boolean>(false);
   editingEventId = signal<string | null>(null);
+  editingEventSource = signal<'admin' | 'user'>('admin');
   showPurchaseModal = signal(false);
   selectedEventDetail = signal<TimelineEvent | null>(null);
   showReportModal = signal(false);
@@ -656,6 +657,7 @@ export class AdminDashboardComponent implements OnInit {
     this.activeSessionTab.set('morning');
     this.isEditingEvent.set(true);
     this.editingEventId.set(ev.id);
+    this.editingEventSource.set(ev.source || 'admin');
 
     this.newEvent = {
       id: ev.id,
@@ -693,6 +695,7 @@ export class AdminDashboardComponent implements OnInit {
   private resetScheduleForm() {
     this.isEditingEvent.set(false);
     this.editingEventId.set(null);
+    this.editingEventSource.set('admin');
     this.scheduleStep.set(1);
     this.activeSessionTab.set('morning');
     this.newEvent = {
@@ -1164,13 +1167,15 @@ export class AdminDashboardComponent implements OnInit {
       ? dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
       : 'Upcoming';
 
+    const eventSource = this.isEditingEvent() ? this.editingEventSource() : 'admin';
+
     // Store rich sessions and complete financial breakdown inside notes payload
     const eventPayload: Partial<WeddingEvent> = {
       ...this.newEvent,
       guest_count: peakGuests,
       notes: JSON.stringify({
-        source: 'admin',
-        creator: 'admin',
+        source: eventSource,
+        creator: eventSource,
         sessions: activeSessions,
         totalDishes: activeSessions.reduce((acc, s) => acc + s.dishes.length, 0),
         venue: this.newEvent.venue || 'No. 73, Mandhaikaara Street, Tirukoilur',
@@ -1182,7 +1187,7 @@ export class AdminDashboardComponent implements OnInit {
     if (this.isEditingEvent() && this.editingEventId()) {
       const eventId = this.editingEventId()!;
       this.selectionService.updateEvent(eventId, eventPayload).subscribe({
-        next: (res) => {
+        next: () => {
           const updatedEv: TimelineEvent = {
             id: eventId,
             rawDate: this.newEvent.event_date || this.formatDateISO(new Date()),
@@ -1195,7 +1200,7 @@ export class AdminDashboardComponent implements OnInit {
             guestCount: peakGuests,
             status: 'Confirming Menu',
             statusClass: 'confirming',
-            source: 'admin',
+            source: eventSource,
             sessions: activeSessions,
             financials: financials
           };
@@ -1206,29 +1211,8 @@ export class AdminDashboardComponent implements OnInit {
           this.isEditingEvent.set(false);
           this.editingEventId.set(null);
         },
-        error: () => {
-          const updatedEv: TimelineEvent = {
-            id: eventId,
-            rawDate: this.newEvent.event_date || this.formatDateISO(new Date()),
-            dateStr,
-            name: `${this.newEvent.event_name} (${this.newEvent.venue || 'Banqueting'})`,
-            customer_name: this.newEvent.customer_name,
-            customer_phone: this.newEvent.customer_phone,
-            customer_email: this.newEvent.customer_email,
-            venue: this.newEvent.venue,
-            guestCount: peakGuests,
-            status: 'Confirming Menu',
-            statusClass: 'confirming',
-            source: 'admin',
-            sessions: activeSessions,
-            financials: financials
-          };
-
-          this.timelineEvents.update(list => list.map(e => e.id === eventId ? updatedEv : e));
-          this.toast.success(`Booking "${this.newEvent.event_name}" updated locally.`);
-          this.showScheduleModal.set(false);
-          this.isEditingEvent.set(false);
-          this.editingEventId.set(null);
+        error: (err) => {
+          this.toast.error(err?.error?.error || 'Failed to update booking on server. Please try again.');
         }
       });
       return;

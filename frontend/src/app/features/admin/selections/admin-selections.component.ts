@@ -85,6 +85,7 @@ export class AdminSelectionsComponent implements OnInit {
   isModalOpen = signal(false);
   isEditing = signal(false);
   editingBookingId = signal<string | null>(null);
+  editingBookingSource = signal<'admin' | 'user'>('admin');
   currentStep = signal<number>(1); // 1 = Basics, 2 = Sessions & Dishes, 3 = Pricing & Custom Rates
   modalActiveSessionId = signal<string>('morning');
   modalDishSearch = signal<string>('');
@@ -333,6 +334,7 @@ export class AdminSelectionsComponent implements OnInit {
   openCreateModal() {
     this.isEditing.set(false);
     this.editingBookingId.set(null);
+    this.editingBookingSource.set('admin');
     this.currentStep.set(1);
     this.bookingForm = {
       customer_name: '',
@@ -353,6 +355,7 @@ export class AdminSelectionsComponent implements OnInit {
   openEditModal(booking: UnifiedBooking) {
     this.isEditing.set(true);
     this.editingBookingId.set(booking.id);
+    this.editingBookingSource.set(booking.source || 'admin');
     this.currentStep.set(1);
 
     this.bookingForm = {
@@ -578,10 +581,10 @@ export class AdminSelectionsComponent implements OnInit {
 
     this.isSubmitting.set(true);
     const financials = this.modalFinancials();
-    const source = this.isEditing() ? undefined : 'admin';
+    const source = this.isEditing() ? this.editingBookingSource() : 'admin';
 
     const notesPayload = {
-      source: source || 'admin',
+      source,
       sessions: this.modalSessions(),
       financials: {
         foodSubtotal: financials.subtotal,

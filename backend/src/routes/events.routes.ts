@@ -84,6 +84,33 @@ eventsApp.put('/:id', adminAuthMiddleware, async (c) => {
       id
     ).run();
 
+    // If this event has an associated customer_selections record, sync updated financials too
+    if (notes) {
+      try {
+        const parsedNotes = JSON.parse(notes);
+        const fin = parsedNotes?.financials;
+        if (fin) {
+          const subtotalPaise = fin.foodSubtotalPaise ?? Math.round((fin.foodSubtotal || 0) * 100);
+          const servicePaise = fin.serviceChargePaise ?? Math.round((fin.serviceCharge || 0) * 100);
+          const transportPaise = fin.transportFeePaise ?? Math.round((fin.transportFee || 0) * 100);
+          const gstPaise = fin.gstAmountPaise ?? Math.round((fin.gstAmount || 0) * 100);
+          const grandPaise = fin.grandTotalPaise ?? Math.round((fin.grandTotal || 0) * 100);
+          const perGuestPaise = fin.perHeadPaise ?? Math.round((fin.perPax || 0) * 100);
+
+          if (grandPaise > 0) {
+            await c.env.DB.prepare(`
+              UPDATE customer_selections
+              SET subtotal = ?, service_charge = ?, transportation_charge = ?,
+                  gst_amount = ?, grand_total = ?, cost_per_guest = ?, updated_at = datetime('now')
+              WHERE event_id = ?
+            `).bind(subtotalPaise, servicePaise, transportPaise, gstPaise, grandPaise, perGuestPaise, id).run();
+          }
+        }
+      } catch {
+        // Ignore non-JSON notes
+      }
+    }
+
     const result = await c.env.DB.prepare('SELECT * FROM events WHERE id = ?').bind(id).first<WeddingEvent>();
     return c.json({ success: true, data: result });
   } catch (err: any) {

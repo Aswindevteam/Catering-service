@@ -651,7 +651,12 @@
                                 </div>
                                 <div class="pick-meta">
                                   <span class="pick-cat-badge">{{ dish.category_name || 'General' }}</span>
-                                  <span class="pick-portion">{{ dish.quantity_per_person || 100 }}{{ dish.serving_unit || 'g' }}/guest</span>
+                                  <span class="pick-portion" [class.customized]="isDishPortionCustomized(dish)">
+                                    {{ getDishServingPortion(dish) }}/guest
+                                    @if (isDishPortionCustomized(dish)) {
+                                      <span class="custom-dot">&bull; Custom</span>
+                                    }
+                                  </span>
                                   <span class="pick-price">₹{{ ((dish.price_per_person || 7500) / 100).toFixed(0) }}</span>
                                 </div>
                               </div>
@@ -664,7 +669,7 @@
                                     title="Dish added! Click to adjust portion pieces/grams"
                                   >
                                     <span class="material-symbols-outlined">done</span>
-                                    <span>Added</span>
+                                    <span>Added • {{ getDishServingPortion(dish) }}</span>
                                   </button>
                                 } @else {
                                   <button 
@@ -1299,7 +1304,7 @@
                 <span class="material-symbols-outlined customizer-icon">scale</span>
                 <div>
                   <h4 class="customizer-title">Banquet Serving Portion</h4>
-                  <p class="customizer-sub">Adjust pieces, grams, or portion for {{ currentSession().shortName }}</p>
+                  <p class="customizer-sub">Master Recipe Default: <strong>{{ dish.quantity_per_person || 100 }}{{ dish.serving_unit || 'g' }}</strong> &bull; Customizing for {{ currentSession().shortName }}</p>
                 </div>
               </div>
             </div>

@@ -1665,10 +1665,25 @@
                     .pick-cat-badge { font-weight: 600; color: #5B1A24; }
                     .pick-portion {
                       background: #F4EFE6;
-                      padding: 1px 5px;
+                      padding: 1px 6px;
                       border-radius: 3px;
                       font-weight: 600;
                       color: #4A3B32;
+                      transition: all 0.15s ease;
+
+                      &.customized {
+                        background: #FEF3C7;
+                        border: 1px solid #F59E0B;
+                        color: #92400E;
+                        font-weight: 700;
+
+                        .custom-dot {
+                          color: #D97706;
+                          font-size: 0.64rem;
+                          font-weight: 700;
+                          margin-left: 2px;
+                        }
+                      }
                     }
                     .pick-price { font-weight: 700; color: #C59B43; }
                   }

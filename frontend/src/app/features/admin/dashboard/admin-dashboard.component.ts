@@ -524,6 +524,26 @@ export class AdminDashboardComponent implements OnInit {
     return s.dishes.some(d => d.dish_id === dishId);
   }
 
+  getDishServingPortion(dish: Dish): string {
+    const cur = this.currentSession();
+    const item = cur?.dishes?.find(d => d.dish_id === dish.id);
+    if (item && item.serving_quantity) {
+      return `${item.serving_quantity}${item.serving_unit || 'g'}`;
+    }
+    return `${dish.quantity_per_person || 100}${dish.serving_unit || 'g'}`;
+  }
+
+  isDishPortionCustomized(dish: Dish): boolean {
+    const cur = this.currentSession();
+    const item = cur?.dishes?.find(d => d.dish_id === dish.id);
+    if (item && item.serving_quantity) {
+      const defaultQty = dish.quantity_per_person || 100;
+      const defaultUnit = dish.serving_unit || 'g';
+      return item.serving_quantity !== defaultQty || (item.serving_unit || 'g') !== defaultUnit;
+    }
+    return false;
+  }
+
   addDishToCurrentSession(dish: Dish) {
     const cur = this.currentSession();
     if (!cur.dishes.some(d => d.dish_id === dish.id)) {
@@ -532,11 +552,11 @@ export class AdminDashboardComponent implements OnInit {
         name: dish.name,
         category_name: dish.category_name,
         price_per_person: dish.price_per_person || 7500,
-        serving_quantity: dish.quantity_per_person || 150,
+        serving_quantity: dish.quantity_per_person || 100,
         serving_unit: dish.serving_unit || 'g'
       });
       this.mealSessions.update(list => [...list]);
-      this.toast.success(`Added "${dish.name}" to ${cur.shortName} session.`);
+      this.toast.success(`Added "${dish.name}" (${dish.quantity_per_person || 100}${dish.serving_unit || 'g'}) to ${cur.shortName} session.`);
     }
   }
 

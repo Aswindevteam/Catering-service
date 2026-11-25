@@ -1215,31 +1215,31 @@
     </div>
   }
 
-  <!-- DISH PROFILE & RECIPE MODAL (WITH PORTION / GRAMS / PIECES CUSTOMIZER) -->
+  <!-- DISH PROFILE & CUSTOMIZER SLIDE-OVER DRAWER -->
   @if (activeDishModal(); as dish) {
-    <div class="dish-profile-backdrop" (click)="closeDishProfile()">
-      <div class="dish-profile-card" (click)="$event.stopPropagation()">
+    <div class="dish-drawer-backdrop" (click)="closeDishProfile()">
+      <aside class="dish-profile-drawer" (click)="$event.stopPropagation()">
         <!-- Header -->
-        <div class="dish-profile-header">
+        <div class="drawer-header">
           <div class="header-titles">
             <div class="cat-diet-row">
-              <span class="profile-cat-pill">{{ dish.category_name || 'Specialty' }}</span>
-              <span class="profile-diet-tag" [class.veg]="dish.food_type !== 'non-veg'" [class.non-veg]="dish.food_type === 'non-veg'">
+              <span class="drawer-cat-pill">{{ dish.category_name || 'Specialty' }}</span>
+              <span class="drawer-diet-tag" [class.veg]="dish.food_type !== 'non-veg'" [class.non-veg]="dish.food_type === 'non-veg'">
                 <span class="diet-dot"></span>
                 <span>{{ dish.food_type === 'non-veg' ? 'Non-Veg' : 'Pure Veg' }}</span>
               </span>
             </div>
-            <h3 class="profile-dish-name">
+            <h3 class="drawer-dish-name">
               {{ tService.getDishName(dish) }}
             </h3>
           </div>
-          <button type="button" class="profile-close-btn" (click)="closeDishProfile()" aria-label="Close">
-            &times;
+          <button type="button" class="drawer-close-btn" (click)="closeDishProfile()" aria-label="Close drawer">
+            <span class="material-symbols-outlined">close</span>
           </button>
         </div>
 
         <!-- Body -->
-        <div class="dish-profile-body">
+        <div class="drawer-body">
           <!-- Multi-Image Hero / Gallery -->
           <div class="profile-gallery-hero">
             <div class="hero-image-wrap">
@@ -1298,8 +1298,8 @@
               <div class="title-wrap">
                 <span class="material-symbols-outlined customizer-icon">scale</span>
                 <div>
-                  <h4 class="customizer-title">Banquet Serving Portion per Guest</h4>
-                  <p class="customizer-sub">Adjust pieces, grams, or portion size for {{ currentSession().shortName }} session</p>
+                  <h4 class="customizer-title">Banquet Serving Portion</h4>
+                  <p class="customizer-sub">Adjust pieces, grams, or portion for {{ currentSession().shortName }}</p>
                 </div>
               </div>
             </div>
@@ -1395,7 +1395,7 @@
             <div class="batch-calculation-banner">
               <span class="material-symbols-outlined batch-calc-icon">soup_kitchen</span>
               <div class="batch-calc-info">
-                <span class="batch-calc-label">Total Kitchen Preparation for <strong>{{ currentSession().guest_count || newEvent.guest_count || 600 }} Guests</strong> ({{ currentSession().shortName }}):</span>
+                <span class="batch-calc-label">Total Kitchen Requirement for <strong>{{ currentSession().guest_count || newEvent.guest_count || 600 }} Guests</strong> ({{ currentSession().shortName }}):</span>
                 <span class="batch-calc-highlight">
                   {{ calculateBatchRequirement(modalServingQuantity(), modalServingUnit(), currentSession().guest_count || newEvent.guest_count || 600) }}
                 </span>
@@ -1446,7 +1446,7 @@
         </div>
 
         <!-- Footer Actions -->
-        <div class="dish-profile-footer">
+        <div class="drawer-footer">
           <button type="button" class="btn-cancel" (click)="closeDishProfile()">
             Close
           </button>
@@ -1469,7 +1469,7 @@
             }
           </div>
         </div>
-      </div>
+      </aside>
     </div>
   }
 </div>

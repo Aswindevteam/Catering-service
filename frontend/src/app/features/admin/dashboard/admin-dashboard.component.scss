@@ -3008,7 +3008,7 @@
 .dish-drawer-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 1300;
+  z-index: 100005; /* Must be higher than .modal-backdrop (99999) so drawer slides in ON TOP of the schedule modal */
   background: rgba(20, 8, 10, 0.45);
   backdrop-filter: blur(2px);
   display: flex;
@@ -3020,12 +3020,12 @@
 
   .dish-profile-drawer {
     width: 100%;
-    max-width: 440px;
+    max-width: 480px;
     height: 100vh;
     height: 100dvh;
     background: #FAF8F5;
-    border-left: 1.5px solid #C59B43;
-    box-shadow: -8px 0 36px rgba(26, 10, 14, 0.35);
+    border-left: 2px solid #C59B43;
+    box-shadow: -12px 0 44px rgba(0, 0, 0, 0.5);
     display: flex;
     flex-direction: column;
     box-sizing: border-box;

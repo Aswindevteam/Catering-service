@@ -249,14 +249,14 @@ import { WeddingEvent } from '../../../core/models';
                   <label>{{ translationService.t('event.cityPincode') }}</label>
                   <input 
                     type="text" 
-                    [placeholder]="translationService.currentLang() === 'ta' ? 'ஆலூர், கள்ளக்குறிச்சி - 605751' : 'Aalur, Kallakurichi - 605751'" 
+                    [placeholder]="translationService.currentLang() === 'ta' ? 'திருக்கோவிலூர் - 607201' : 'Tirukoilur - 607201'" 
                   />
                 </div>
               </div>
 
               <div class="field-wrap">
                 <label>{{ translationService.t('dialog.venueAddress') }}</label>
-                <textarea rows="2" [(ngModel)]="eventForm.venue" placeholder="e.g. Manikandan, Aalur, Thirukoilur Taluk, Kallakurichi Dt, 605751, Tamil Nadu"></textarea>
+                <textarea rows="2" [(ngModel)]="eventForm.venue" [placeholder]="translationService.currentLang() === 'ta' ? 'எ.கா. எண். 73, மந்தைக்காரத் தெரு, திருக்கோவிலூர் - 607201' : 'e.g. No. 73, Mandhaikaara Street, Tirukoilur - 607201'"></textarea>
               </div>
 
               <div class="modal-concierge-callout">

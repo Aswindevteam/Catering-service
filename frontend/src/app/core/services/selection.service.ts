@@ -29,7 +29,7 @@ export class SelectionService {
     event_name: 'Grand Wedding Reception',
     event_type: 'Wedding',
     event_date: '2026-12-15',
-    venue: 'Manikandan, Aalur, Thirukoilur Taluk, Kallakurichi Dt, 605751, Tamil Nadu',
+    venue: 'No. 73, Mandhaikaara Street, Tirukoilur - 607201',
     guest_count: 250,
     status: 'pending',
     notes: null,
@@ -187,6 +187,14 @@ export class SelectionService {
   getEvents(): Observable<{ success: boolean; data: WeddingEvent[] }> {
     return this.http.get<{ success: boolean; data: WeddingEvent[] }>(
       `${environment.apiUrl}/events`,
+      { headers: this.auth.getAuthHeaders() }
+    );
+  }
+
+  createEvent(event: Partial<WeddingEvent>): Observable<{ success: boolean; data: WeddingEvent }> {
+    return this.http.post<{ success: boolean; data: WeddingEvent }>(
+      `${environment.apiUrl}/events`,
+      event,
       { headers: this.auth.getAuthHeaders() }
     );
   }

@@ -1,0 +1,1176 @@
+<div class="executive-overview-page">
+  <!-- Header Greeting matching Figma Screen 04 -->
+  <header class="executive-header">
+    <div class="header-text">
+      <h1 class="greeting-title">{{ tService.t('admin.overviewTitle') }}</h1>
+      <p class="greeting-subtitle">{{ tService.t('admin.overviewLead') }}</p>
+    </div>
+    <div class="header-actions">
+      <button type="button" class="btn-royal-action" (click)="openScheduleModal()">
+        <span class="material-symbols-outlined">add</span>
+        <span>{{ tService.t('admin.actions.scheduleEvent') }}</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- KPI Metrics Grid matching Screen 04 -->
+  <section class="kpi-metrics-grid">
+    <div class="kpi-metric-card">
+      <div class="metric-top">
+        <span class="metric-title">{{ tService.t('admin.kpi.totalRevenue') }}</span>
+        <div class="metric-icon-box">
+          <span class="material-symbols-outlined">currency_rupee</span>
+        </div>
+      </div>
+      <div class="metric-main-value">
+        <span class="currency-sym">₹</span>
+        <span class="val-num">84.50</span>
+        <span class="val-unit">Lakhs</span>
+      </div>
+      <div class="metric-badge-trend positive">
+        <span class="material-symbols-outlined trend-arrow">trending_up</span>
+        <span class="trend-text">+14.2%</span>
+        <span class="trend-sub">vs last season</span>
+      </div>
+    </div>
+
+    <div class="kpi-metric-card">
+      <div class="metric-top">
+        <span class="metric-title">{{ tService.t('admin.kpi.totalEvents') }}</span>
+        <div class="metric-icon-box">
+          <span class="material-symbols-outlined">celebration</span>
+        </div>
+      </div>
+      <div class="metric-main-value">
+        <span class="val-num">128</span>
+        <span class="val-unit">Events</span>
+      </div>
+      <div class="metric-badge-trend positive">
+        <span class="material-symbols-outlined trend-arrow">trending_up</span>
+        <span class="trend-text">+8%</span>
+        <span class="trend-sub">active inquiries</span>
+      </div>
+    </div>
+
+    <div class="kpi-metric-card">
+      <div class="metric-top">
+        <span class="metric-title">{{ tService.t('admin.kpi.avgGuestSize') }}</span>
+        <div class="metric-icon-box">
+          <span class="material-symbols-outlined">groups</span>
+        </div>
+      </div>
+      <div class="metric-main-value">
+        <span class="val-num">650</span>
+        <span class="val-unit">Guests</span>
+      </div>
+      <div class="metric-badge-trend neutral">
+        <span class="trend-sub">banquet average</span>
+      </div>
+    </div>
+
+    <div class="kpi-metric-card highlight">
+      <div class="metric-top">
+        <span class="metric-title">{{ tService.t('admin.kpi.confirmedFeasts') }}</span>
+        <div class="metric-icon-box gold">
+          <span class="material-symbols-outlined">verified</span>
+        </div>
+      </div>
+      <div class="metric-main-value gold-text">
+        <span class="val-num">94</span>
+        <span class="val-unit">Orders</span>
+      </div>
+      <div class="metric-badge-trend highlight-trend">
+        <span class="trend-text">73.4%</span>
+        <span class="trend-sub">conversion rate</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Layout: Left Section (68%) + Right Panel (32%) -->
+  <div class="overview-main-grid">
+    <!-- Left Section: Revenue Chart + Calendar / Timeline Section -->
+    <div class="primary-column">
+      <!-- Revenue Chart Card -->
+      <div class="chart-luxury-card">
+        <div class="chart-head">
+          <div class="chart-titles">
+            <h3>{{ tService.t('admin.chart.revenueOverview') }}</h3>
+            <span class="chart-sub">Fiscal Season Catering Trajectory (INR in Lakhs)</span>
+          </div>
+          <div class="chart-pills">
+            <span class="chart-pill active">FY 2026-27</span>
+            <span class="chart-pill">Quarterly</span>
+          </div>
+        </div>
+
+        <div class="svg-chart-container">
+          <svg class="revenue-svg" viewBox="0 0 700 210" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="goldGradientArea" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#C59B43" stop-opacity="0.32"/>
+                <stop offset="70%" stop-color="#C59B43" stop-opacity="0.08"/>
+                <stop offset="100%" stop-color="#FAF8F5" stop-opacity="0"/>
+              </linearGradient>
+              <filter id="goldGlow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#C59B43" flood-opacity="0.25"/>
+              </filter>
+            </defs>
+
+            <line x1="40" y1="35" x2="660" y2="35" stroke="#E5DEC9" stroke-dasharray="3 4" stroke-width="0.8"/>
+            <line x1="40" y1="85" x2="660" y2="85" stroke="#E5DEC9" stroke-dasharray="3 4" stroke-width="0.8"/>
+            <line x1="40" y1="135" x2="660" y2="135" stroke="#E5DEC9" stroke-dasharray="3 4" stroke-width="0.8"/>
+            <line x1="40" y1="180" x2="660" y2="180" stroke="#E5DEC9" stroke-width="1.2"/>
+
+            <text x="32" y="39" fill="#9E8D8F" font-size="10.5" text-anchor="end">₹20L</text>
+            <text x="32" y="89" fill="#9E8D8F" font-size="10.5" text-anchor="end">₹15L</text>
+            <text x="32" y="139" fill="#9E8D8F" font-size="10.5" text-anchor="end">₹10L</text>
+            <text x="32" y="184" fill="#9E8D8F" font-size="10.5" text-anchor="end">₹0</text>
+
+            <text x="95" y="198" fill="#7A686B" font-size="11" font-weight="600" text-anchor="middle">July</text>
+            <text x="230" y="198" fill="#7A686B" font-size="11" font-weight="600" text-anchor="middle">August</text>
+            <text x="365" y="198" fill="#7A686B" font-size="11" font-weight="600" text-anchor="middle">September</text>
+            <text x="500" y="198" fill="#7A686B" font-size="11" font-weight="600" text-anchor="middle">October</text>
+            <text x="615" y="198" fill="#5B1A24" font-size="11.5" font-weight="700" text-anchor="middle">November (Peak)</text>
+
+            <path d="M 95 145 
+                     C 145 135, 185 118, 230 110 
+                     C 275 102, 320 130, 365 125 
+                     C 415 120, 455 75, 500 70 
+                     C 555 65, 580 42, 615 38 
+                     L 615 180 L 95 180 Z" 
+                  fill="url(#goldGradientArea)"/>
+
+            <path d="M 95 145 
+                     C 145 135, 185 118, 230 110 
+                     C 275 102, 320 130, 365 125 
+                     C 415 120, 455 75, 500 70 
+                     C 555 65, 580 42, 615 38" 
+                  fill="none" 
+                  stroke="#C59B43" 
+                  stroke-width="3.5" 
+                  stroke-linecap="round"
+                  filter="url(#goldGlow)"/>
+
+            <circle cx="95" cy="145" r="4.5" fill="#5B1A24" stroke="#FAF8F5" stroke-width="2.5"/>
+            <circle cx="230" cy="110" r="4.5" fill="#5B1A24" stroke="#FAF8F5" stroke-width="2.5"/>
+            <circle cx="365" cy="125" r="4.5" fill="#5B1A24" stroke="#FAF8F5" stroke-width="2.5"/>
+            <circle cx="500" cy="70" r="4.5" fill="#5B1A24" stroke="#FAF8F5" stroke-width="2.5"/>
+            <circle cx="615" cy="38" r="6" fill="#C59B43" stroke="#5B1A24" stroke-width="3"/>
+
+            <rect x="575" y="6" width="76" height="24" rx="4" fill="#421119" stroke="#C59B43" stroke-width="1"/>
+            <text x="613" y="22" fill="#FAF8F5" font-size="11.5" font-weight="700" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif">₹18.75L</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Wedding Events Calendar & Schedule Section -->
+      <div class="timeline-luxury-card">
+        <div class="timeline-head">
+          <div class="timeline-title-wrap">
+            <h3>{{ tService.t('admin.timeline.title') }}</h3>
+            <!-- View Mode Switcher: Calendar vs Timeline -->
+            <div class="view-mode-pill">
+              <button 
+                type="button" 
+                class="mode-btn" 
+                [class.active]="viewMode() === 'calendar'" 
+                (click)="viewMode.set('calendar')"
+                title="Switch to Full Calendar View"
+              >
+                <span class="material-symbols-outlined">calendar_month</span>
+                <span>Full Calendar</span>
+              </button>
+              <button 
+                type="button" 
+                class="mode-btn" 
+                [class.active]="viewMode() === 'timeline'" 
+                (click)="viewMode.set('timeline')"
+                title="Switch to Timeline List"
+              >
+                <span class="material-symbols-outlined">view_list</span>
+                <span>Timeline List</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="head-right-actions">
+            <button type="button" class="btn-sm-schedule" (click)="openScheduleModal()">
+              <span class="material-symbols-outlined">add</span>
+              <span>Schedule Wedding</span>
+            </button>
+            <a routerLink="/admin/selections" class="view-all-link">All Bookings &rarr;</a>
+          </div>
+        </div>
+
+        <!-- CALENDAR VIEW -->
+        @if (viewMode() === 'calendar') {
+          <div class="calendar-wrapper">
+            <!-- Calendar Navigation Toolbar -->
+            <div class="calendar-nav-bar">
+              <div class="nav-controls">
+                <button type="button" class="cal-nav-btn" (click)="prevMonth()" title="Previous Month">
+                  <span class="material-symbols-outlined">chevron_left</span>
+                </button>
+                <span class="cal-month-title">{{ currentMonthYearDisplay() }}</span>
+                <button type="button" class="cal-nav-btn" (click)="nextMonth()" title="Next Month">
+                  <span class="material-symbols-outlined">chevron_right</span>
+                </button>
+                <button type="button" class="cal-today-btn" (click)="goToToday()">Today</button>
+              </div>
+
+              <div class="cal-legend">
+                <span class="legend-item"><span class="legend-badge morning"></span> 🌅 Morning</span>
+                <span class="legend-item"><span class="legend-badge lunch"></span> ☀️ Lunch</span>
+                <span class="legend-item"><span class="legend-badge dinner"></span> 🌙 Dinner</span>
+              </div>
+            </div>
+
+            <!-- 7-Day Weekdays Header -->
+            <div class="cal-weekdays">
+              <span>Sun</span>
+              <span>Mon</span>
+              <span>Tue</span>
+              <span>Wed</span>
+              <span>Thu</span>
+              <span>Fri</span>
+              <span>Sat</span>
+            </div>
+
+            <!-- Month Days Grid -->
+            <div class="cal-grid">
+              @for (day of calendarDays(); track day.dateStr) {
+                <div 
+                  class="cal-day-cell" 
+                  [class.other-month]="!day.isCurrentMonth"
+                  [class.today]="day.isToday"
+                  [class.has-events]="day.events.length > 0"
+                  (click)="onDateCellClick(day)"
+                >
+                  <div class="day-cell-top">
+                    <span class="day-number">{{ day.dayNum }}</span>
+                    <button 
+                      type="button" 
+                      class="day-add-btn" 
+                      (click)="$event.stopPropagation(); openScheduleModalForDate(day.dateStr)" 
+                      title="Schedule Wedding on this date"
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  <div class="day-events-list">
+                    @for (ev of day.events; track ev.id) {
+                      <div 
+                        class="cal-event-chip" 
+                        [ngClass]="ev.statusClass" 
+                        (click)="$event.stopPropagation(); openEventDetailModal(ev)"
+                        [title]="ev.name + ' (' + ev.guestCount + ' guests) - Click for Menu Sessions'"
+                      >
+                        <div class="chip-header">
+                          <span class="event-chip-title">{{ ev.name }}</span>
+                          <span class="event-chip-guests">{{ ev.guestCount }} guests</span>
+                        </div>
+                        @if (ev.sessions && ev.sessions.length > 0) {
+                          <div class="chip-sessions">
+                            @for (s of ev.sessions; track s.id) {
+                              <span class="session-dot" [title]="s.name + ': ' + s.guest_count + ' guests, ' + s.dishes.length + ' dishes'">
+                                {{ s.shortName === 'Morning' ? '🌅' : s.shortName === 'Lunch' ? '☀️' : s.shortName === 'Evening' ? '☕' : '🌙' }} {{ s.guest_count }}
+                              </span>
+                            }
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        } @else {
+          <!-- TIMELINE LIST VIEW -->
+          <div class="events-table-wrap">
+            <table class="timeline-table">
+              <tbody>
+                @for (ev of timelineEvents(); track ev.id) {
+                  <tr class="timeline-row" (click)="openEventDetailModal(ev)" style="cursor: pointer;">
+                    <td class="cell-date">
+                      <span class="date-badge">{{ ev.dateStr }}</span>
+                    </td>
+                    <td class="cell-name">
+                      <div class="name-block">
+                        <span class="event-title">{{ ev.name }}</span>
+                        @if (ev.sessions && ev.sessions.length > 0) {
+                          <div class="row-sessions-badges">
+                            @for (s of ev.sessions; track s.id) {
+                              <span class="row-session-badge">
+                                {{ s.shortName }}: {{ s.guest_count }} guests ({{ s.dishes.length }} dishes)
+                              </span>
+                            }
+                          </div>
+                        }
+                      </div>
+                    </td>
+                    <td class="cell-guests">
+                      <span class="guest-count">{{ ev.guestCount }} Guests</span>
+                    </td>
+                    <td class="cell-status text-right">
+                      <span class="status-badge" [ngClass]="ev.statusClass">
+                        {{ ev.status }}
+                      </span>
+                      <button 
+                        type="button" 
+                        class="btn-row-report" 
+                        (click)="$event.stopPropagation(); openFinalReport(ev)"
+                        title="View Final Banquet Order Report"
+                      >
+                        <span class="material-symbols-outlined">description</span>
+                      </button>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="4" class="empty-timeline-cell">
+                      <div class="empty-events-state">
+                        <span class="material-symbols-outlined empty-icon">event_busy</span>
+                        <h4>No Wedding Events Scheduled</h4>
+                        <p>No active banquet celebrations found in the schedule. Click "+ Schedule Wedding" to create your first celebration event!</p>
+                        <button type="button" class="btn-sm-schedule" (click)="openScheduleModal()">
+                          <span class="material-symbols-outlined">add</span>
+                          <span>Schedule First Wedding</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Right Side Column: Top Performing Dishes + Quick Actions -->
+    <aside class="side-column">
+      <!-- Top Performing Dishes matching Figma Screen 04 -->
+      <div class="dishes-rank-card">
+        <div class="rank-head">
+          <h3>{{ tService.t('admin.dishes.topPerforming') }}</h3>
+          <a routerLink="/admin/dishes" class="rank-link">Catalog &rarr;</a>
+        </div>
+
+        <div class="ranked-dishes-list">
+          @for (dish of topDishes(); track dish.id) {
+            <div class="dish-rank-item">
+              <div class="dish-img-wrap">
+                <img [src]="dish.image_url" [alt]="dish.name" class="dish-thumb-round" />
+              </div>
+              <div class="dish-details">
+                <span class="dish-name">{{ dish.name }}</span>
+                <div class="dish-bar-bg">
+                  <div class="dish-bar-fill" [style.width.%]="dish.percentage"></div>
+                </div>
+              </div>
+              <div class="dish-share-badge">
+                <span>({{ dish.percentage }}%)</span>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Quick Operational Actions Card -->
+      <div class="actions-luxury-card">
+        <h3>{{ tService.t('admin.actions.title') }}</h3>
+        <div class="action-buttons-stack">
+          <button type="button" class="action-btn" (click)="openScheduleModal()">
+            <span class="material-symbols-outlined icon">event_available</span>
+            <span class="lbl">{{ tService.t('admin.actions.scheduleEvent') }}</span>
+          </button>
+
+          <button type="button" class="action-btn" (click)="openPurchaseOrdersModal()">
+            <span class="material-symbols-outlined icon">receipt_long</span>
+            <span class="lbl">{{ tService.t('admin.actions.reviewPO') }}</span>
+          </button>
+
+          <button type="button" class="action-btn" (click)="exportFinancialReport()">
+            <span class="material-symbols-outlined icon">file_download</span>
+            <span class="lbl">{{ tService.t('admin.actions.exportFinancials') }}</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- MULTI-SESSION SCHEDULE WEDDING EVENT MODAL -->
+  @if (showScheduleModal()) {
+    <div class="modal-backdrop" (click)="showScheduleModal.set(false)">
+      <div class="modal-dialog extra-large" (click)="$event.stopPropagation()">
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <div class="header-titles">
+            <h3>Schedule Wedding Celebration</h3>
+            <span class="modal-sub">Multi-Session Banquet Curating & Categorized Dishes</span>
+          </div>
+          <button class="close-btn" (click)="showScheduleModal.set(false)">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <!-- Stepper Navigation -->
+        <div class="modal-stepper">
+          <button 
+            type="button" 
+            class="step-tab" 
+            [class.active]="scheduleStep() === 1" 
+            (click)="scheduleStep.set(1)"
+          >
+            <span class="step-num">1</span>
+            <span class="step-label">Event Particulars</span>
+          </button>
+
+          <button 
+            type="button" 
+            class="step-tab" 
+            [class.active]="scheduleStep() === 2" 
+            (click)="scheduleStep.set(2)"
+          >
+            <span class="step-num">2</span>
+            <span class="step-label">Meal Sessions & Dishes</span>
+            <span class="step-badge">{{ sessionSummary().activeCount }} Sessions</span>
+          </button>
+
+          <button 
+            type="button" 
+            class="step-tab" 
+            [class.active]="scheduleStep() === 3" 
+            (click)="scheduleStep.set(3)"
+          >
+            <span class="step-num">3</span>
+            <span class="step-label">Feast Summary & Pricing</span>
+          </button>
+        </div>
+
+        <!-- Modal Body Content -->
+        <div class="modal-body-scrollable">
+          <!-- STEP 1: EVENT DETAILS -->
+          @if (scheduleStep() === 1) {
+            <div class="step-pane">
+              <div class="modal-field">
+                <label>Celebration / Family Event Name *</label>
+                <input 
+                  type="text" 
+                  [(ngModel)]="newEvent.event_name" 
+                  placeholder="e.g. Iyer-Krishnan Grand Wedding Reception" 
+                />
+              </div>
+
+              <div class="modal-row-2">
+                <div class="modal-field">
+                  <label>Customer / Host Full Name *</label>
+                  <input 
+                    type="text" 
+                    [(ngModel)]="newEvent.customer_name" 
+                    placeholder="e.g. Ramesh Iyer" 
+                  />
+                </div>
+                <div class="modal-field">
+                  <label>Contact Phone Number *</label>
+                  <input 
+                    type="text" 
+                    [(ngModel)]="newEvent.customer_phone" 
+                    placeholder="+91 72998 87725" 
+                  />
+                </div>
+              </div>
+
+              <div class="modal-row-2">
+                <div class="modal-field">
+                  <label>Wedding Date *</label>
+                  <input 
+                    type="date" 
+                    [(ngModel)]="newEvent.event_date" 
+                  />
+                </div>
+                <div class="modal-field">
+                  <label>Event Type</label>
+                  <select [(ngModel)]="newEvent.event_type" class="modal-select">
+                    <option value="Wedding">Wedding (Traditional Muhurtham)</option>
+                    <option value="Wedding Reception">Wedding Reception</option>
+                    <option value="Sangeet & Mehendi">Sangeet & Mehendi</option>
+                    <option value="Engagement Banquet">Engagement Banquet</option>
+                    <option value="Seemantham / Housewarming">Seemantham / Housewarming</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="modal-field">
+                <label>Banquet Venue & Street Address *</label>
+                <textarea 
+                  rows="2" 
+                  [(ngModel)]="newEvent.venue" 
+                  placeholder="e.g. No. 73, Mandhaikaara Street, Tirukoilur - 607201"
+                ></textarea>
+              </div>
+
+              <div class="info-alert-box">
+                <span class="material-symbols-outlined info-icon">info</span>
+                <div>
+                  <strong>Next: Configure Morning, Lunch, and Dinner Sessions</strong>
+                  <p>In Step 2, you can specify individual guest counts and select categorized dishes for each meal session (Breakfast, Lunch, High Tea, and Dinner).</p>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- STEP 2: MEAL SESSIONS & CATEGORIZED DISHES BUILDER -->
+          @if (scheduleStep() === 2) {
+            <div class="step-pane sessions-builder-pane">
+              <!-- Session Selector Tabs -->
+              <div class="sessions-selector-tabs">
+                @for (session of mealSessions(); track session.id) {
+                  <button 
+                    type="button" 
+                    class="session-tab-btn" 
+                    [class.active]="activeSessionTab() === session.id"
+                    [class.disabled]="!session.enabled"
+                    (click)="activeSessionTab.set(session.id)"
+                  >
+                    <div class="tab-top">
+                      <span class="session-tab-icon">{{ session.shortName === 'Morning' ? '🌅' : session.shortName === 'Lunch' ? '☀️' : session.shortName === 'Evening' ? '☕' : '🌙' }}</span>
+                      <span class="session-tab-name">{{ session.shortName }}</span>
+                      <input 
+                        type="checkbox" 
+                        [checked]="session.enabled" 
+                        (change)="toggleSession(session); $event.stopPropagation()" 
+                        title="Enable/disable this session"
+                        class="session-checkbox"
+                      />
+                    </div>
+                    @if (session.enabled) {
+                      <div class="tab-meta">
+                        <span class="meta-guests">{{ session.guest_count }} Guests</span>
+                        <span class="meta-dishes">{{ session.dishes.length }} Dishes</span>
+                      </div>
+                    } @else {
+                      <span class="tab-disabled-text">Disabled</span>
+                    }
+                  </button>
+                }
+              </div>
+
+              <!-- Active Session Configuration Card -->
+              @if (currentSession(); as cur) {
+                <div class="current-session-card">
+                  <!-- Session Top Bar: Guest Count & Time Slot -->
+                  <div class="session-config-bar">
+                    <div class="config-identity">
+                      <h4>{{ cur.name }}</h4>
+                      <label class="enable-switch">
+                        <input type="checkbox" [checked]="cur.enabled" (change)="toggleSession(cur)" />
+                        <span>Include in Wedding Schedule</span>
+                      </label>
+                    </div>
+
+                    @if (cur.enabled) {
+                      <div class="config-inputs">
+                        <div class="input-inline">
+                          <label>Session Guests:</label>
+                          <input 
+                            type="number" 
+                            [(ngModel)]="cur.guest_count" 
+                            min="25" 
+                            max="5000" 
+                            class="guests-input"
+                          />
+                        </div>
+                        <div class="input-inline">
+                          <label>Serving Time:</label>
+                          <input 
+                            type="text" 
+                            [(ngModel)]="cur.timeSlot" 
+                            placeholder="07:30 AM - 10:00 AM" 
+                            class="time-input"
+                          />
+                        </div>
+                      </div>
+                    }
+                  </div>
+
+                  @if (cur.enabled) {
+                    <!-- Dish Picker & Selected Dishes Two-Column Split -->
+                    <div class="session-dishes-split">
+                      <!-- Left: Available Dishes with Category Tabs & Search -->
+                      <div class="picker-panel">
+                        <div class="picker-search-bar">
+                          <span class="material-symbols-outlined search-icon">search</span>
+                          <input 
+                            type="text" 
+                            [ngModel]="dishSearchQuery()" 
+                            (ngModelChange)="dishSearchQuery.set($event)" 
+                            placeholder="Search dishes to add to {{ cur.shortName }}..." 
+                            class="search-input"
+                          />
+                        </div>
+
+                        <!-- Category Filter Pills -->
+                        <div class="category-filter-pills">
+                          <button 
+                            type="button" 
+                            class="cat-pill" 
+                            [class.active]="selectedDishCategory() === 'all'"
+                            (click)="selectedDishCategory.set('all')"
+                          >
+                            All Categories
+                          </button>
+                          @for (cat of categories(); track cat.id) {
+                            <button 
+                              type="button" 
+                              class="cat-pill" 
+                              [class.active]="selectedDishCategory() === cat.id"
+                              (click)="selectedDishCategory.set(cat.id)"
+                            >
+                              {{ cat.name }}
+                            </button>
+                          }
+                        </div>
+
+                        <!-- Dishes Catalog List -->
+                        <div class="dishes-catalog-scroll">
+                          @for (dish of filteredDishesForPicker(); track dish.id) {
+                            <div class="dish-pick-row" [class.selected]="isDishInCurrentSession(dish.id)">
+                              <div class="dish-info-left">
+                                <span class="pick-dish-name">{{ dish.name }}</span>
+                                <div class="pick-meta">
+                                  <span class="pick-cat-badge">{{ dish.category_name || 'General' }}</span>
+                                  <span class="pick-portion">{{ dish.quantity_per_person || 100 }}{{ dish.serving_unit || 'g' }}/guest</span>
+                                  <span class="pick-price">₹{{ ((dish.price_per_person || 7500) / 100).toFixed(0) }}</span>
+                                </div>
+                              </div>
+                              <button 
+                                type="button" 
+                                class="add-dish-btn" 
+                                [disabled]="isDishInCurrentSession(dish.id)"
+                                (click)="addDishToCurrentSession(dish)"
+                              >
+                                @if (isDishInCurrentSession(dish.id)) {
+                                  <span class="material-symbols-outlined">done</span>
+                                  <span>Added</span>
+                                } @else {
+                                  <span class="material-symbols-outlined">add</span>
+                                  <span>Add</span>
+                                }
+                              </button>
+                            </div>
+                          } @empty {
+                            <div class="empty-picker">
+                              <p>No dishes found matching your query.</p>
+                            </div>
+                          }
+                        </div>
+                      </div>
+
+                      <!-- Right: Curated Menu for this Session -->
+                      <div class="selected-tray-panel">
+                        <div class="tray-header">
+                          <h5>Selected for {{ cur.shortName }}</h5>
+                          <span class="tray-count-badge">{{ cur.dishes.length }} dishes</span>
+                        </div>
+
+                        <div class="selected-items-scroll">
+                          @for (d of cur.dishes; track d.dish_id; let i = $index) {
+                            <div class="tray-dish-chip">
+                              <span class="dish-num">{{ i + 1 }}</span>
+                              <div class="tray-dish-details">
+                                <span class="tray-name">{{ d.name }}</span>
+                                <span class="tray-sub">{{ d.category_name }} • ₹{{ (d.price_per_person / 100).toFixed(0) }}/guest</span>
+                              </div>
+                              <button 
+                                type="button" 
+                                class="remove-chip-btn" 
+                                (click)="removeDishFromCurrentSession(d.dish_id)" 
+                                title="Remove from this session"
+                              >
+                                &times;
+                              </button>
+                            </div>
+                          } @empty {
+                            <div class="empty-tray">
+                              <span class="material-symbols-outlined tray-empty-icon">restaurant_menu</span>
+                              <p>No dishes selected for {{ cur.shortName }} yet.</p>
+                              <span>Click "+ Add" on any dish from the left catalog.</span>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  } @else {
+                    <div class="session-disabled-notice">
+                      <p>This session is currently disabled for this wedding. Check the box above if you want to serve food during {{ cur.name }}.</p>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+
+          <!-- STEP 3: FEAST SUMMARY & COST BREAKDOWN -->
+          @if (scheduleStep() === 3) {
+            <div class="step-pane summary-pane">
+              <div class="summary-card-royal">
+                <div class="summary-top">
+                  <h4>{{ newEvent.event_name || 'Wedding Celebration Feast' }}</h4>
+                  <span class="summary-venue">{{ newEvent.venue }}</span>
+                  <span class="summary-date">{{ newEvent.event_date }}</span>
+                </div>
+
+                <div class="summary-stats-grid">
+                  <div class="stat-box">
+                    <span class="stat-label">Host / Contact</span>
+                    <strong class="stat-val">{{ newEvent.customer_name }} ({{ newEvent.customer_phone }})</strong>
+                  </div>
+                  <div class="stat-box">
+                    <span class="stat-label">Active Meal Sessions</span>
+                    <strong class="stat-val">{{ sessionSummary().activeCount }} Sessions</strong>
+                  </div>
+                  <div class="stat-box">
+                    <span class="stat-label">Peak Guest Count</span>
+                    <strong class="stat-val">{{ sessionSummary().peakGuests }} Guests</strong>
+                  </div>
+                  <div class="stat-box">
+                    <span class="stat-label">Total Distinct Dishes</span>
+                    <strong class="stat-val">{{ sessionSummary().totalDishes }} Menu Items</strong>
+                  </div>
+                </div>
+
+                <div class="sessions-breakdown-list">
+                  <h5>Course Sessions Breakdown</h5>
+                  @for (s of mealSessions(); track s.id) {
+                    @if (s.enabled) {
+                      <div class="session-summary-row">
+                        <div class="row-left">
+                          <span class="session-icon-circle">{{ s.shortName === 'Morning' ? '🌅' : s.shortName === 'Lunch' ? '☀️' : s.shortName === 'Evening' ? '☕' : '🌙' }}</span>
+                          <div>
+                            <strong>{{ s.name }}</strong>
+                            <div class="session-sub-meta">
+                              <span>Serving: {{ s.timeSlot }}</span> • 
+                              <span><strong>{{ s.guest_count }} Guests</strong></span> • 
+                              <span>{{ s.dishes.length }} Dishes</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="row-dishes-chips">
+                          @for (d of s.dishes; track d.dish_id) {
+                            <span class="dish-tag">{{ d.name }}</span>
+                          }
+                        </div>
+                      </div>
+                    }
+                  }
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Modal Footer Actions -->
+        <div class="modal-footer">
+          <div class="footer-left">
+            @if (scheduleStep() > 1) {
+              <button type="button" class="btn-cancel" (click)="scheduleStep.set(scheduleStep() - 1)">
+                &larr; Back
+              </button>
+            } @else {
+              <button type="button" class="btn-cancel" (click)="showScheduleModal.set(false)">
+                Cancel
+              </button>
+            }
+          </div>
+
+          <div class="footer-right">
+            @if (scheduleStep() < 3) {
+              <button type="button" class="btn-submit" (click)="scheduleStep.set(scheduleStep() + 1)">
+                Next Step &rarr;
+              </button>
+            } @else {
+              <button type="button" class="btn-submit" (click)="saveScheduledEvent()">
+                Confirm & Save Celebration Event
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- EVENT DETAILS INSPECTION MODAL -->
+  @if (selectedEventDetail(); as ev) {
+    <div class="modal-backdrop" (click)="closeEventDetailModal()">
+      <div class="modal-dialog large" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div>
+            <h3>{{ ev.name }}</h3>
+            <span class="modal-sub">Scheduled Wedding Date: {{ ev.dateStr }} • Total {{ ev.guestCount }} Guests</span>
+          </div>
+          <button class="close-btn" (click)="closeEventDetailModal()">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="inspection-details-grid">
+            <div class="inspect-field">
+              <span class="lbl">Customer / Host</span>
+              <strong>{{ ev.customer_name || 'Ramesh Iyer' }}</strong>
+            </div>
+            <div class="inspect-field">
+              <span class="lbl">Contact Phone</span>
+              <strong>{{ ev.customer_phone || '+91 72998 87725' }}</strong>
+            </div>
+            <div class="inspect-field">
+              <span class="lbl">Banquet Venue</span>
+              <strong>{{ ev.venue || 'No. 73, Mandhaikaara Street, Tirukoilur' }}</strong>
+            </div>
+            <div class="inspect-field">
+              <span class="lbl">Status</span>
+              <span class="status-badge" [ngClass]="ev.statusClass">{{ ev.status }}</span>
+            </div>
+          </div>
+
+          <!-- Session Breakdown if available -->
+          @if (ev.sessions && ev.sessions.length > 0) {
+            <div class="inspect-sessions-container">
+              <h4>Configured Meal Sessions</h4>
+              @for (s of ev.sessions; track s.id) {
+                <div class="session-detail-card">
+                  <div class="session-detail-header">
+                    <div class="s-title">
+                      <span class="icon">{{ s.shortName === 'Morning' ? '🌅' : s.shortName === 'Lunch' ? '☀️' : s.shortName === 'Evening' ? '☕' : '🌙' }}</span>
+                      <strong>{{ s.name }}</strong>
+                    </div>
+                    <div class="s-stats">
+                      <span class="badge-guest">{{ s.guest_count }} Guests</span>
+                      <span class="badge-time">{{ s.timeSlot }}</span>
+                    </div>
+                  </div>
+
+                  <div class="session-dishes-cloud">
+                    @for (d of s.dishes; track d.dish_id) {
+                      <div class="session-dish-pill">
+                        <span class="p-name">{{ d.name }}</span>
+                        @if (d.category_name) {
+                          <span class="p-cat">({{ d.category_name }})</span>
+                        }
+                      </div>
+                    } @empty {
+                      <span class="no-dishes-note">Dishes to be finalized with customer.</span>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="closeEventDetailModal()">Close</button>
+          <button type="button" class="btn-report-action" (click)="openFinalReport(ev)">
+            <span class="material-symbols-outlined">description</span>
+            <span>Final Banquet Report (BEO)</span>
+          </button>
+          <a 
+            [href]="'https://wa.me/' + (ev.customer_phone ? ev.customer_phone.replace('+', '').replace(' ', '') : '917299887725') + '?text=Namaste%20from%20Thirumala%20Catering%20Service!%20Regarding%20your%20scheduled%20wedding%20feast%20on%20' + ev.dateStr"
+            target="_blank"
+            class="btn-wa-action"
+          >
+            <span class="material-symbols-outlined">chat</span>
+            <span>WhatsApp Host</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Purchase Orders Modal -->
+  @if (showPurchaseModal()) {
+    <div class="modal-backdrop" (click)="showPurchaseModal.set(false)">
+      <div class="modal-dialog large" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div>
+            <h3>Aggregate Kitchen Purchase Orders</h3>
+            <span class="modal-sub">Calculated for Upcoming Wedding Feasts</span>
+          </div>
+          <button class="close-btn" (click)="showPurchaseModal.set(false)">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <table class="po-table">
+            <thead>
+              <tr>
+                <th>Raw Ingredient</th>
+                <th>Required Batch</th>
+                <th>Supplier Benchmark</th>
+                <th>Estimated Value</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Fresh Malai Paneer</td>
+                <td>1,680 kg</td>
+                <td>₹375 / kg</td>
+                <td>₹6,30,000</td>
+                <td><span class="po-pill ready">PO Approved</span></td>
+              </tr>
+              <tr>
+                <td>Royal Basmati Rice (Daawat)</td>
+                <td>2,100 kg</td>
+                <td>₹140 / kg</td>
+                <td>₹2,94,000</td>
+                <td><span class="po-pill ready">PO Approved</span></td>
+              </tr>
+              <tr>
+                <td>Pure Desi Ghee (Amul / Nandini)</td>
+                <td>630 kg</td>
+                <td>₹580 / kg</td>
+                <td>₹3,65,400</td>
+                <td><span class="po-pill pending">Awaiting Delivery</span></td>
+              </tr>
+              <tr>
+                <td>Kashmiri Saffron & Whole Spices</td>
+                <td>125 kg</td>
+                <td>₹1,800 / kg</td>
+                <td>₹2,25,000</td>
+                <td><span class="po-pill ready">PO Approved</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="showPurchaseModal.set(false)">Close</button>
+          <button type="button" class="btn-submit" (click)="downloadPurchaseOrderPdf()">Download PO Sheet</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- FINAL BANQUET EVENT ORDER (BEO) REPORT MODAL -->
+  @if (showReportModal() && selectedReportEvent(); as rpt) {
+    <div class="modal-backdrop" (click)="closeReportModal()">
+      <div class="modal-dialog extra-large report-dialog" (click)="$event.stopPropagation()">
+        <!-- Modal Toolbar (Hidden during print) -->
+        <div class="modal-header no-print">
+          <div class="header-titles">
+            <h3>Final Banquet Event Order & Kitchen Production Report</h3>
+            <span class="modal-sub">Official Catering Spec Sheet for Production, Head Chef & Client</span>
+          </div>
+          <div class="report-top-actions">
+            <button type="button" class="btn-print-action" (click)="printCurrentReport()">
+              <span class="material-symbols-outlined">print</span>
+              <span>Print / Save PDF</span>
+            </button>
+            <button type="button" class="btn-wa-action" (click)="shareReportViaWhatsApp(rpt)">
+              <span class="material-symbols-outlined">chat</span>
+              <span>WhatsApp Report</span>
+            </button>
+            <button class="close-btn" (click)="closeReportModal()">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="modal-body report-modal-body">
+          <div class="report-sheet">
+            <!-- Official Branded Header -->
+            <div class="report-header">
+              <div class="brand-crest">
+                <span class="brand-om">ॐ</span>
+                <div class="brand-titles">
+                  <h1 class="brand-main">Thirumala Catering Service</h1>
+                  <div class="brand-multi-lang">
+                    <span>திருமலா கேட்டரிங் சர்வீஸ்</span>
+                    <span>•</span>
+                    <span>तिरुमाला कैटरिंग सर्विस</span>
+                    <span>•</span>
+                    <span>തിരുമല കാറ്ററിംഗ് സർവീസ്</span>
+                  </div>
+                  <div class="brand-tagline">Traditional South Indian & Royal Multi-Cuisine Banqueting</div>
+                </div>
+              </div>
+
+              <div class="report-doc-badge">
+                <span class="badge-title">BANQUET EVENT ORDER</span>
+                <span class="badge-ref">REF: BEO-2026-{{ rpt.id.toUpperCase() }}</span>
+                <span class="badge-status">{{ rpt.status }}</span>
+              </div>
+            </div>
+
+            <!-- Locations Bar -->
+            <div class="report-branches-bar">
+              <div class="branch-item">
+                <span class="branch-label">Central Culinary HQ:</span>
+                <span class="branch-val">No. 73, Mandhaikaara Street, Tirukoilur - 607201</span>
+              </div>
+              <div class="branch-divider">|</div>
+              <div class="branch-item">
+                <span class="branch-label">Chennai Branch:</span>
+                <span class="branch-val">No. 5, Krishnappa Agraharam Street, Sowcarpet, Chennai - 600079</span>
+              </div>
+              <div class="branch-divider">|</div>
+              <div class="branch-item">
+                <span class="branch-label">Concierge:</span>
+                <span class="branch-val">+91 72998 87725</span>
+              </div>
+            </div>
+
+            <!-- Event & Patron Particulars Card -->
+            <div class="report-event-info-grid">
+              <div class="info-cell">
+                <span class="cell-label">Event / Celebration</span>
+                <span class="cell-data strong">{{ rpt.name }}</span>
+              </div>
+              <div class="info-cell">
+                <span class="cell-label">Host / Patron Name</span>
+                <span class="cell-data">{{ rpt.customer_name || 'Valued Patron' }}</span>
+              </div>
+              <div class="info-cell">
+                <span class="cell-label">Patron Phone / WhatsApp</span>
+                <span class="cell-data">{{ rpt.customer_phone || '+91 72998 87725' }}</span>
+              </div>
+              <div class="info-cell">
+                <span class="cell-label">Scheduled Date</span>
+                <span class="cell-data highlight">{{ rpt.dateStr }} ({{ rpt.rawDate }})</span>
+              </div>
+              <div class="info-cell full-span">
+                <span class="cell-label">Banquet Venue / Mandapam Address</span>
+                <span class="cell-data">{{ rpt.venue || 'Tirukoilur Mandapam' }}</span>
+              </div>
+              <div class="info-cell">
+                <span class="cell-label">Peak Headcount</span>
+                <span class="cell-data badge-count">{{ rpt.guestCount }} Guests</span>
+              </div>
+              <div class="info-cell">
+                <span class="cell-label">Active Meal Sessions</span>
+                <span class="cell-data">{{ rpt.sessions?.length || 0 }} Scheduled</span>
+              </div>
+            </div>
+
+            <!-- Session by Session Menu Tables -->
+            @if (rpt.sessions && rpt.sessions.length > 0) {
+              <div class="report-sessions-container">
+                @for (s of rpt.sessions; track s.id) {
+                  <div class="report-session-section">
+                    <div class="session-section-header">
+                      <div class="sec-left">
+                        <span class="sec-icon material-symbols-outlined">{{ s.icon }}</span>
+                        <h3 class="sec-title">{{ s.name }}</h3>
+                      </div>
+                      <div class="sec-right">
+                        <span class="sec-slot">🕒 {{ s.timeSlot }}</span>
+                        <span class="sec-guests">👥 {{ s.guest_count }} Guests</span>
+                        <span class="sec-dish-count">🍽️ {{ s.dishes.length }} Dishes</span>
+                      </div>
+                    </div>
+
+                    <table class="report-dishes-table">
+                      <thead>
+                        <tr>
+                          <th style="width: 48px;">#</th>
+                          <th style="width: 140px;">Category</th>
+                          <th>Dish Name</th>
+                          <th style="width: 130px;">Portion / Guest</th>
+                          <th style="width: 160px;">Batch Prep Size</th>
+                          <th style="width: 120px;" class="text-right">Per Head</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (d of s.dishes; track d.dish_id; let idx = $index) {
+                          <tr>
+                            <td class="text-muted">{{ idx + 1 }}</td>
+                            <td><span class="tbl-cat-pill">{{ d.category_name || 'General' }}</span></td>
+                            <td class="dish-name-cell">{{ d.name }}</td>
+                            <td>{{ d.serving_quantity || 100 }}{{ d.serving_unit || 'g' }}</td>
+                            <td class="batch-cell">
+                              <strong>{{ calculateBatchRequirement(d.serving_quantity, d.serving_unit, s.guest_count) }}</strong>
+                            </td>
+                            <td class="text-right text-muted">₹{{ ((d.price_per_person || 7500) / 100).toFixed(0) }}</td>
+                          </tr>
+                        } @empty {
+                          <tr>
+                            <td colspan="6" class="empty-dishes">Dishes to be finalized with head chef and host.</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                }
+              </div>
+            }
+
+            <!-- Master Kitchen Provision / Raw Material Estimation -->
+            <div class="report-raw-provisions">
+              <h4 class="provisions-title">Kitchen Raw Material & Key Ingredient Requisition</h4>
+              <div class="provisions-grid">
+                <div class="prov-card">
+                  <span class="prov-icon material-symbols-outlined">grain</span>
+                  <div class="prov-info">
+                    <span class="prov-name">Royal Basmati Rice</span>
+                    <span class="prov-calc">~{{ ((rpt.guestCount * 0.16) || 80).toFixed(0) }} kg</span>
+                  </div>
+                </div>
+                <div class="prov-card">
+                  <span class="prov-icon material-symbols-outlined">liquor</span>
+                  <div class="prov-info">
+                    <span class="prov-name">Pure Desi Ghee</span>
+                    <span class="prov-calc">~{{ ((rpt.guestCount * 0.04) || 20).toFixed(0) }} kg</span>
+                  </div>
+                </div>
+                <div class="prov-card">
+                  <span class="prov-icon material-symbols-outlined">soup_kitchen</span>
+                  <div class="prov-info">
+                    <span class="prov-name">Fresh Malai Paneer</span>
+                    <span class="prov-calc">~{{ ((rpt.guestCount * 0.08) || 40).toFixed(0) }} kg</span>
+                  </div>
+                </div>
+                <div class="prov-card">
+                  <span class="prov-icon material-symbols-outlined">nest_eco_leaf</span>
+                  <div class="prov-info">
+                    <span class="prov-name">Fresh Farm Vegetables</span>
+                    <span class="prov-calc">~{{ ((rpt.guestCount * 0.35) || 175).toFixed(0) }} kg</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Signatures Section -->
+            <div class="report-signatures">
+              <div class="sig-block">
+                <div class="sig-line"></div>
+                <span class="sig-label">Prepared By: Banquet Operations Manager</span>
+                <span class="sig-sub">Thirumala Catering Service</span>
+              </div>
+              <div class="sig-block">
+                <div class="sig-line"></div>
+                <span class="sig-label">Confirmed & Accepted By</span>
+                <span class="sig-sub">Host / Family Representative</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer no-print">
+          <button type="button" class="btn-cancel" (click)="closeReportModal()">Close</button>
+          <button type="button" class="btn-wa-action" (click)="shareReportViaWhatsApp(rpt)">
+            <span class="material-symbols-outlined">chat</span>
+            <span>WhatsApp Host</span>
+          </button>
+          <button type="button" class="btn-print-action" (click)="printCurrentReport()">
+            <span class="material-symbols-outlined">print</span>
+            <span>Print / Save PDF</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

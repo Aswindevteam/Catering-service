@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { BrandLogoComponent } from '../../shared/components/brand-logo/brand-logo.component';
+import { TranslationService } from '../../core/services/translation.service';
 
 @Component({
   selector: 'app-customer-layout',
@@ -21,18 +22,31 @@ import { BrandLogoComponent } from '../../shared/components/brand-logo/brand-log
             <div class="footer-brand">
               <div class="footer-brand-header">
                 <app-brand-logo [size]="44"></app-brand-logo>
-                <h3>Thirumala Catering Service</h3>
+                <h3>{{ translationService.t('brand.name') }}</h3>
               </div>
-              <p>Royal Wedding Catering, Heirloom Cuisine & Real-Time Estimation Platform.</p>
+              <p>{{ translationService.t('footer.tagline') }}</p>
+
               <div class="footer-address">
                 <span class="material-symbols-outlined addr-icon">location_on</span>
-                <span><strong>Culinary Headquarters & Catering Contact:</strong><br/>Manikandan, Aalur, Thirukoilur Taluk, Kallakurichi Dt, 605751, Tamil Nadu</span>
+                <div class="address-details">
+                  <span class="addr-heading"><strong>{{ translationService.t('footer.addressHeading') }}</strong></span>
+                  
+                  <div class="branch-card">
+                    <span class="branch-badge">{{ translationService.t('footer.branch1Title') }}</span>
+                    <span class="branch-text">{{ translationService.t('footer.address1') }}</span>
+                  </div>
+
+                  <div class="branch-card">
+                    <span class="branch-badge">{{ translationService.t('footer.branch2Title') }}</span>
+                    <span class="branch-text">{{ translationService.t('footer.address2') }}</span>
+                  </div>
+                </div>
               </div>
             </div>
 
             <div class="footer-concierge-card">
-              <h4>Direct Catering Concierge</h4>
-              <p>Have custom menu queries, tasting session requests, or live counter suggestions?</p>
+              <h4>{{ translationService.t('footer.conciergeTitle') }}</h4>
+              <p>{{ translationService.t('footer.conciergeDesc') }}</p>
               <div class="concierge-actions">
                 <a 
                   href="https://wa.me/917299887725?text=Namaste%20Thirumala%20Catering%20Service!%20I%20would%20like%20to%20inquire%20about%20wedding%20catering%20arrangements." 
@@ -42,24 +56,24 @@ import { BrandLogoComponent } from '../../shared/components/brand-logo/brand-log
                   <svg viewBox="0 0 24 24" width="18" height="18" fill="#FFFFFF">
                     <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2Z"/>
                   </svg>
-                  <span>Chat on WhatsApp (+91 72998 87725)</span>
+                  <span>{{ translationService.t('proposal.waBtn') }}</span>
                 </a>
-                <span class="concierge-time">Available 7 Days • 9:00 AM – 10:00 PM IST</span>
+                <span class="concierge-time">{{ translationService.t('footer.conciergeHours') }}</span>
               </div>
             </div>
 
             <div class="footer-nav-col">
-              <h4>Platform Navigation</h4>
+              <h4>{{ translationService.t('footer.navTitle') }}</h4>
               <div class="footer-links">
-                <a routerLink="/menu">Curate Catering Feast</a>
-                <a routerLink="/menu-review">Review Feast Estimation</a>
-                <a routerLink="/admin/login">Admin Culinary Studio</a>
+                <a routerLink="/menu">{{ translationService.t('footer.navMenu') }}</a>
+                <a routerLink="/menu-review">{{ translationService.t('footer.navReview') }}</a>
+                <a routerLink="/admin/login">{{ translationService.t('footer.navAdmin') }}</a>
               </div>
             </div>
           </div>
 
           <div class="footer-bottom">
-            <span>&copy; 2026 Thirumala Catering Service Platform. Built on Cloudflare Workers, Cloudflare D1 & R2 Object Storage.</span>
+            <span>{{ translationService.t('footer.copyright') }}</span>
           </div>
         </div>
       </footer>
@@ -94,7 +108,7 @@ import { BrandLogoComponent } from '../../shared/components/brand-logo/brand-log
 
         .footer-grid {
           display: grid;
-          grid-template-columns: 1.2fr 1.2fr 0.8fr;
+          grid-template-columns: 1.25fr 1fr 0.75fr;
           gap: 2.5rem;
           text-align: left;
 
@@ -133,16 +147,55 @@ import { BrandLogoComponent } from '../../shared/components/brand-logo/brand-log
           .footer-address {
             display: flex;
             align-items: flex-start;
-            gap: 0.5rem;
+            gap: 0.65rem;
             font-size: 0.82rem;
-            color: rgba(255, 255, 255, 0.8);
+            color: rgba(255, 255, 255, 0.85);
             line-height: 1.45;
             margin-top: 0.5rem;
 
             .addr-icon {
-              font-size: 18px;
+              font-size: 20px;
               color: var(--accent-gold, #c59b43);
               margin-top: 2px;
+              flex-shrink: 0;
+            }
+
+            .address-details {
+              display: flex;
+              flex-direction: column;
+              gap: 0.5rem;
+              width: 100%;
+
+              .addr-heading {
+                color: #fceabb;
+                font-weight: 700;
+                font-size: 0.84rem;
+                letter-spacing: 0.2px;
+              }
+
+              .branch-card {
+                display: flex;
+                flex-direction: column;
+                gap: 0.15rem;
+                padding: 0.4rem 0.65rem;
+                background: rgba(255, 255, 255, 0.04);
+                border-left: 2px solid var(--accent-gold, #c59b43);
+                border-radius: 0 6px 6px 0;
+
+                .branch-badge {
+                  font-size: 0.74rem;
+                  font-weight: 700;
+                  color: #e5bd68;
+                  text-transform: uppercase;
+                  letter-spacing: 0.4px;
+                }
+
+                .branch-text {
+                  font-size: 0.80rem;
+                  color: rgba(255, 255, 255, 0.9);
+                  line-height: 1.4;
+                }
+              }
             }
           }
         }
@@ -245,4 +298,6 @@ import { BrandLogoComponent } from '../../shared/components/brand-logo/brand-log
     }
   `]
 })
-export class CustomerLayoutComponent {}
+export class CustomerLayoutComponent {
+  translationService = inject(TranslationService);
+}

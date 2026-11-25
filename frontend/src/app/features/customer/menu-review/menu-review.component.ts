@@ -315,7 +315,7 @@ import { CustomerSelection, WeddingEvent } from '../../../core/models';
 
               <div class="form-group">
                 <label>{{ translationService.t('dialog.venueAddress') }}</label>
-                <textarea rows="2" [(ngModel)]="bookingForm.venue" placeholder="e.g. Manikandan, Aalur, Thirukoilur Taluk, Kallakurichi Dt, 605751, Tamil Nadu"></textarea>
+                <textarea rows="2" [(ngModel)]="bookingForm.venue" [placeholder]="translationService.currentLang() === 'ta' ? 'எ.கா. எண். 73, மந்தைக்காரத் தெரு, திருக்கோவிலூர் - 607201' : 'e.g. No. 73, Mandhaikaara Street, Tirukoilur - 607201'"></textarea>
               </div>
 
               <div class="form-group">

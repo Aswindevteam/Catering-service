@@ -65,6 +65,8 @@ export class AdminSelectionsComponent implements OnInit {
   private categoryService = inject(CategoryService);
   private toastService = inject(ToastService);
 
+  readonly defaultDishImage = 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=400&q=80';
+
   // Data signals
   isLoading = signal(false);
   bookings = signal<UnifiedBooking[]>([]);
@@ -366,8 +368,15 @@ export class AdminSelectionsComponent implements OnInit {
     };
 
     if (booking.sessions && booking.sessions.length > 0) {
-      // Clone sessions deep copy
+      // Clone sessions deep copy and enrich missing dish images from catalog
       const cloned: BookingSession[] = JSON.parse(JSON.stringify(booking.sessions));
+      for (const s of cloned) {
+        for (const d of s.dishes) {
+          if (!d.image_url) {
+            d.image_url = this.getDishImage(d.dish_id);
+          }
+        }
+      }
       this.modalSessions.set(cloned);
       this.modalActiveSessionId.set(cloned[0].id);
       this.isModalOpen.set(true);
@@ -385,7 +394,8 @@ export class AdminSelectionsComponent implements OnInit {
               price_per_person: it.price_per_person || 7500,
               original_price_per_person: it.price_per_person || 7500,
               offer_price_per_person: it.price_per_person || 7500,
-              is_offer_applied: false
+              is_offer_applied: false,
+              image_url: this.getDishImage(it.dish_id)
             }));
 
             const initialSessions: BookingSession[] = [
@@ -733,5 +743,54 @@ export class AdminSelectionsComponent implements OnInit {
       return `${Math.round(qty * g).toLocaleString('en-IN')} cups`;
     }
     return `${(qty * g).toLocaleString('en-IN')} ${unit}`;
+  }
+
+  getFallbackImageForName(name: string): string {
+    const n = (name || '').toLowerCase();
+    if (n.includes('idly') || n.includes('idli')) {
+      return 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=500&q=80';
+    }
+    if (n.includes('vada') || n.includes('vadai') || n.includes('bonda')) {
+      return 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=500&q=80';
+    }
+    if (n.includes('dosa') || n.includes('dosai') || n.includes('uttapam')) {
+      return 'https://images.unsplash.com/photo-1668236543090-82eba5ee5976?auto=format&fit=crop&w=500&q=80';
+    }
+    if (n.includes('biryani') || n.includes('briyani') || n.includes('pulao') || n.includes('rice') || n.includes('pongal')) {
+      return 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=500&q=80';
+    }
+    if (n.includes('paneer') || n.includes('tikka')) {
+      return 'https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?auto=format&fit=crop&w=500&q=80';
+    }
+    if (n.includes('gobi') || n.includes('cauliflower') || n.includes('65') || n.includes('manchurian')) {
+      return 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?auto=format&fit=crop&w=500&q=80';
+    }
+    if (n.includes('tea') || n.includes('coffee') || n.includes('juice') || n.includes('drink') || n.includes('milk') || n.includes('lassi')) {
+      return 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=500&q=80';
+    }
+    return this.defaultDishImage;
+  }
+
+  getDishImage(dishId: string, fallbackUrl?: string, dishName?: string): string {
+    if (fallbackUrl) return fallbackUrl;
+    const found = this.allDishes().find(d => d.id === dishId);
+    if (found?.primary_image_url) return found.primary_image_url;
+    if (found?.images && found.images.length > 0) {
+      const primary = found.images.find(img => img.is_primary === 1) || found.images[0];
+      if (primary?.image_url) return primary.image_url;
+    }
+    return this.getFallbackImageForName(dishName || found?.name || '');
+  }
+
+  isDishInCurrentSession(dishId: string): boolean {
+    const cur = this.currentModalSession();
+    return cur ? cur.dishes.some(d => d.dish_id === dishId) : false;
+  }
+
+  onImageError(event: Event) {
+    const img = event.target as HTMLImageElement;
+    if (img && img.src !== this.defaultDishImage) {
+      img.src = this.defaultDishImage;
+    }
   }
 }

@@ -498,9 +498,17 @@
                       @for (d of curSess.dishes; track d.dish_id) {
                         <div class="tray-dish-card" [class.has-offer]="d.is_offer_applied">
                           <div class="dish-card-top">
-                            <div class="dish-title-col">
-                              <span class="dish-cat-mini">{{ d.category_name }}</span>
-                              <strong class="dish-name-main">{{ d.name }}</strong>
+                            <div class="dish-thumb-title">
+                              <img 
+                                [src]="getDishImage(d.dish_id, d.image_url, d.name)" 
+                                [alt]="d.name" 
+                                class="tray-dish-img"
+                                (error)="onImageError($event)"
+                              />
+                              <div class="dish-title-col">
+                                <span class="dish-cat-mini">{{ d.category_name }}</span>
+                                <strong class="dish-name-main">{{ d.name }}</strong>
+                              </div>
                             </div>
                             <button 
                               type="button" 
@@ -584,16 +592,31 @@
                   <!-- Dishes Grid -->
                   <div class="catalog-dishes-grid">
                     @for (dish of filteredCatalogDishes(); track dish.id) {
-                      <div class="catalog-item-card" (click)="addDishToCurrentSession(dish)">
-                        <div class="item-img-placeholder">
-                          <span class="material-symbols-outlined">restaurant</span>
+                      <div 
+                        class="catalog-item-card" 
+                        [class.already-added]="isDishInCurrentSession(dish.id)"
+                        (click)="addDishToCurrentSession(dish)"
+                      >
+                        <div class="item-img-wrap">
+                          <img 
+                            [src]="dish.primary_image_url || getFallbackImageForName(dish.name)" 
+                            [alt]="dish.name" 
+                            class="catalog-dish-img"
+                            loading="lazy"
+                            (error)="onImageError($event)"
+                          />
+                          @if (isDishInCurrentSession(dish.id)) {
+                            <span class="added-corner-badge">✓ Added</span>
+                          }
                         </div>
                         <div class="item-body">
                           <strong class="item-name">{{ dish.name }}</strong>
                           <span class="item-cat">{{ dish.category_name || 'Authentic' }}</span>
                           <div class="item-rate-row">
                             <span class="item-rate">₹{{ ((dish.price_per_person || 7500) / 100).toFixed(0) }}</span>
-                            <span class="add-plus-badge">+ Add</span>
+                            <span class="add-plus-badge" [class.added]="isDishInCurrentSession(dish.id)">
+                              {{ isDishInCurrentSession(dish.id) ? '✓ In Menu' : '+ Add' }}
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -634,11 +657,19 @@
                       @for (d of s.dishes; track d.dish_id) {
                         <div class="dish-rate-row">
                           <div class="rate-dish-info">
-                            <span class="dish-name-lbl">{{ d.name }}</span>
-                            <span class="dish-portion-lbl">({{ d.serving_quantity || 100 }}{{ d.serving_unit || 'g' }}/guest)</span>
-                            @if (d.is_offer_applied) {
-                              <span class="badge-offer-applied">OFFER RATE</span>
-                            }
+                            <img 
+                              [src]="getDishImage(d.dish_id, d.image_url, d.name)" 
+                              [alt]="d.name" 
+                              class="rate-dish-thumb"
+                              (error)="onImageError($event)"
+                            />
+                            <div class="rate-dish-text">
+                              <span class="dish-name-lbl">{{ d.name }}</span>
+                              <span class="dish-portion-lbl">({{ d.serving_quantity || 100 }}{{ d.serving_unit || 'g' }}/guest)</span>
+                              @if (d.is_offer_applied) {
+                                <span class="badge-offer-applied">OFFER RATE</span>
+                              }
+                            </div>
                           </div>
 
                           <div class="rate-controls-wrap">

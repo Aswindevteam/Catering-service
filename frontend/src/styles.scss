@@ -450,6 +450,11 @@ textarea, .editorial-textarea {
   padding: 1.5rem 1rem !important;
   overflow-y: auto !important;
   box-sizing: border-box !important;
+
+  @media (max-width: 640px) {
+    align-items: flex-start !important;
+    padding: 0.5rem !important;
+  }
 }
 
 .modal-dialog, .event-modal-dialog {
@@ -459,4 +464,9 @@ textarea, .editorial-textarea {
   flex-direction: column !important;
   position: relative !important;
   box-sizing: border-box !important;
+
+  @media (max-width: 640px) {
+    max-height: calc(100dvh - 1rem) !important;
+    margin: 0 auto !important;
+  }
 }

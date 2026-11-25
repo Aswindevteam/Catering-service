@@ -684,6 +684,14 @@
                         <div class="dishes-catalog-scroll">
                           @for (dish of filteredDishesForPicker(); track dish.id) {
                             <div class="dish-pick-row" [class.selected]="isDishInCurrentSession(dish.id)">
+                              <img 
+                                [src]="dish.primary_image_url || getFallbackImagesForDish(dish)[0]" 
+                                [alt]="dish.name" 
+                                class="pick-dish-thumb"
+                                loading="lazy"
+                                (error)="onImageError($event)"
+                                (click)="openDishProfile(dish)"
+                              />
                               <div class="dish-info-left" (click)="openDishProfile(dish)" title="Click to view full recipe & dish profile">
                                 <div class="pick-name-row">
                                   <span class="diet-dot" [class.veg]="dish.food_type !== 'non-veg'" [class.non-veg]="dish.food_type === 'non-veg'"></span>

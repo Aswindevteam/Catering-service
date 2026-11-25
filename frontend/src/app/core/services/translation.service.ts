@@ -1230,10 +1230,10 @@ export class TranslationService {
       ml: 'വിവാഹ കാറ്ററിംഗ് തിരഞ്ഞെടുപ്പുകൾ, ഇവന്റുകൾ, പ്രത്യേക ഓഫർ നിരക്കുകൾ എന്നിവ നിയന്ത്രിക്കുക.',
     },
     'admin.sel.scheduleBtn': {
-      en: '+ Schedule Wedding',
-      ta: '+ திருமணம் திட்டமிடு',
-      hi: '+ समारोह तय करें',
-      ml: '+ വിവാഹം ഷെഡ്യൂൾ ചെയ്യുക',
+      en: 'Schedule Wedding',
+      ta: 'திருமணம் திட்டமிடு',
+      hi: 'समारोह तय करें',
+      ml: 'വിവാഹം ഷെഡ്യൂൾ ചെയ്യുക',
     },
     'admin.sel.kpi.total': {
       en: 'Total Bookings',

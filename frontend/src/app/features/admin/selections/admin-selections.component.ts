@@ -26,6 +26,8 @@ export interface BookingSession {
   name: string;
   shortName: string;
   timeSlot: string;
+  icon?: string;
+  enabled?: boolean;
   guest_count: number;
   dishes: BookingDishItem[];
 }
@@ -172,9 +174,11 @@ export class AdminSelectionsComponent implements OnInit {
     return result;
   });
 
-  // Financials computed for the modal
+  activeModalSessions = computed(() => this.modalSessions().filter(s => s.enabled !== false));
+
+  // Financials computed for the modal (only active/enabled sessions)
   modalFinancials = computed(() => {
-    const sessions = this.modalSessions();
+    const sessions = this.activeModalSessions();
     let subtotalPaise = 0;
     let totalGuestsServed = 0;
 
@@ -373,20 +377,22 @@ export class AdminSelectionsComponent implements OnInit {
     };
 
     if (booking.sessions && booking.sessions.length > 0) {
-      // Clone sessions deep copy and enrich missing dish images from catalog
-      const cloned: BookingSession[] = JSON.parse(JSON.stringify(booking.sessions));
-      for (const s of cloned) {
+      // Merge saved sessions into the standard Add Event sessions list
+      const clonedSaved: BookingSession[] = JSON.parse(JSON.stringify(booking.sessions));
+      for (const s of clonedSaved) {
         for (const d of s.dishes) {
           if (!d.image_url) {
             d.image_url = this.getDishImage(d.dish_id);
           }
         }
       }
-      this.modalSessions.set(cloned);
-      this.modalActiveSessionId.set(cloned[0].id);
+      const merged = this.mergeWithDefaultSessions(clonedSaved, booking.guest_count);
+      this.modalSessions.set(merged);
+      const firstEnabled = merged.find(s => s.enabled !== false) || merged[0];
+      this.modalActiveSessionId.set(firstEnabled.id);
       this.isModalOpen.set(true);
     } else if (booking.selection_id) {
-      // Fetch customer selection items and convert into session
+      // Fetch customer selection items and convert into Afternoon Lunch Feast session
       this.selectionService.getSelectionById(booking.selection_id).subscribe({
         next: (res) => {
           if (res.success && res.data && res.data.items) {
@@ -403,18 +409,19 @@ export class AdminSelectionsComponent implements OnInit {
               image_url: this.getDishImage(it.dish_id)
             }));
 
-            const initialSessions: BookingSession[] = [
-              {
-                id: 'lunch',
-                name: 'Traditional Wedding Feast (மதிய விருந்து)',
-                shortName: 'Muhurtham Feast',
-                timeSlot: '11:30 AM - 02:30 PM',
-                guest_count: booking.guest_count,
-                dishes: convertedDishes
-              }
-            ];
-            this.modalSessions.set(initialSessions);
-            this.modalActiveSessionId.set('lunch');
+            const savedLunch: BookingSession = {
+              id: 'afternoon',
+              name: 'Afternoon (Banquet Lunch / Virundhu)',
+              shortName: 'Lunch',
+              timeSlot: '12:00 PM - 03:00 PM',
+              icon: 'restaurant',
+              enabled: true,
+              guest_count: booking.guest_count,
+              dishes: convertedDishes
+            };
+            const merged = this.mergeWithDefaultSessions([savedLunch], booking.guest_count);
+            this.modalSessions.set(merged);
+            this.modalActiveSessionId.set('afternoon');
           } else {
             this.modalSessions.set(this.buildDefaultSessions(booking.guest_count));
             this.modalActiveSessionId.set('morning');
@@ -434,41 +441,76 @@ export class AdminSelectionsComponent implements OnInit {
     }
   }
 
+  mergeWithDefaultSessions(saved: BookingSession[], guests: number): BookingSession[] {
+    const base = this.buildDefaultSessions(guests).map(s => ({ ...s, enabled: false, dishes: [] as BookingDishItem[] }));
+    const merged: BookingSession[] = base.map(b => {
+      const match = saved.find(s =>
+        s.id === b.id ||
+        (b.id === 'afternoon' && s.id === 'lunch') ||
+        (b.id === 'night' && s.id === 'dinner')
+      );
+      if (match) {
+        return { ...b, ...match, id: b.id, enabled: match.enabled !== false };
+      }
+      return b;
+    });
+    for (const s of saved) {
+      if (!['morning', 'afternoon', 'lunch', 'evening', 'night', 'dinner'].includes(s.id)) {
+        merged.push({ ...s, enabled: s.enabled !== false });
+      }
+    }
+    return merged;
+  }
+
   buildDefaultSessions(guests: number): BookingSession[] {
     return [
       {
         id: 'morning',
-        name: 'Morning Breakfast & Tiffin (காலை உணவு)',
-        shortName: 'Breakfast',
+        name: 'Morning (Breakfast / Muhurtham Tiffin)',
+        shortName: 'Morning',
         timeSlot: '07:30 AM - 10:00 AM',
+        icon: 'wb_twilight',
+        enabled: true,
         guest_count: guests,
         dishes: []
       },
       {
-        id: 'lunch',
-        name: 'Grand Muhurtham Wedding Feast (மதிய விருந்து)',
-        shortName: 'Muhurtham Feast',
-        timeSlot: '11:30 AM - 02:30 PM',
+        id: 'afternoon',
+        name: 'Afternoon (Banquet Lunch / Virundhu)',
+        shortName: 'Lunch',
+        timeSlot: '12:00 PM - 03:00 PM',
+        icon: 'restaurant',
+        enabled: true,
         guest_count: guests,
         dishes: []
       },
       {
         id: 'evening',
-        name: 'High Tea & Traditional Sweets (மாலை சிற்றுண்டி)',
-        shortName: 'High Tea',
+        name: 'Evening (Hi-Tea & Snacks)',
+        shortName: 'Evening',
         timeSlot: '04:30 PM - 06:30 PM',
+        icon: 'coffee',
+        enabled: false,
         guest_count: Math.round(guests * 0.75),
         dishes: []
       },
       {
-        id: 'dinner',
-        name: 'Grand Reception Dinner (இரவு விருந்து)',
-        shortName: 'Reception Dinner',
-        timeSlot: '07:00 PM - 10:30 PM',
+        id: 'night',
+        name: 'Night (Dinner / Reception Feast)',
+        shortName: 'Dinner',
+        timeSlot: '07:30 PM - 10:30 PM',
+        icon: 'nightlife',
+        enabled: true,
         guest_count: guests,
         dishes: []
       }
     ];
+  }
+
+  toggleSession(sess: BookingSession, event?: Event) {
+    if (event) event.stopPropagation();
+    sess.enabled = !(sess.enabled !== false);
+    this.modalSessions.set([...this.modalSessions()]);
   }
 
   closeModal() {
@@ -478,37 +520,45 @@ export class AdminSelectionsComponent implements OnInit {
 
   showAddSessionBar = signal(false);
 
-  addSession(preset?: 'morning' | 'lunch' | 'evening' | 'dinner' | 'custom') {
+  addSession(preset?: 'morning' | 'afternoon' | 'evening' | 'night' | 'custom') {
     const existing = this.modalSessions();
     const defaultGuests = Number(this.bookingForm.guest_count) || 600;
 
     const presets: Record<string, Omit<BookingSession, 'dishes'>> = {
       morning: {
         id: 'morning',
-        name: 'Morning Breakfast & Tiffin (காலை உணவு)',
-        shortName: 'Breakfast',
+        name: 'Morning (Breakfast / Muhurtham Tiffin)',
+        shortName: 'Morning',
         timeSlot: '07:30 AM - 10:00 AM',
+        icon: 'wb_twilight',
+        enabled: true,
         guest_count: defaultGuests
       },
-      lunch: {
-        id: 'lunch',
-        name: 'Grand Muhurtham Wedding Feast (மதிய விருந்து)',
-        shortName: 'Muhurtham Feast',
-        timeSlot: '11:30 AM - 02:30 PM',
+      afternoon: {
+        id: 'afternoon',
+        name: 'Afternoon (Banquet Lunch / Virundhu)',
+        shortName: 'Lunch',
+        timeSlot: '12:00 PM - 03:00 PM',
+        icon: 'restaurant',
+        enabled: true,
         guest_count: defaultGuests
       },
       evening: {
         id: 'evening',
-        name: 'High Tea & Traditional Sweets (மாலை சிற்றுண்டி)',
-        shortName: 'High Tea',
+        name: 'Evening (Hi-Tea & Snacks)',
+        shortName: 'Evening',
         timeSlot: '04:30 PM - 06:30 PM',
+        icon: 'coffee',
+        enabled: true,
         guest_count: Math.round(defaultGuests * 0.75)
       },
-      dinner: {
-        id: 'dinner',
-        name: 'Grand Reception Dinner (இரவு விருந்து)',
-        shortName: 'Reception Dinner',
-        timeSlot: '07:00 PM - 10:30 PM',
+      night: {
+        id: 'night',
+        name: 'Night (Dinner / Reception Feast)',
+        shortName: 'Dinner',
+        timeSlot: '07:30 PM - 10:30 PM',
+        icon: 'nightlife',
+        enabled: true,
         guest_count: defaultGuests
       }
     };
@@ -516,9 +566,10 @@ export class AdminSelectionsComponent implements OnInit {
     if (preset && preset !== 'custom' && presets[preset]) {
       const exists = existing.find(s => s.id === preset);
       if (exists) {
+        exists.enabled = true;
+        this.modalSessions.set([...existing]);
         this.modalActiveSessionId.set(exists.id);
         this.showAddSessionBar.set(false);
-        this.toastService.info(`${exists.shortName} is already in this booking`);
         return;
       }
       const created: BookingSession = { ...presets[preset], dishes: [] };
@@ -534,6 +585,8 @@ export class AdminSelectionsComponent implements OnInit {
       name: `Special Session ${num}`,
       shortName: `Session ${num}`,
       timeSlot: '06:00 PM - 08:30 PM',
+      icon: 'celebration',
+      enabled: true,
       guest_count: defaultGuests,
       dishes: []
     };
@@ -671,13 +724,20 @@ export class AdminSelectionsComponent implements OnInit {
       return;
     }
 
+    const activeSessions = this.activeModalSessions();
+    if (activeSessions.length === 0) {
+      this.toastService.error('Please enable at least one meal session (Morning, Lunch, Evening, or Dinner).');
+      this.currentStep.set(2);
+      return;
+    }
+
     this.isSubmitting.set(true);
     const financials = this.modalFinancials();
     const source = this.isEditing() ? this.editingBookingSource() : 'admin';
 
     const notesPayload = {
       source,
-      sessions: this.modalSessions(),
+      sessions: activeSessions,
       financials: {
         foodSubtotal: financials.subtotal,
         serviceCharge: financials.serviceCharge,

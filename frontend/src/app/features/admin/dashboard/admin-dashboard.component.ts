@@ -671,10 +671,36 @@ export class AdminDashboardComponent implements OnInit {
       guest_count: ev.guestCount || 600
     };
 
+    const defaultGuests = ev.guestCount || 600;
+    const baseSessions: MealSession[] = [
+      { id: 'morning', name: 'Morning (Breakfast / Muhurtham Tiffin)', shortName: 'Morning', timeSlot: '07:30 AM - 10:00 AM', icon: 'wb_twilight', enabled: false, guest_count: defaultGuests, dishes: [] },
+      { id: 'afternoon', name: 'Afternoon (Banquet Lunch / Virundhu)', shortName: 'Lunch', timeSlot: '12:00 PM - 03:00 PM', icon: 'restaurant', enabled: false, guest_count: defaultGuests, dishes: [] },
+      { id: 'evening', name: 'Evening (Hi-Tea & Snacks)', shortName: 'Evening', timeSlot: '04:30 PM - 06:30 PM', icon: 'coffee', enabled: false, guest_count: Math.round(defaultGuests * 0.75), dishes: [] },
+      { id: 'night', name: 'Night (Dinner / Reception Feast)', shortName: 'Dinner', timeSlot: '07:30 PM - 10:30 PM', icon: 'nightlife', enabled: false, guest_count: defaultGuests, dishes: [] }
+    ];
+
     if (ev.sessions && ev.sessions.length > 0) {
-      const cloned: MealSession[] = JSON.parse(JSON.stringify(ev.sessions));
-      this.mealSessions.set(cloned);
-      this.activeSessionTab.set(cloned[0].id);
+      const clonedSaved: MealSession[] = JSON.parse(JSON.stringify(ev.sessions));
+      const merged: MealSession[] = baseSessions.map(base => {
+        const match = clonedSaved.find(s =>
+          s.id === base.id ||
+          (base.id === 'afternoon' && s.id === 'lunch') ||
+          (base.id === 'night' && s.id === 'dinner')
+        );
+        if (match) {
+          return { ...base, ...match, id: base.id, enabled: match.enabled !== false };
+        }
+        return base;
+      });
+      // Append any custom sessions
+      for (const s of clonedSaved) {
+        if (!['morning', 'afternoon', 'lunch', 'evening', 'night', 'dinner'].includes(s.id)) {
+          merged.push({ ...s, enabled: s.enabled !== false });
+        }
+      }
+      this.mealSessions.set(merged);
+      const firstEnabled = merged.find(s => s.enabled) || merged[0];
+      this.activeSessionTab.set(firstEnabled.id);
     } else {
       const preservedSource = ev.source || 'admin';
       this.resetScheduleForm();

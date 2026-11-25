@@ -452,11 +452,21 @@
                   <button 
                     type="button" 
                     class="session-tab-btn" 
-                    [class.active]="modalActiveSessionId() === sess.id" 
+                    [class.active]="modalActiveSessionId() === sess.id"
+                    [class.disabled]="sess.enabled === false"
                     (click)="modalActiveSessionId.set(sess.id)"
                   >
+                    <span class="sess-ico">{{ sess.shortName === 'Morning' ? '🌅' : sess.shortName === 'Lunch' ? '☀️' : sess.shortName === 'Evening' ? '☕' : sess.shortName === 'Dinner' ? '🌙' : '✨' }}</span>
                     <span class="sess-name">{{ sess.shortName }}</span>
-                    <span class="sess-count-badge">{{ sess.dishes.length }}</span>
+                    <span class="sess-count-badge">{{ sess.enabled === false ? 'Off' : sess.dishes.length }}</span>
+                    <input 
+                      type="checkbox" 
+                      [checked]="sess.enabled !== false" 
+                      (change)="toggleSession(sess, $event)" 
+                      (click)="$event.stopPropagation()"
+                      title="Include or exclude this session"
+                      class="sess-tab-chk"
+                    />
                   </button>
                 }
 
@@ -472,10 +482,10 @@
 
               @if (showAddSessionBar()) {
                 <div class="sel-add-session-bar">
-                  <button type="button" class="sel-preset-btn" (click)="addSession('morning')">🌅 Breakfast</button>
-                  <button type="button" class="sel-preset-btn" (click)="addSession('lunch')">☀️ Muhurtham Feast</button>
-                  <button type="button" class="sel-preset-btn" (click)="addSession('evening')">☕ High Tea</button>
-                  <button type="button" class="sel-preset-btn" (click)="addSession('dinner')">🌙 Reception Dinner</button>
+                  <button type="button" class="sel-preset-btn" (click)="addSession('morning')">🌅 Morning</button>
+                  <button type="button" class="sel-preset-btn" (click)="addSession('afternoon')">☀️ Lunch</button>
+                  <button type="button" class="sel-preset-btn" (click)="addSession('evening')">☕ Evening</button>
+                  <button type="button" class="sel-preset-btn" (click)="addSession('night')">🌙 Dinner</button>
                   <button type="button" class="sel-preset-btn custom" (click)="addSession('custom')">✨ + Custom Session</button>
                 </div>
               }
@@ -503,28 +513,38 @@
                         </button>
                       }
                     </div>
-                    <div class="sess-time-edit-wrap">
-                      <span class="time-ico">⏰</span>
-                      <input 
-                        type="text" 
-                        class="sess-time-input" 
-                        [(ngModel)]="curSess.timeSlot"
-                        placeholder="07:30 AM - 10:00 AM"
-                      />
+                    <div class="sess-meta-controls">
+                      <div class="sess-time-edit-wrap">
+                        <span class="time-ico">⏰</span>
+                        <input 
+                          type="text" 
+                          class="sess-time-input" 
+                          [(ngModel)]="curSess.timeSlot"
+                          placeholder="07:30 AM - 10:00 AM"
+                        />
+                      </div>
+                      <label class="sess-enable-lbl">
+                        <input type="checkbox" [checked]="curSess.enabled !== false" (change)="toggleSession(curSess)" />
+                        <span>Include in Schedule</span>
+                      </label>
                     </div>
                   </div>
 
-                  <div class="sess-guest-adjust">
-                    <label>{{ tService.t('admin.sel.session.guests') }}</label>
-                    <input 
-                      type="number" 
-                      [(ngModel)]="curSess.guest_count" 
-                      class="sess-guest-input"
-                      min="10" 
-                      max="10000"
-                    />
-                  </div>
+                  @if (curSess.enabled !== false) {
+                    <div class="sess-guest-adjust">
+                      <label>{{ tService.t('admin.sel.session.guests') }}</label>
+                      <input 
+                        type="number" 
+                        [(ngModel)]="curSess.guest_count" 
+                        class="sess-guest-input"
+                        min="10" 
+                        max="10000"
+                      />
+                    </div>
+                  }
                 </div>
+
+                @if (curSess.enabled !== false) {
 
                 <!-- Selected Dishes in Active Session (Tray) -->
                 <div class="selected-tray-section">
@@ -672,6 +692,14 @@
                     }
                   </div>
                 </div>
+                } @else {
+                  <div class="session-disabled-box">
+                    <p>This session is currently disabled. Check the box above to include {{ curSess.shortName }} in this wedding schedule.</p>
+                    <button type="button" class="btn-enable-sess" (click)="toggleSession(curSess)">
+                      + Enable {{ curSess.shortName }}
+                    </button>
+                  </div>
+                }
               }
             </div>
           }
@@ -689,7 +717,7 @@
 
               <!-- Breakdown By Session with Offer Price Inputs -->
               <div class="sessions-pricing-summary">
-                @for (s of modalSessions(); track s.id) {
+                @for (s of activeModalSessions(); track s.id) {
                   <div class="session-pricing-card">
                     <div class="sess-card-head">
                       <div>

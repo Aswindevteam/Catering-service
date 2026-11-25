@@ -586,16 +586,39 @@ textarea, .editorial-textarea {
     .report-financial-table {
       min-width: 0 !important;
       width: 100% !important;
+      page-break-inside: auto !important;
+      break-inside: auto !important;
+
+      thead {
+        display: table-header-group !important;
+      }
+
+      tr {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+      }
     }
 
     .beo-session-block,
-    .report-session-section,
+    .report-session-section {
+      break-inside: auto !important;
+      page-break-inside: auto !important;
+    }
+
+    .beo-section-title,
+    .beo-session-head,
+    .session-section-header {
+      break-after: avoid !important;
+      page-break-after: avoid !important;
+    }
+
+    .beo-summary-grid,
     .beo-commercial-section,
     .report-financial-section,
     .beo-footer,
     .report-footer {
-      break-inside: avoid;
-      page-break-inside: avoid;
+      break-inside: avoid !important;
+      page-break-inside: avoid !important;
     }
   }
 }

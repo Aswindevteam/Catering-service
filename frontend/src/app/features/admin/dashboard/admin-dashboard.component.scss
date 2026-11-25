@@ -3518,14 +3518,21 @@
   }
 
   .report-session-section {
-    page-break-inside: avoid;
+    page-break-inside: auto;
+    break-inside: auto;
   }
 
   .report-dishes-table {
     page-break-inside: auto;
+    break-inside: auto;
+
+    thead {
+      display: table-header-group;
+    }
 
     tr {
       page-break-inside: avoid;
+      break-inside: avoid;
     }
   }
 

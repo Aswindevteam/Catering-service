@@ -851,48 +851,50 @@
                     <span class="sess-guests-badge">{{ sess.guest_count }} Guests</span>
                   </div>
 
-                  <table class="beo-dishes-table">
-                    <thead>
-                      <tr>
-                        <th style="width: 40px;">#</th>
-                        <th>Category</th>
-                        <th>Dish Name</th>
-                        <th>Portion / Guest</th>
-                        <th>Batch Requirement</th>
-                        <th class="text-right">Rate / Guest</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      @for (d of sess.dishes; track d.dish_id; let i = $index) {
+                  <div class="beo-table-scroll">
+                    <table class="beo-dishes-table">
+                      <thead>
                         <tr>
-                          <td>{{ i + 1 }}</td>
-                          <td><span class="cat-chip">{{ d.category_name }}</span></td>
-                          <td><strong class="dish-tbl-name">{{ d.name }}</strong></td>
-                          <td>{{ d.serving_quantity || 100 }}{{ d.serving_unit || 'g' }}</td>
-                          <td>
-                            <strong class="batch-req">
-                              {{ calculateBatchRequirement(d.serving_quantity, d.serving_unit, sess.guest_count) }}
-                            </strong>
-                          </td>
-                          <td class="text-right">
-                            @if (d.is_offer_applied && d.original_price_per_person) {
-                              <div class="beo-rate-offer">
-                                <span class="rate-offer-val">₹{{ ((d.offer_price_per_person || d.price_per_person) / 100).toFixed(0) }}</span>
-                                <del class="rate-orig-strike">₹{{ (d.original_price_per_person / 100).toFixed(0) }}</del>
-                                <span class="beo-pill-offer">OFFER</span>
-                              </div>
-                            } @else {
-                              <span class="rate-standard">₹{{ ((d.price_per_person || 7500) / 100).toFixed(0) }}</span>
-                            }
-                          </td>
+                          <th style="width: 40px;">#</th>
+                          <th>Category</th>
+                          <th>Dish Name</th>
+                          <th>Portion / Guest</th>
+                          <th>Batch Requirement</th>
+                          <th class="text-right">Rate / Guest</th>
                         </tr>
-                      } @empty {
-                        <tr>
-                          <td colspan="6" class="text-muted text-center py-2">Dishes to be finalized with head chef and host.</td>
-                        </tr>
-                      }
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        @for (d of sess.dishes; track d.dish_id; let i = $index) {
+                          <tr>
+                            <td>{{ i + 1 }}</td>
+                            <td><span class="cat-chip">{{ d.category_name }}</span></td>
+                            <td><strong class="dish-tbl-name">{{ d.name }}</strong></td>
+                            <td>{{ d.serving_quantity || 100 }}{{ d.serving_unit || 'g' }}</td>
+                            <td>
+                              <strong class="batch-req">
+                                {{ calculateBatchRequirement(d.serving_quantity, d.serving_unit, sess.guest_count) }}
+                              </strong>
+                            </td>
+                            <td class="text-right">
+                              @if (d.is_offer_applied && d.original_price_per_person) {
+                                <div class="beo-rate-offer">
+                                  <span class="rate-offer-val">₹{{ ((d.offer_price_per_person || d.price_per_person) / 100).toFixed(0) }}</span>
+                                  <del class="rate-orig-strike">₹{{ (d.original_price_per_person / 100).toFixed(0) }}</del>
+                                  <span class="beo-pill-offer">OFFER</span>
+                                </div>
+                              } @else {
+                                <span class="rate-standard">₹{{ ((d.price_per_person || 7500) / 100).toFixed(0) }}</span>
+                              }
+                            </td>
+                          </tr>
+                        } @empty {
+                          <tr>
+                            <td colspan="6" class="text-muted text-center py-2">Dishes to be finalized with head chef and host.</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               }
             </div>

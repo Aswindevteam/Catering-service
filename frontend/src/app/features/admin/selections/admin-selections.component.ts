@@ -5,6 +5,7 @@ import { SelectionService } from '../../../core/services/selection.service';
 import { DishService } from '../../../core/services/dish.service';
 import { CategoryService } from '../../../core/services/category.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { TranslationService } from '../../../core/services/translation.service';
 import { WeddingEvent, Dish, FoodCategory, CustomerSelectionItem } from '../../../core/models';
 
 export interface BookingDishItem {
@@ -64,6 +65,7 @@ export class AdminSelectionsComponent implements OnInit {
   private dishService = inject(DishService);
   private categoryService = inject(CategoryService);
   private toastService = inject(ToastService);
+  public tService = inject(TranslationService);
 
   readonly defaultDishImage = 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=400&q=80';
 
@@ -804,5 +806,14 @@ export class AdminSelectionsComponent implements OnInit {
     if (img && img.src !== this.defaultDishImage) {
       img.src = this.defaultDishImage;
     }
+  }
+
+  getStatusLabel(status: string): string {
+    const s = (status || '').toLowerCase();
+    if (s === 'confirmed') return this.tService.t('admin.sel.status.confirmed');
+    if (s === 'pending' || s === 'submitted') return this.tService.t('admin.sel.status.pending');
+    if (s === 'completed') return this.tService.t('admin.sel.status.completed');
+    if (s === 'cancelled') return this.tService.t('admin.sel.status.cancelled');
+    return status.toUpperCase();
   }
 }

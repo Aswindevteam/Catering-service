@@ -3,16 +3,16 @@
   <div class="page-head">
     <div class="head-text">
       <div class="title-row">
-        <h1 class="main-title">Customer Selections & Bookings</h1>
+        <h1 class="main-title">{{ tService.t('admin.sel.title') }}</h1>
         <span class="heritage-badge">திருமலா முன்பதிவுகள்</span>
       </div>
-      <p class="subtitle">Review customer wedding catering selections, scheduled banquet events, and negotiate custom dish offer rates.</p>
+      <p class="subtitle">{{ tService.t('admin.sel.subtitle') }}</p>
     </div>
 
     <div class="head-actions">
       <button type="button" class="btn-royal-schedule" (click)="openCreateModal()">
         <span class="material-symbols-outlined">add_circle</span>
-        <span>+ Schedule Wedding</span>
+        <span>{{ tService.t('admin.sel.scheduleBtn') }}</span>
       </button>
     </div>
   </div>
@@ -21,46 +21,46 @@
   <div class="kpi-grid">
     <div class="kpi-card">
       <div class="kpi-top">
-        <span class="kpi-label">Total Bookings</span>
+        <span class="kpi-label">{{ tService.t('admin.sel.kpi.total') }}</span>
         <span class="material-symbols-outlined kpi-icon">event_available</span>
       </div>
       <div class="kpi-val">{{ metrics().total }}</div>
-      <span class="kpi-sub">All active celebration orders</span>
+      <span class="kpi-sub">{{ tService.t('admin.sel.kpi.totalSub') }}</span>
     </div>
 
     <div class="kpi-card highlight-admin">
       <div class="kpi-top">
-        <span class="kpi-label">Created by Admin</span>
+        <span class="kpi-label">{{ tService.t('admin.sel.kpi.admin') }}</span>
         <span class="material-symbols-outlined kpi-icon admin-icon">admin_panel_settings</span>
       </div>
       <div class="kpi-val admin-val">{{ metrics().adminCount }}</div>
-      <span class="kpi-sub">Directly scheduled bookings</span>
+      <span class="kpi-sub">{{ tService.t('admin.sel.kpi.adminSub') }}</span>
     </div>
 
     <div class="kpi-card highlight-user">
       <div class="kpi-top">
-        <span class="kpi-label">Customer Selections</span>
+        <span class="kpi-label">{{ tService.t('admin.sel.kpi.user') }}</span>
         <span class="material-symbols-outlined kpi-icon user-icon">public</span>
       </div>
       <div class="kpi-val user-val">{{ metrics().userCount }}</div>
-      <span class="kpi-sub">Inquiries from website menu</span>
+      <span class="kpi-sub">{{ tService.t('admin.sel.kpi.userSub') }}</span>
     </div>
 
     <div class="kpi-card highlight-gold">
       <div class="kpi-top">
-        <span class="kpi-label">Projected Revenue</span>
+        <span class="kpi-label">{{ tService.t('admin.sel.kpi.revenue') }}</span>
         <span class="material-symbols-outlined kpi-icon gold-icon">payments</span>
       </div>
       <div class="kpi-val gold-val">
         <span class="curr-sym">₹</span>{{ (metrics().totalRevenue / 100).toLocaleString('en-IN') }}
       </div>
-      <span class="kpi-sub">Grand total across all events</span>
+      <span class="kpi-sub">{{ tService.t('admin.sel.kpi.revenueSub') }}</span>
     </div>
   </div>
 
   <!-- Controls & Filters Bar -->
   <div class="filters-toolbar">
-    <!-- Creator Filter Pill (Requested Feature) -->
+    <!-- Creator Filter Pill -->
     <div class="creator-filter-pill">
       <button 
         type="button" 
@@ -68,7 +68,7 @@
         [class.active]="filterEventSource() === 'all'" 
         (click)="filterEventSource.set('all')"
       >
-        All ({{ metrics().total }})
+        {{ tService.t('admin.sel.filter.all') }} ({{ metrics().total }})
       </button>
       <button 
         type="button" 
@@ -77,7 +77,7 @@
         (click)="filterEventSource.set('admin')"
         title="Events scheduled by Admin"
       >
-        👑 By Me (Admin) ({{ metrics().adminCount }})
+        👑 {{ tService.t('admin.sel.filter.byMe') }} ({{ metrics().adminCount }})
       </button>
       <button 
         type="button" 
@@ -86,7 +86,7 @@
         (click)="filterEventSource.set('user')"
         title="Events booked by Customer"
       >
-        🌐 By Users ({{ metrics().userCount }})
+        🌐 {{ tService.t('admin.sel.filter.byUsers') }} ({{ metrics().userCount }})
       </button>
     </div>
 
@@ -96,7 +96,7 @@
         <span class="material-symbols-outlined search-icon">search</span>
         <input 
           type="text" 
-          placeholder="Search host, phone, event, venue..." 
+          [placeholder]="tService.t('admin.sel.searchPlaceholder')" 
           [ngModel]="searchQuery()"
           (ngModelChange)="searchQuery.set($event)"
           class="search-input"
@@ -114,11 +114,11 @@
           [ngModel]="filterStatus()"
           (ngModelChange)="filterStatus.set($event)"
         >
-          <option value="all">All Statuses</option>
-          <option value="confirmed">Confirmed</option>
-          <option value="pending">Pending</option>
-          <option value="completed">Completed</option>
-          <option value="cancelled">Cancelled</option>
+          <option value="all">{{ tService.t('admin.sel.status.all') }}</option>
+          <option value="confirmed">{{ tService.t('admin.sel.status.confirmed') }}</option>
+          <option value="pending">{{ tService.t('admin.sel.status.pending') }}</option>
+          <option value="completed">{{ tService.t('admin.sel.status.completed') }}</option>
+          <option value="cancelled">{{ tService.t('admin.sel.status.cancelled') }}</option>
         </select>
       </div>
     </div>
@@ -129,21 +129,21 @@
     @if (isLoading()) {
       <div class="loading-state">
         <span class="spinner-circle"></span>
-        <p>Loading celebration bookings & menus...</p>
+        <p>{{ tService.t('admin.sel.loading') }}</p>
       </div>
     } @else {
       <div class="table-responsive">
         <table class="wf-table">
           <thead>
             <tr>
-              <th>Event & Creator</th>
-              <th>Date & Venue</th>
-              <th>Guests & Sessions</th>
-              <th>Food Subtotal</th>
-              <th>Grand Total</th>
-              <th>Per Pax</th>
-              <th>Status</th>
-              <th class="text-right">Actions</th>
+              <th>{{ tService.t('admin.sel.col.eventCreator') }}</th>
+              <th>{{ tService.t('admin.sel.col.dateVenue') }}</th>
+              <th>{{ tService.t('admin.sel.col.guestsSessions') }}</th>
+              <th>{{ tService.t('admin.sel.col.foodSubtotal') }}</th>
+              <th>{{ tService.t('admin.sel.col.grandTotal') }}</th>
+              <th>{{ tService.t('admin.sel.col.perPax') }}</th>
+              <th>{{ tService.t('admin.sel.col.status') }}</th>
+              <th class="text-right">{{ tService.t('admin.sel.col.actions') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -155,11 +155,11 @@
                     <div class="cust-name-row">
                       <strong class="cust-name">{{ booking.customer_name }}</strong>
                       <span class="source-tag" [class.admin]="booking.source === 'admin'" [class.user]="booking.source === 'user'">
-                        {{ booking.source === 'admin' ? '👑 Admin' : '🌐 Customer' }}
+                        {{ booking.source === 'admin' ? ('👑 ' + tService.t('admin.sel.src.admin')) : ('🌐 ' + tService.t('admin.sel.src.customer')) }}
                       </span>
                     </div>
                     <span class="event-name">{{ booking.event_name }}</span>
-                    <span class="event-type-pill">{{ booking.event_type }}</span>
+                    <span class="event-type-pill">{{ tService.getEventTypeName(booking.event_type) }}</span>
                     @if (booking.customer_phone) {
                       <span class="cust-contact">📞 {{ booking.customer_phone }}</span>
                     }
@@ -183,7 +183,7 @@
                 <!-- Headcount & Sessions -->
                 <td>
                   <div class="headcount-col">
-                    <strong class="guest-num">{{ booking.guest_count }} Guests</strong>
+                    <strong class="guest-num">{{ booking.guest_count }} {{ tService.t('admin.sel.guests') }}</strong>
                     @if (booking.sessions && booking.sessions.length > 0) {
                       <div class="sessions-mini-pills">
                         @for (s of booking.sessions; track s.id) {
@@ -193,7 +193,7 @@
                         }
                       </div>
                     } @else {
-                      <span class="no-session-note">1 Main Feast Session</span>
+                      <span class="no-session-note">1 Main Feast</span>
                     }
                   </div>
                 </td>
@@ -208,7 +208,7 @@
                   <div class="grand-total-col">
                     <strong class="grand-price">₹{{ (booking.grand_total / 100).toLocaleString('en-IN') }}</strong>
                     @if (booking.sessions && booking.sessions.length > 0) {
-                      <span class="incl-fees-note">Incl. 10% Svc + 5% GST</span>
+                      <span class="incl-fees-note">{{ tService.t('admin.sel.inclFees') }}</span>
                     }
                   </div>
                 </td>
@@ -221,7 +221,7 @@
                 <!-- Status Badge -->
                 <td>
                   <span class="status-badge" [ngClass]="booking.status">
-                    {{ booking.status | uppercase }}
+                    {{ getStatusLabel(booking.status) }}
                   </span>
                 </td>
 
@@ -235,7 +235,7 @@
                       title="Edit Booking, Sessions & Dish Offer Prices"
                     >
                       <span class="material-symbols-outlined">edit</span>
-                      <span>Edit</span>
+                      <span>{{ tService.t('admin.sel.btn.edit') }}</span>
                     </button>
 
                     <button 
@@ -245,7 +245,7 @@
                       title="View Banquet Event Order (BEO) Spec Sheet & Quotation"
                     >
                       <span class="material-symbols-outlined">description</span>
-                      <span>BEO</span>
+                      <span>{{ tService.t('admin.sel.btn.beo') }}</span>
                     </button>
 
                     <button 
@@ -264,10 +264,10 @@
                 <td colspan="8" class="no-data-cell">
                   <div class="empty-state">
                     <span class="material-symbols-outlined empty-icon">event_busy</span>
-                    <h3>No Celebrations Found</h3>
-                    <p>No wedding events or customer selections match your current filter criteria.</p>
+                    <h3>{{ tService.t('admin.sel.emptyTitle') }}</h3>
+                    <p>{{ tService.t('admin.sel.emptyDesc') }}</p>
                     <button type="button" class="btn-royal-schedule sm" (click)="openCreateModal()">
-                      + Schedule New Wedding
+                      {{ tService.t('admin.sel.scheduleBtn') }}
                     </button>
                   </div>
                 </td>
@@ -289,11 +289,11 @@
         <div class="modal-head">
           <div>
             <div class="modal-title-row">
-              <h2>{{ isEditing() ? 'Edit Celebration Booking & Offer Rates' : 'Schedule Wedding Celebration' }}</h2>
-              <span class="modal-badge">{{ isEditing() ? '👑 Admin Editor' : '👑 New Booking' }}</span>
+              <h2>{{ isEditing() ? tService.t('admin.sel.modal.editTitle') : tService.t('admin.sel.modal.newTitle') }}</h2>
+              <span class="modal-badge">👑 {{ tService.t('admin.sel.src.admin') }}</span>
             </div>
             <p class="modal-sub">
-              {{ isEditing() ? 'Modify event schedule, adjust dish portion weights, and specify custom negotiated offer rates.' : 'Configure celebration dates, course sessions, menu quantities, and commercial quotations.' }}
+              {{ tService.t('admin.sel.offer.bannerDesc') }}
             </p>
           </div>
           <button type="button" class="btn-close-modal" (click)="closeModal()" aria-label="Close modal">
@@ -310,7 +310,7 @@
             (click)="currentStep.set(1)"
           >
             <span class="step-num">1</span>
-            <span class="step-text">Event & Host Details</span>
+            <span class="step-text">{{ tService.t('admin.sel.modal.step1') }}</span>
           </button>
           <div class="step-connector"></div>
           <button 
@@ -320,7 +320,7 @@
             (click)="currentStep.set(2)"
           >
             <span class="step-num">2</span>
-            <span class="step-text">Course Sessions & Dishes</span>
+            <span class="step-text">{{ tService.t('admin.sel.modal.step2') }}</span>
           </button>
           <div class="step-connector"></div>
           <button 
@@ -330,7 +330,7 @@
             (click)="currentStep.set(3)"
           >
             <span class="step-num">3</span>
-            <span class="step-text">Quotation & Offer Rates</span>
+            <span class="step-text">{{ tService.t('admin.sel.modal.step3') }}</span>
           </button>
         </div>
 
@@ -339,10 +339,10 @@
           <!-- STEP 1: Basic Event Details -->
           @if (currentStep() === 1) {
             <div class="step-content">
-              <h3 class="section-title">Host & Celebration Details</h3>
+              <h3 class="section-title">{{ tService.t('admin.sel.form.hostDetails') }}</h3>
               <div class="form-grid">
                 <div class="form-group">
-                  <label>Host / Family Name <span class="req">*</span></label>
+                  <label>{{ tService.t('admin.sel.form.hostName') }} <span class="req">*</span></label>
                   <input 
                     type="text" 
                     [(ngModel)]="bookingForm.customer_name" 
@@ -353,7 +353,7 @@
                 </div>
 
                 <div class="form-group">
-                  <label>Contact Phone <span class="req">*</span></label>
+                  <label>{{ tService.t('admin.sel.form.phone') }} <span class="req">*</span></label>
                   <input 
                     type="tel" 
                     [(ngModel)]="bookingForm.customer_phone" 
@@ -364,7 +364,7 @@
                 </div>
 
                 <div class="form-group">
-                  <label>Email Address</label>
+                  <label>{{ tService.t('admin.sel.form.email') }}</label>
                   <input 
                     type="email" 
                     [(ngModel)]="bookingForm.customer_email" 
@@ -374,7 +374,7 @@
                 </div>
 
                 <div class="form-group">
-                  <label>Celebration Title <span class="req">*</span></label>
+                  <label>{{ tService.t('admin.sel.form.eventTitle') }} <span class="req">*</span></label>
                   <input 
                     type="text" 
                     [(ngModel)]="bookingForm.event_name" 
@@ -385,7 +385,7 @@
                 </div>
 
                 <div class="form-group">
-                  <label>Event Type</label>
+                  <label>{{ tService.t('admin.sel.form.eventType') }}</label>
                   <select [(ngModel)]="bookingForm.event_type" class="form-control">
                     <option value="Traditional Hindu Wedding">Traditional Hindu Wedding (திருமணம்)</option>
                     <option value="Muhurtham Feast">Muhurtham Feast (முகூர்த்த விருந்து)</option>
@@ -399,7 +399,7 @@
                 </div>
 
                 <div class="form-group">
-                  <label>Event Date <span class="req">*</span></label>
+                  <label>{{ tService.t('admin.sel.form.eventDate') }} <span class="req">*</span></label>
                   <input 
                     type="date" 
                     [(ngModel)]="bookingForm.event_date" 
@@ -409,7 +409,7 @@
                 </div>
 
                 <div class="form-group">
-                  <label>Total Primary Headcount (Guests) <span class="req">*</span></label>
+                  <label>{{ tService.t('admin.sel.form.headcount') }} <span class="req">*</span></label>
                   <input 
                     type="number" 
                     [(ngModel)]="bookingForm.guest_count" 
@@ -421,17 +421,17 @@
                 </div>
 
                 <div class="form-group">
-                  <label>Booking Status</label>
+                  <label>{{ tService.t('admin.sel.form.status') }}</label>
                   <select [(ngModel)]="bookingForm.status" class="form-control">
-                    <option value="confirmed">Confirmed</option>
-                    <option value="pending">Pending Inquiry</option>
-                    <option value="completed">Completed Feast</option>
-                    <option value="cancelled">Cancelled</option>
+                    <option value="confirmed">{{ tService.t('admin.sel.status.confirmed') }}</option>
+                    <option value="pending">{{ tService.t('admin.sel.status.pending') }}</option>
+                    <option value="completed">{{ tService.t('admin.sel.status.completed') }}</option>
+                    <option value="cancelled">{{ tService.t('admin.sel.status.cancelled') }}</option>
                   </select>
                 </div>
 
                 <div class="form-group full-width">
-                  <label>Banquet Venue / Hall Address</label>
+                  <label>{{ tService.t('admin.sel.form.venue') }}</label>
                   <input 
                     type="text" 
                     [(ngModel)]="bookingForm.venue" 
@@ -470,7 +470,7 @@
                   </div>
 
                   <div class="sess-guest-adjust">
-                    <label>Guests for this session:</label>
+                    <label>{{ tService.t('admin.sel.session.guests') }}</label>
                     <input 
                       type="number" 
                       [(ngModel)]="curSess.guest_count" 
@@ -484,14 +484,14 @@
                 <!-- Selected Dishes in Active Session (Tray) -->
                 <div class="selected-tray-section">
                   <div class="tray-head">
-                    <h5>Dishes in {{ curSess.shortName }} ({{ curSess.dishes.length }} Selected)</h5>
-                    <span class="tray-hint">Adjust portion weights or set custom Admin Offer Rates per guest</span>
+                    <h5>{{ curSess.shortName }} — {{ tService.t('admin.sel.session.selectedDishes') }} ({{ curSess.dishes.length }})</h5>
+                    <span class="tray-hint">{{ tService.t('admin.sel.session.trayHint') }}</span>
                   </div>
 
                   @if (curSess.dishes.length === 0) {
                     <div class="empty-tray-box">
                       <span class="material-symbols-outlined empty-tray-icon">soup_kitchen</span>
-                      <p>No dishes added to {{ curSess.shortName }} yet. Pick dishes from the catalog below.</p>
+                      <p>{{ tService.t('receipt.emptyTrayTitle') }}</p>
                     </div>
                   } @else {
                     <div class="tray-chips-grid">
@@ -506,8 +506,8 @@
                                 (error)="onImageError($event)"
                               />
                               <div class="dish-title-col">
-                                <span class="dish-cat-mini">{{ d.category_name }}</span>
-                                <strong class="dish-name-main">{{ d.name }}</strong>
+                                <span class="dish-cat-mini">{{ tService.getCategoryName({ name: d.category_name }) }}</span>
+                                <strong class="dish-name-main">{{ tService.getDishName({ id: d.dish_id, name: d.name }) }}</strong>
                               </div>
                             </div>
                             <button 
@@ -522,18 +522,18 @@
 
                           <!-- Portion Stepper -->
                           <div class="dish-stepper-row">
-                            <span class="portion-lbl">Portion:</span>
+                            <span class="portion-lbl">{{ tService.t('dishModal.portionPerGuest') }}:</span>
                             <button type="button" class="btn-step" (click)="adjustDishPortion(d.dish_id, -1, $event)">-</button>
                             <span class="portion-val">{{ d.serving_quantity || 100 }}</span>
                             <button type="button" class="btn-step" (click)="adjustDishPortion(d.dish_id, 1, $event)">+</button>
                             <button type="button" class="btn-unit" (click)="cycleDishUnit(d.dish_id, $event)">
-                              {{ d.serving_unit || 'g' }}
+                              {{ tService.formatUnit(d.serving_unit || 'g') }}
                             </button>
                           </div>
 
                           <!-- Admin Offer Price Field -->
                           <div class="dish-offer-input-row">
-                            <span class="offer-lbl">Offer: ₹</span>
+                            <span class="offer-lbl">{{ tService.t('admin.sel.offer.label') }}</span>
                             <input 
                               type="number" 
                               class="offer-input-inline" 
@@ -543,7 +543,7 @@
                               title="Custom negotiated offer rate per guest (admin only)"
                             />
                             @if (d.is_offer_applied) {
-                              <span class="offer-tag-active">Active</span>
+                              <span class="offer-tag-active">✓</span>
                             }
                           </div>
                         </div>
@@ -555,12 +555,12 @@
                 <!-- Catalog Dish Browser -->
                 <div class="catalog-browser-section">
                   <div class="browser-head">
-                    <h5>Add Dishes to {{ curSess.shortName }}</h5>
+                    <h5>{{ tService.t('admin.sel.session.addDishesTo') }} {{ curSess.shortName }}</h5>
                     <div class="browser-controls">
                       <input 
                         type="text" 
                         class="catalog-search-input" 
-                        placeholder="Search menu catalog..."
+                        [placeholder]="tService.t('admin.sel.session.searchCatalog')"
                         [ngModel]="modalDishSearch()"
                         (ngModelChange)="modalDishSearch.set($event)"
                       />
@@ -575,7 +575,7 @@
                       [class.active]="modalSelectedCategory() === 'all'" 
                       (click)="modalSelectedCategory.set('all')"
                     >
-                      All ({{ allDishes().length }})
+                      {{ tService.t('admin.sel.filter.all') }} ({{ allDishes().length }})
                     </button>
                     @for (cat of categories(); track cat.id) {
                       <button 
@@ -584,7 +584,7 @@
                         [class.active]="modalSelectedCategory() === cat.id" 
                         (click)="modalSelectedCategory.set(cat.id)"
                       >
-                        {{ cat.name }}
+                        {{ tService.getCategoryName(cat) }}
                       </button>
                     }
                   </div>
@@ -606,23 +606,23 @@
                             (error)="onImageError($event)"
                           />
                           @if (isDishInCurrentSession(dish.id)) {
-                            <span class="added-corner-badge">✓ Added</span>
+                            <span class="added-corner-badge">✓</span>
                           }
                         </div>
                         <div class="item-body">
-                          <strong class="item-name">{{ dish.name }}</strong>
-                          <span class="item-cat">{{ dish.category_name || 'Authentic' }}</span>
+                          <strong class="item-name">{{ tService.getDishName(dish) }}</strong>
+                          <span class="item-cat">{{ tService.getCategoryName({ id: dish.category_id, name: dish.category_name || 'Authentic' }) }}</span>
                           <div class="item-rate-row">
                             <span class="item-rate">₹{{ ((dish.price_per_person || 7500) / 100).toFixed(0) }}</span>
                             <span class="add-plus-badge" [class.added]="isDishInCurrentSession(dish.id)">
-                              {{ isDishInCurrentSession(dish.id) ? '✓ In Menu' : '+ Add' }}
+                              {{ isDishInCurrentSession(dish.id) ? '✓' : '+ Add' }}
                             </span>
                           </div>
                         </div>
                       </div>
                     } @empty {
                       <div class="empty-catalog-box">
-                        <p>No dishes match the search filter.</p>
+                        <p>{{ tService.t('menu.noMatches') }}</p>
                       </div>
                     }
                   </div>
@@ -637,8 +637,8 @@
               <div class="offer-notice-banner">
                 <span class="material-symbols-outlined banner-icon">verified</span>
                 <div>
-                  <strong>Admin Negotiated Rates Applied</strong>
-                  <p>Custom offer prices entered here apply exclusively to this event booking. Master catalog dish prices remain completely unchanged.</p>
+                  <strong>{{ tService.t('admin.sel.offer.bannerTitle') }}</strong>
+                  <p>{{ tService.t('admin.sel.offer.bannerDesc') }}</p>
                 </div>
               </div>
 
@@ -649,7 +649,7 @@
                     <div class="sess-card-head">
                       <div>
                         <strong class="sess-card-name">{{ s.name }}</strong>
-                        <span class="sess-card-sub">{{ s.guest_count }} Guests &bull; {{ s.dishes.length }} Dishes</span>
+                        <span class="sess-card-sub">{{ s.guest_count }} {{ tService.t('admin.sel.guests') }} &bull; {{ s.dishes.length }}</span>
                       </div>
                     </div>
 
@@ -664,10 +664,10 @@
                               (error)="onImageError($event)"
                             />
                             <div class="rate-dish-text">
-                              <span class="dish-name-lbl">{{ d.name }}</span>
-                              <span class="dish-portion-lbl">({{ d.serving_quantity || 100 }}{{ d.serving_unit || 'g' }}/guest)</span>
+                              <span class="dish-name-lbl">{{ tService.getDishName({ id: d.dish_id, name: d.name }) }}</span>
+                              <span class="dish-portion-lbl">({{ d.serving_quantity || 100 }}{{ tService.formatUnit(d.serving_unit || 'g') }})</span>
                               @if (d.is_offer_applied) {
-                                <span class="badge-offer-applied">OFFER RATE</span>
+                                <span class="badge-offer-applied">{{ tService.t('admin.sel.offer.label') }}</span>
                               }
                             </div>
                           </div>
@@ -678,11 +678,11 @@
                                 <del class="orig-strike">₹{{ (d.original_price_per_person / 100).toFixed(0) }}</del>
                               }
                               <strong class="eff-val">₹{{ (d.price_per_person / 100).toFixed(0) }}</strong>
-                              <span class="per-pax-lbl">/guest</span>
+                              <span class="per-pax-lbl">/{{ tService.t('admin.sel.col.perPax') }}</span>
                             </div>
 
                             <div class="offer-input-box">
-                              <span class="prefix">Offer ₹</span>
+                              <span class="prefix">{{ tService.t('admin.sel.offer.label') }}</span>
                               <input 
                                 type="number" 
                                 class="offer-field"
@@ -695,7 +695,7 @@
                           </div>
                         </div>
                       } @empty {
-                        <div class="no-dishes-row">No dishes selected for this session.</div>
+                        <div class="no-dishes-row">{{ tService.t('receipt.emptyTrayTitle') }}</div>
                       }
                     </div>
                   </div>
@@ -704,30 +704,30 @@
 
               <!-- Commercial Estimate Totals Box -->
               <div class="commercial-totals-card">
-                <h4 class="totals-title">Commercial Estimate Breakdown</h4>
+                <h4 class="totals-title">{{ tService.t('admin.sel.beo.commTitle') }}</h4>
                 <div class="fee-row">
-                  <span>Food Catering Subtotal</span>
+                  <span>{{ tService.t('admin.sel.beo.subtotal') }}</span>
                   <span class="fee-val">₹{{ modalFinancials().subtotal.toLocaleString('en-IN') }}</span>
                 </div>
                 <div class="fee-row">
-                  <span>Catering & Setup Service Fee (10%)</span>
+                  <span>{{ tService.t('admin.sel.beo.service') }}</span>
                   <span class="fee-val">₹{{ modalFinancials().serviceCharge.toLocaleString('en-IN') }}</span>
                 </div>
                 <div class="fee-row">
-                  <span>Banquet Logistics & Transport</span>
+                  <span>{{ tService.t('admin.sel.beo.transport') }}</span>
                   <span class="fee-val">₹{{ modalFinancials().transportationCharge.toLocaleString('en-IN') }}</span>
                 </div>
                 <div class="fee-row">
-                  <span>GST (5%)</span>
+                  <span>{{ tService.t('admin.sel.beo.gst') }}</span>
                   <span class="fee-val">₹{{ modalFinancials().gstAmount.toLocaleString('en-IN') }}</span>
                 </div>
                 <div class="fee-row grand-total-row">
-                  <span>Grand Total (All Inclusive)</span>
+                  <span>{{ tService.t('admin.sel.beo.grand') }}</span>
                   <span class="grand-val">₹{{ modalFinancials().grandTotal.toLocaleString('en-IN') }}</span>
                 </div>
                 <div class="fee-row per-pax-row">
-                  <span>Average Cost Per Guest</span>
-                  <span class="per-pax-badge">₹{{ modalFinancials().perPax.toFixed(0) }} / Guest</span>
+                  <span>{{ tService.t('admin.sel.beo.avgGuest') }}</span>
+                  <span class="per-pax-badge">₹{{ modalFinancials().perPax.toFixed(0) }} / {{ tService.t('admin.sel.guests') }}</span>
                 </div>
               </div>
             </div>
@@ -737,19 +737,19 @@
         <!-- Modal Footer Controls -->
         <div class="modal-foot">
           <button type="button" class="btn-modal-cancel" (click)="closeModal()">
-            Cancel
+            {{ tService.t('admin.sel.modal.cancel') }}
           </button>
 
           <div class="foot-stepper-actions">
             @if (currentStep() > 1) {
               <button type="button" class="btn-step-nav" (click)="currentStep.set(currentStep() - 1)">
-                &larr; Back
+                &larr; {{ tService.t('admin.sel.modal.back') }}
               </button>
             }
 
             @if (currentStep() < 3) {
               <button type="button" class="btn-step-next" (click)="currentStep.set(currentStep() + 1)">
-                Next &rarr;
+                {{ tService.t('admin.sel.modal.next') }} &rarr;
               </button>
             } @else {
               <button 
@@ -759,7 +759,7 @@
                 [disabled]="isSubmitting()"
               >
                 <span class="material-symbols-outlined">check_circle</span>
-                <span>{{ isSubmitting() ? 'Saving...' : (isEditing() ? 'Save & Update Booking' : 'Confirm & Schedule Booking') }}</span>
+                <span>{{ isSubmitting() ? tService.t('admin.sel.modal.saving') : (isEditing() ? tService.t('admin.sel.modal.saveUpdate') : tService.t('admin.sel.modal.saveNew')) }}</span>
               </button>
             }
           </div>
@@ -778,17 +778,17 @@
         <div class="beo-actions-bar">
           <div class="beo-action-title">
             <span class="material-symbols-outlined">menu_book</span>
-            <span>Banquet Event Order (BEO) & Quotation</span>
+            <span>{{ tService.t('admin.sel.beo.title') }}</span>
           </div>
 
           <div class="beo-btn-group">
             <button type="button" class="btn-beo-print" (click)="printBEOReport()">
               <span class="material-symbols-outlined">print</span>
-              <span>Print / Save PDF</span>
+              <span>{{ tService.t('admin.sel.beo.print') }}</span>
             </button>
             <button type="button" class="btn-beo-wa" (click)="shareBEOViaWhatsApp(beo)">
               <span class="material-symbols-outlined">chat</span>
-              <span>Share WhatsApp</span>
+              <span>{{ tService.t('admin.sel.beo.wa') }}</span>
             </button>
             <button type="button" class="btn-beo-close" (click)="closeBEOReport()">
               <span class="material-symbols-outlined">close</span>
@@ -817,22 +817,22 @@
           <!-- Event Summary Grid -->
           <div class="beo-summary-grid">
             <div class="sum-box">
-              <span class="sum-lbl">Celebration:</span>
+              <span class="sum-lbl">{{ tService.t('admin.sel.form.eventTitle') }}:</span>
               <strong class="sum-val">{{ beo.event_name }}</strong>
-              <span class="sum-type">{{ beo.event_type }}</span>
+              <span class="sum-type">{{ tService.getEventTypeName(beo.event_type) }}</span>
             </div>
             <div class="sum-box">
-              <span class="sum-lbl">Host / Family:</span>
+              <span class="sum-lbl">{{ tService.t('admin.sel.form.hostName') }}:</span>
               <strong class="sum-val">{{ beo.customer_name }}</strong>
               <span class="sum-sub">{{ beo.customer_phone }}</span>
             </div>
             <div class="sum-box">
-              <span class="sum-lbl">Event Date:</span>
+              <span class="sum-lbl">{{ tService.t('admin.sel.form.eventDate') }}:</span>
               <strong class="sum-val date-val">{{ beo.event_date }}</strong>
-              <span class="sum-sub">Headcount: {{ beo.guest_count }} Guests</span>
+              <span class="sum-sub">{{ beo.guest_count }} {{ tService.t('admin.sel.guests') }}</span>
             </div>
             <div class="sum-box">
-              <span class="sum-lbl">Banquet Venue:</span>
+              <span class="sum-lbl">{{ tService.t('admin.sel.form.venue') }}:</span>
               <strong class="sum-val venue-val">{{ beo.venue }}</strong>
             </div>
           </div>
@@ -840,15 +840,15 @@
           <!-- Course Sessions & Dish Batches -->
           @if (beo.sessions && beo.sessions.length > 0) {
             <div class="beo-sessions-section">
-              <h3 class="beo-section-title">Menu Specification & Batch Preparation Schedule</h3>
+              <h3 class="beo-section-title">{{ tService.t('admin.sel.beo.menuTitle') }}</h3>
               @for (sess of beo.sessions; track sess.id) {
                 <div class="beo-session-block">
                   <div class="beo-session-head">
                     <div>
                       <strong class="sess-title">{{ sess.name }}</strong>
-                      <span class="sess-time-tag">Serving: {{ sess.timeSlot }}</span>
+                      <span class="sess-time-tag">{{ sess.timeSlot }}</span>
                     </div>
-                    <span class="sess-guests-badge">{{ sess.guest_count }} Guests</span>
+                    <span class="sess-guests-badge">{{ sess.guest_count }} {{ tService.t('admin.sel.guests') }}</span>
                   </div>
 
                   <div class="beo-table-scroll">
@@ -856,20 +856,20 @@
                       <thead>
                         <tr>
                           <th style="width: 40px;">#</th>
-                          <th>Category</th>
-                          <th>Dish Name</th>
-                          <th>Portion / Guest</th>
-                          <th>Batch Requirement</th>
-                          <th class="text-right">Rate / Guest</th>
+                          <th>{{ tService.t('admin.story.category') }}</th>
+                          <th>{{ tService.t('admin.story.dishTitle') }}</th>
+                          <th>{{ tService.t('dishModal.portionPerGuest') }}</th>
+                          <th>{{ tService.t('admin.totalPrepQuantity') }}</th>
+                          <th class="text-right">{{ tService.t('admin.sel.col.perPax') }}</th>
                         </tr>
                       </thead>
                       <tbody>
                         @for (d of sess.dishes; track d.dish_id; let i = $index) {
                           <tr>
                             <td>{{ i + 1 }}</td>
-                            <td><span class="cat-chip">{{ d.category_name }}</span></td>
-                            <td><strong class="dish-tbl-name">{{ d.name }}</strong></td>
-                            <td>{{ d.serving_quantity || 100 }}{{ d.serving_unit || 'g' }}</td>
+                            <td><span class="cat-chip">{{ tService.getCategoryName({ name: d.category_name }) }}</span></td>
+                            <td><strong class="dish-tbl-name">{{ tService.getDishName({ id: d.dish_id, name: d.name }) }}</strong></td>
+                            <td>{{ d.serving_quantity || 100 }}{{ tService.formatUnit(d.serving_unit || 'g') }}</td>
                             <td>
                               <strong class="batch-req">
                                 {{ calculateBatchRequirement(d.serving_quantity, d.serving_unit, sess.guest_count) }}
@@ -889,7 +889,7 @@
                           </tr>
                         } @empty {
                           <tr>
-                            <td colspan="6" class="text-muted text-center py-2">Dishes to be finalized with head chef and host.</td>
+                            <td colspan="6" class="text-muted text-center py-2">{{ tService.t('receipt.emptyTrayTitle') }}</td>
                           </tr>
                         }
                       </tbody>
@@ -902,31 +902,31 @@
 
           <!-- Commercial Statement -->
           <div class="beo-commercial-section">
-            <h3 class="beo-section-title">Commercial Estimate & Account Summary</h3>
+            <h3 class="beo-section-title">{{ tService.t('admin.sel.beo.commTitle') }}</h3>
             <div class="beo-comm-table">
               <div class="comm-row">
-                <span>Food Catering Subtotal</span>
+                <span>{{ tService.t('admin.sel.beo.subtotal') }}</span>
                 <span>₹{{ (beo.subtotal / 100).toLocaleString('en-IN') }}</span>
               </div>
               <div class="comm-row">
-                <span>Catering & Setup Service Charges (10%)</span>
+                <span>{{ tService.t('admin.sel.beo.service') }}</span>
                 <span>₹{{ (beo.service_charge / 100).toLocaleString('en-IN') }}</span>
               </div>
               <div class="comm-row">
-                <span>Banquet Transportation & Logistics</span>
+                <span>{{ tService.t('admin.sel.beo.transport') }}</span>
                 <span>₹{{ (beo.transportation_charge / 100).toLocaleString('en-IN') }}</span>
               </div>
               <div class="comm-row">
-                <span>GST (5%)</span>
+                <span>{{ tService.t('admin.sel.beo.gst') }}</span>
                 <span>₹{{ (beo.gst_amount / 100).toLocaleString('en-IN') }}</span>
               </div>
               <div class="comm-row grand-total">
-                <span>Grand Total (All Inclusive)</span>
+                <span>{{ tService.t('admin.sel.beo.grand') }}</span>
                 <span>₹{{ (beo.grand_total / 100).toLocaleString('en-IN') }}</span>
               </div>
               <div class="comm-row per-pax">
-                <span>Average Cost Per Guest</span>
-                <span>₹{{ (beo.cost_per_guest / 100).toFixed(0) }} / Guest</span>
+                <span>{{ tService.t('admin.sel.beo.avgGuest') }}</span>
+                <span>₹{{ (beo.cost_per_guest / 100).toFixed(0) }} / {{ tService.t('admin.sel.guests') }}</span>
               </div>
             </div>
           </div>
